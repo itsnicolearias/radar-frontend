@@ -106,56 +106,56 @@ export default function EventsScreen() {
 
             return (
               <TouchableOpacity
-              key={event.eventId}
-              style={styles.eventCard}
-              onPress={() => router.push(`/events/${event.eventId}`)}
-            >
-              {/* Event image placeholder */}
-              <View style={styles.eventImage}>
-                <Text style={styles.eventImageText}>{event.title[0]}</Text>
-              </View>
+                key={event.eventId}
+                style={styles.eventCard}
+                onPress={() => router.push(`/events/${event.eventId}`)}
+              >
+                {/* Event image placeholder */}
+                <View style={styles.eventImage}>
+                  <Text style={styles.eventImageText}>{event.title[0]}</Text>
+                </View>
 
-              {/* Event info */}
-              <View style={styles.eventInfo}>
-                <Text style={styles.eventTitle} numberOfLines={1}>
-                  {event.title}
-                </Text>
-                <Text style={styles.eventLocation} numberOfLines={1}>
-                  📍 {event.location} · {event.distance ? `${(event.distance / 1000).toFixed(1)} km` : "Cerca"}
-                </Text>
-                <View style={styles.eventMeta}>
-                  <Text style={styles.eventDate}>🕐 {formatDate(event.startDate)}</Text>
-                  <Text style={styles.eventAttendees}>👥 {event.InterestedUsers?.length || 0}</Text>
-                </View>
-                <View style={styles.eventFooter}>
-                  <View style={styles.categoryBadge}>
-                    <Text style={styles.categoryBadgeText}>{event.category}</Text>
+                {/* Event info */}
+                <View style={styles.eventInfo}>
+                  <Text style={styles.eventTitle} numberOfLines={1}>
+                    {event.title}
+                  </Text>
+                  <Text style={styles.eventLocation} numberOfLines={1}>
+                    📍 {event.location} · {event.distance ? `${(event.distance / 1000).toFixed(1)} km` : "Cerca"}
+                  </Text>
+                  <View style={styles.eventMeta}>
+                    <Text style={styles.eventDate}>🕐 {formatDate(event.startDate)}</Text>
+                    <Text style={styles.eventAttendees}>👥 {event.InterestedUsers?.length || 0}</Text>
                   </View>
-                  <TouchableOpacity
-                    style={[styles.interestButton, isInterested && styles.interestButtonActive]}
-                    onPress={() => handleInterestClick(event.eventId, isInterested || false)}
-                  >
-                    <Text style={[styles.interestButtonText, isInterested && styles.interestButtonTextActive]}>
-                      {isInterested ? "Me interesa ❤️" : "No me interesa"}
-                    </Text>
-                  </TouchableOpacity>
+                  <View style={styles.eventFooter}>
+                    <View style={styles.categoryBadge}>
+                      <Text style={styles.categoryBadgeText}>{event.category}</Text>
+                    </View>
+                    <TouchableOpacity
+                      style={[styles.interestButton, isInterested && styles.interestButtonActive]}
+                      onPress={() => handleInterestClick(event.eventId, isInterested || false)}
+                    >
+                      <Text style={[styles.interestButtonText, isInterested && styles.interestButtonTextActive]}>
+                        {isInterested ? "Me interesa ❤️" : "No me interesa"}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
-              </View>
-            </TouchableOpacity>
-            )            
+              </TouchableOpacity>
+            )
           })
         )}
       </ScrollView>
 
       {/* Bottom Nav */}
       <BottomNavNative
-              activeTab="events"
-              onTabChange={(tab) => {
-                if (tab === "chats") router.push("/chats")
-                else if (tab === "events") router.push("/events")
-                else if (tab === "profile") router.push("/profile")
-              }}
-            />
+        activeTab="events"
+        onTabChange={(tab) => {
+          if (tab === "chats") router.push("/chats")
+          else if (tab === "radar") router.push("/radar")
+          else if (tab === "profile") router.push("/profile")
+        }}
+      />
     </View>
   )
 }

@@ -1,5 +1,6 @@
 import axios from "axios"
 import { API_BASE_URL } from "@radar/config"
+import { emitLogout } from "../common/event-bus"
 
 export const axiosClient = axios.create({
   baseURL: API_BASE_URL,
@@ -28,8 +29,13 @@ axiosClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      globalThis.localStorage?.removeItem("radar_token")
-      // Navigation will be handled by features layer
+      try {
+        globalThis.localStorage?.removeItem("radar_token")
+      } catch (e) {
+        // ignore
+      }
+      // emit a cross-platform logout event
+      emitLogout()
     }
     return Promise.reject(error)
   },

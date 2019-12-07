@@ -5,7 +5,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from "react-nati
 import { LinearGradient } from "expo-linear-gradient"
 import { useRouter } from "expo-router"
 import { MotiView } from "moti"
-import { Radio } from "lucide-react-native"
+import { Radio, MapPin } from "lucide-react-native"
 import { useRadarStore, useAuthStore, useSocketEvent, useChatStore } from "@radar/features"
 import { connectionService, profileViewService, radarService, signalService } from "@radar/api"
 import type { IRadarUser, IRadarSignal, IEventResponse, IConnectionResponse } from "@radar/types"
@@ -45,7 +45,7 @@ export default function RadarScreen() {
   const [selectedUser, setSelectedUser] = useState<IRadarUser | null>(null)
   const [selectedEvent, setSelectedEvent] = useState<IEventResponse | null>(null)
   const [isScanning, setIsScanning] = useState(false)
-  const [ connections, setConnections] = useState<IConnectionResponse[]>([])
+  const [connections, setConnections] = useState<IConnectionResponse[]>([])
 
   useEffect(() => {
     const fetchNearbyData = async () => {
@@ -142,7 +142,7 @@ export default function RadarScreen() {
   }
 
   const handleSelectUser = async (user: IRadarUser) => {
-      setSelectedUser(user)
+    setSelectedUser(user)
     try {
       await profileViewService.registerProfileView(user.userId)
     } catch (error) {
@@ -156,8 +156,8 @@ export default function RadarScreen() {
   }
 
   const isUserConnected = (userId: string): boolean => {
-  const isConnected = connections.some((c) => c.receiverId === userId || c.senderId === userId)
-  return isConnected;
+    const isConnected = connections.some((c) => c.receiverId === userId || c.senderId === userId)
+    return isConnected
   }
 
   const handleConnect = async (receiverId: string) => {
@@ -176,12 +176,14 @@ export default function RadarScreen() {
     }
   }
 
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Text style={styles.radiusLabel}>Radio: {radiusKm} km</Text>
+          <View style={styles.radiusInfo}>
+            <MapPin color="#00FFB3" size={14} />
+            <Text style={styles.radiusLabel}>{radiusKm} km</Text>
+          </View>
         </View>
         <Text style={styles.title}>RADAR</Text>
         <View style={styles.headerRight}>
@@ -189,6 +191,7 @@ export default function RadarScreen() {
         </View>
       </View>
 
+      {/* Radius filter buttons */}
       <View style={styles.radiusFilter}>
         {[2, 5, 10].map((km) => (
           <TouchableOpacity
@@ -225,7 +228,6 @@ export default function RadarScreen() {
           />
         ))}
 
-        {/* Concentric circles */}
         {[0.25, 0.5, 0.75].map((scale, i) => (
           <View
             key={i}
@@ -290,7 +292,7 @@ export default function RadarScreen() {
             style={styles.sendSignalPulse}
           />
           <LinearGradient colors={["#00FFB3", "#1DE3F2"]} style={styles.sendSignalGradient}>
-            <Radio color="#000000" size={32} />
+            <Radio color="#000000" size={28} />
           </LinearGradient>
         </TouchableOpacity>
       </View>
@@ -324,7 +326,7 @@ export default function RadarScreen() {
           onMessage={() => handleMessageUser(selectedUser.userId)}
           isUserConnected={() => isUserConnected(selectedUser.userId)}
           sendConnection={() => handleConnect(selectedUser.userId)}
-          deleteConnection={() => handleDeleteConnection(selectedUser.userId)}         
+          deleteConnection={() => handleDeleteConnection(selectedUser.userId)}
         />
       )}
 
@@ -342,9 +344,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 24,
-    paddingTop: 60,
-    paddingBottom: 16,
+    paddingHorizontal: 16,
+    paddingTop: 50,
+    paddingBottom: 12,
     backgroundColor: "rgba(26, 26, 26, 0.5)",
     borderBottomWidth: 1,
     borderBottomColor: "rgba(0, 255, 179, 0.2)",
@@ -352,8 +354,13 @@ const styles = StyleSheet.create({
   headerLeft: {
     flex: 1,
   },
+  radiusInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
   title: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "bold",
     color: "#FFFFFF",
     letterSpacing: 2,
@@ -363,39 +370,23 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "flex-end",
     alignItems: "center",
-    gap: 12,
+    gap: 8,
   },
   radiusLabel: {
     color: "#00FFB3",
     fontSize: 12,
     fontWeight: "600",
   },
-  signalsBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: "#1A1A1A",
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "rgba(255, 0, 92, 0.3)",
-  },
-  signalsBadgeText: {
-    color: "#FF005C",
-    fontSize: 12,
-    fontWeight: "600",
-  },
   radiusFilter: {
     flexDirection: "row",
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    gap: 6,
   },
   radiusButton: {
     flex: 1,
-    paddingVertical: 3,
-    borderRadius: 10,
+    paddingVertical: 6,
+    borderRadius: 16,
     backgroundColor: "#1A1A1A",
     borderWidth: 1,
     borderColor: "rgba(0, 255, 179, 0.2)",
@@ -406,18 +397,20 @@ const styles = StyleSheet.create({
     borderWidth: 0,
   },
   radiusButtonGradient: {
-    paddingVertical: 8,
-    paddingHorizontal: 24,
-    borderRadius: 20,
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    width: "100%",
+    alignItems: "center",
   },
   radiusButtonText: {
     color: "#C5C5C5",
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "500",
   },
   radiusButtonTextActive: {
     color: "#000000",
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "600",
   },
   radarContainer: {
@@ -453,27 +446,26 @@ const styles = StyleSheet.create({
   },
   sendSignalButton: {
     position: "absolute",
-    bottom: 40,
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    bottom: 32,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     justifyContent: "center",
     alignItems: "center",
     zIndex: 30,
   },
   sendSignalPulse: {
     position: "absolute",
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     backgroundColor: "rgba(0, 255, 179, 0.3)",
   },
   sendSignalGradient: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     justifyContent: "center",
     alignItems: "center",
   },
 })
-

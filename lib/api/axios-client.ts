@@ -1,4 +1,5 @@
 import axios from "axios"
+import { emitLogout } from "../../packages/common/event-bus"
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
 
@@ -30,10 +31,14 @@ axiosClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("radar_token")
-        window.location.href = "/login"
+      try {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("radar_token")
+        }
+      } catch (e) {
+        // ignore
       }
+      emitLogout()
     }
     return Promise.reject(error)
   },

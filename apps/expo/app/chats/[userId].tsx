@@ -37,8 +37,6 @@ function ChatConversationPage() {
         const data = await messageService.getMessages(userId)
         setMessages(userId, data)
         resetUnreadCount(userId)
-
-
       } catch (error) {
         console.error("[v0] Error fetching messages:", error)
       }
@@ -95,12 +93,13 @@ function ChatConversationPage() {
       : firstMsg.Receiver.displayName
     : "Chat"
 
-  const distance = firstMsg ? firstMsg.Sender?.userId === userId
+  const distance = firstMsg
+    ? firstMsg.Sender?.userId === userId
       ? firstMsg.Sender?.distance
       : firstMsg.Receiver?.distance
-    : 0;
+    : 0
 
-    const formatDistance = (distance?: number) => {
+  const formatDistance = (distance?: number) => {
     if (!distance) return "Cerca"
     if (distance < 1000) return `${Math.round(distance)}m`
     return `${(distance / 1000).toFixed(1)}km`
@@ -112,24 +111,22 @@ function ChatConversationPage() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={0}
     >
-      <View style={styles.gradientBg} />
-
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <View style={styles.backButtonInner}>
+        <View style={styles.headerContent}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
             <ArrowLeft color="#00FFB3" size={20} />
-          </View>
-        </TouchableOpacity>
+          </TouchableOpacity>
 
-        <View style={styles.headerInfo}>
-          <View style={styles.headerAvatar}>
-            <Text style={styles.headerAvatarText}>{name![0]}</Text>
-          </View>
-          <View>
-            <Text style={styles.headerTitle}>{name}</Text>
-            <View style={styles.headerMeta}>
-              <View style={styles.distanceDot} />
-              <Text style={styles.distanceText}>{formatDistance(distance)}</Text>
+          <View style={styles.headerInfo}>
+            <View style={styles.headerAvatar}>
+              <Text style={styles.headerAvatarText}>{name?.[0] || "?"}</Text>
+            </View>
+            <View style={styles.headerTextContainer}>
+              <Text style={styles.headerTitle}>{name}</Text>
+              <View style={styles.headerMeta}>
+                <View style={styles.distanceDot} />
+                <Text style={styles.distanceText}>{formatDistance(distance)}</Text>
+              </View>
             </View>
           </View>
         </View>
@@ -153,7 +150,9 @@ function ChatConversationPage() {
               <View style={[styles.bubble, isSent ? styles.sentBubbleInner : styles.receivedBubbleInner]}>
                 <Text style={[styles.messageText, isSent && styles.sentMessageText]}>{msg.content}</Text>
               </View>
-              <Text style={styles.timestamp}>{formatTimestamp(String(msg.createdAt))}</Text>
+              <Text style={[styles.timestamp, isSent ? styles.timestampSent : styles.timestampReceived]}>
+                {formatTimestamp(String(msg.createdAt))}
+              </Text>
             </MotiView>
           )
         })}
@@ -212,30 +211,20 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#000000",
   },
-  gradientBg: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "transparent",
-  },
   header: {
     backgroundColor: "rgba(26, 26, 26, 0.5)",
     paddingTop: 50,
     paddingBottom: 12,
-    paddingHorizontal: 24,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
+    paddingHorizontal: 16,
     borderBottomWidth: 1,
     borderBottomColor: "rgba(0, 255, 179, 0.2)",
   },
-  backButton: {
-    width: 40,
-    height: 40,
+  headerContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
   },
-  backButtonInner: {
+  backButton: {
     width: 40,
     height: 40,
     backgroundColor: "#1A1A1A",
@@ -266,6 +255,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
+  headerTextContainer: {
+    flex: 1,
+  },
   headerTitle: {
     color: "#FFFFFF",
     fontSize: 16,
@@ -288,12 +280,12 @@ const styles = StyleSheet.create({
     color: "#1DE3F2",
   },
   messagesContainer: {
-    padding: 24,
+    padding: 16,
     flexGrow: 1,
   },
   messageBubble: {
     maxWidth: "75%",
-    marginBottom: 16,
+    marginBottom: 12,
   },
   sentBubble: {
     alignSelf: "flex-end",
@@ -330,9 +322,15 @@ const styles = StyleSheet.create({
     marginTop: 4,
     paddingHorizontal: 4,
   },
+  timestampSent: {
+    textAlign: "right",
+  },
+  timestampReceived: {
+    textAlign: "left",
+  },
   replyingToContainer: {
     backgroundColor: "#1A1A1A",
-    marginHorizontal: 24,
+    marginHorizontal: 16,
     marginBottom: 8,
     padding: 12,
     borderRadius: 12,
@@ -360,7 +358,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   inputContainer: {
-    padding: 24,
+    padding: 16,
     backgroundColor: "#000000",
     borderTopWidth: 1,
     borderTopColor: "rgba(0, 255, 179, 0.2)",
@@ -372,20 +370,20 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    height: 56,
+    height: 48,
     paddingHorizontal: 16,
     backgroundColor: "#1A1A1A",
     borderWidth: 1,
     borderColor: "rgba(0, 255, 179, 0.3)",
-    borderRadius: 28,
+    borderRadius: 24,
     color: "#FFFFFF",
     fontSize: 14,
   },
   sendButton: {
-    width: 56,
-    height: 56,
+    width: 48,
+    height: 48,
     backgroundColor: "#00FFB3",
-    borderRadius: 28,
+    borderRadius: 24,
     justifyContent: "center",
     alignItems: "center",
   },
