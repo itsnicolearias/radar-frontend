@@ -25,3 +25,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+apps/**/node_modules/
+# Ignore only node_modules inside packages
+packages/**/node_modules/
+# Keep other content in packages tracked by default
