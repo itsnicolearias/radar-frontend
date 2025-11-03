@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "@radar/api": ["../../packages/api"],
+      "@radar/config": ["../../packages/config"],
+      "@radar/features": ["../../packages/features"],
+      "@radar/types": ["../../packages/types"],
+      "@radar/ui": ["../../packages/ui"]
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}

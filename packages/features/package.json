@@ -1,0 +1,12 @@
+{
+  "name": "@radar/features",
+  "version": "0.1.0",
+  "main": "index.ts",
+  "types": "index.ts",
+  "dependencies": {
+    "@radar/api": "*",
+    "@radar/types": "*",
+    "zustand": "latest",
+    "immer": "latest"
+  }
+}
