@@ -4,15 +4,15 @@ import type React from "react"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { GradientBackground } from "@/components/ui/gradient-background"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { authService } from "@/lib/api/auth-service"
-import { useAuthStore } from "@/lib/store/use-auth-store"
-import { loginSchema, type LoginInput } from "@/lib/validations/auth"
+import { GradientBackground } from "../../../../components/ui/gradient-background"
+import { Button } from "../../../../components/ui/button"
+import { Input } from "../../../../components/ui/input"
+import { authService } from "../../../../lib/api/auth-service"
+import { loginSchema, type LoginInput } from "../../../../lib/validations/auth"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
+import { useAuthStore } from "../../../../lib/store/use-auth-store"
+import { Label } from "../../../../components/ui/label"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -31,7 +31,7 @@ export default function LoginPage() {
     const validation = loginSchema.safeParse(formData)
     if (!validation.success) {
       const fieldErrors: Partial<Record<keyof LoginInput, string>> = {}
-      validation.error.errors.forEach((err) => {
+      validation.error.issues.forEach((err) => {
         if (err.path[0]) {
           fieldErrors[err.path[0] as keyof LoginInput] = err.message
         }

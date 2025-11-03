@@ -1,6 +1,6 @@
-import type { NextConfig } from "next"
 
-const nextConfig: NextConfig = {
+
+const nextConfig = {
   transpilePackages: ["@radar/api", "@radar/config", "@radar/features", "@radar/types", "@radar/ui"],
   reactStrictMode: true,
   eslint: {
