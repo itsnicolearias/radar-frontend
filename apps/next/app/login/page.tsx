@@ -4,15 +4,12 @@ import type React from "react"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { GradientBackground } from "../../../../components/ui/gradient-background"
-import { Button } from "../../../../components/ui/button"
-import { Input } from "../../../../components/ui/input"
-import { authService } from "../../../../lib/api/auth-service"
-import { loginSchema, type LoginInput } from "../../../../lib/validations/auth"
+import { GradientBackground, Button, Input, Label } from "@radar/ui"
+import { authService } from "@radar/api"
+import { loginSchema, type LoginInput } from "@radar/types/validations/auth"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
-import { useAuthStore } from "../../../../lib/store/use-auth-store"
-import { Label } from "../../../../components/ui/label"
+import { useAuthStore } from "@radar/features"
 
 export default function LoginPage() {
   const router = useRouter()

@@ -6,3 +6,5 @@ export * from "./services/connection-service"
 export * from "./services/message-service"
 export * from "./services/notification-service"
 export * from "./services/event-service"
+
+export * from "./socket-client"

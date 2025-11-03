@@ -16,7 +16,7 @@ Notifications.setNotificationHandler({
   }),
 })
 
-export const useNotificationsNative = () => {
+export const useNotifications = () => {
   const { notifications, unreadCount, setNotifications, setUnreadCount, addNotification } = useNotificationStore()
 
   const notificationListener = useRef<Notifications.Subscription>()

@@ -12,7 +12,7 @@ interface GeolocationState {
   isLoading: boolean
 }
 
-export const useGeolocationNative = (enableTracking = true) => {
+export const useGeolocation = (enableTracking = true) => {
   const [state, setState] = useState<GeolocationState>({
     latitude: null,
     longitude: null,
