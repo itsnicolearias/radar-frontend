@@ -1,7 +1,23 @@
-
-
+/** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ["@radar/api", "@radar/config", "@radar/features", "@radar/types", "@radar/ui"],
+  transpilePackages: [
+    "react-native",
+    "react-native-web",
+    "expo",
+    "solito",
+    "moti",
+    "dripsy",
+    "@expo/vector-icons",
+    "nativewind",
+    "react-native-reanimated",
+    "react-native-safe-area-context",
+    "react-native-gesture-handler",
+    "@radar/api",
+    "@radar/config",
+    "@radar/features",
+    "@radar/types",
+    "@radar/ui",
+  ],
   reactStrictMode: true,
   eslint: {
     ignoreDuringBuilds: true,
@@ -12,6 +28,13 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-}
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      "react-native$": "react-native-web",
+    };
+    return config;
+  },
+};
 
-export default nextConfig
+module.exports = nextConfig;

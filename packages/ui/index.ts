@@ -14,3 +14,8 @@ export * from "./chat/tabs"
 
 export * from "./profile/profile-card"
 export * from "./profile/interest-pill"
+
+export * from "./components/button"
+export * from "./components/input"
+export * from "./components/label"
+export * from "./components/textarea"

@@ -1,7 +1,7 @@
 import type React from "react"
 import { Stack } from "expo-router"
 import { StatusBar } from "expo-status-bar"
-import { useAuthStore, useGeolocationNative, useNotificationsNative, useSocket } from "@radar/features"
+import { useAuthStore, useGeolocation, useNotifications, useSocket } from "@radar/features"
 
 function AppProviders({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore()
@@ -10,10 +10,10 @@ function AppProviders({ children }: { children: React.ReactNode }) {
   useSocket()
 
   // Enable geolocation tracking when authenticated
-  useGeolocationNative(isAuthenticated)
+  useGeolocation(isAuthenticated)
 
   // Setup notifications
-  useNotificationsNative()
+  useNotifications()
 
   return <>{children}</>
 }

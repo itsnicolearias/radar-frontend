@@ -1,5 +1,4 @@
-import { GradientBackground } from "../../../components/ui/gradient-background"
-import { Button } from "../../../components/ui/button"
+import { GradientBackground, Button } from "@radar/ui"
 import Link from "next/link"
 
 export default function WelcomePage() {

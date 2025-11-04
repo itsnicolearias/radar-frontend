@@ -8,6 +8,4 @@ export * from "./notification/use-notification-store"
 export * from "./geolocation/use-geolocation"
 export * from "./notifications/use-notifications"
 
-// Export native-specific hooks
-export * from "./geolocation/use-geolocation-native"
-export * from "./notifications/use-notifications-native"
+// The native-specific hooks are imported automatically by the bundler.
