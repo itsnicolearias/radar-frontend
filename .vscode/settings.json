@@ -1,0 +1,8 @@
+{
+  // Avoid VS Code downloading JSON schemas from schemastore (prevents EAI_AGAIN warnings when offline)
+  "json.schemaDownload.enable": false,
+  // Don't validate package.json against remote schema (avoids network errors in the Problems pane)
+  "json.schemas": [],
+  // Disable automatic type acquisition (optional, can reduce noise)
+  "typescript.disableAutomaticTypeAcquisition": true
+}
