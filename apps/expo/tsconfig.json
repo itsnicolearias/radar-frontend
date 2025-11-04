@@ -3,14 +3,30 @@
   "compilerOptions": {
     "strict": true,
     "baseUrl": ".",
+    "jsx": "react-jsx",
     "paths": {
-      "@radar/api": ["../../packages/api"],
-      "@radar/config": ["../../packages/config"],
-      "@radar/features": ["../../packages/features"],
-      "@radar/types": ["../../packages/types"],
-      "@radar/ui": ["../../packages/ui"]
+      "@radar/api": [
+        "../../packages/api"
+      ],
+      "@radar/config": [
+        "../../packages/config"
+      ],
+      "@radar/features": [
+        "../../packages/features"
+      ],
+      "@radar/types": [
+        "../../packages/types"
+      ],
+      "@radar/ui": [
+        "../../packages/ui"
+      ]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
