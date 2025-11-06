@@ -1,8 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Button, Input, Label, Textarea } from "@radar/ui"
-import { GradientBackground } from "@radar/ui/gradient-background"
+import { Button, GradientBackground, Input, Label, Textarea } from "@radar/ui"
 import { useAuthStore } from "@radar/features"
 import { ArrowLeft, Camera } from "lucide-react"
 import Link from "next/link"
@@ -36,7 +35,7 @@ export default function ProfilePage() {
           {/* Profile photo */}
           <div className="flex flex-col items-center gap-4">
             <div className="relative">
-              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+              <div className="w-32 h-32 rounded-full bg-linear-to-br from-primary to-accent flex items-center justify-center">
                 {profile?.photoUrl ? (
                   <img
                     src={profile.photoUrl || "/placeholder.svg"}
@@ -96,7 +95,7 @@ export default function ProfilePage() {
             </div>
 
             {isEditing && (
-              <Button className="w-full h-12 bg-gradient-to-r from-primary to-accent hover:opacity-90">
+              <Button className="w-full h-12 bg-linear-to-r from-primary to-accent hover:opacity-90">
                 Guardar cambios
               </Button>
             )}

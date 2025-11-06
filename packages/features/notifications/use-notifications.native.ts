@@ -13,14 +13,16 @@ Notifications.setNotificationHandler({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
+    shouldShowList: true,
+    shouldShowBanner: false
   }),
 })
 
 export const useNotifications = () => {
   const { notifications, unreadCount, setNotifications, setUnreadCount, addNotification } = useNotificationStore()
 
-  const notificationListener = useRef<Notifications.Subscription>()
-  const responseListener = useRef<Notifications.Subscription>()
+  const notificationListener = useRef<Notifications.Subscription>(null)
+  const responseListener = useRef<Notifications.Subscription>(null)
 
   // Fetch notifications on mount
   useEffect(() => {
@@ -84,10 +86,10 @@ export const useNotifications = () => {
 
     return () => {
       if (notificationListener.current) {
-        Notifications.removeNotificationSubscription(notificationListener.current)
+        notificationListener.current.remove()
       }
       if (responseListener.current) {
-        Notifications.removeNotificationSubscription(responseListener.current)
+        responseListener.current.remove()
       }
     }
   }, [])

@@ -7,9 +7,9 @@ import { useRouter } from "next/navigation"
 import { GradientBackground, Button, Input, Label } from "@radar/ui"
 import { authService } from "@radar/api"
 import { useAuthStore } from "@radar/features"
-import { registerSchema, type RegisterInput } from "@radar/types/validations/auth"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
+import { RegisterInput, registerSchema } from "../../../../packages/api/validations"
 
 export default function RegisterPage() {
   const router = useRouter()

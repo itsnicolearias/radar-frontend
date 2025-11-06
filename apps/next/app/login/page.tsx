@@ -6,10 +6,10 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { GradientBackground, Button, Input, Label } from "@radar/ui"
 import { authService } from "@radar/api"
-import { loginSchema, type LoginInput } from "@radar/types/validations/auth"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 import { useAuthStore } from "@radar/features"
+import { LoginInput, loginSchema } from "../../../../packages/api/validations"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -97,7 +97,7 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full h-12 text-lg font-semibold bg-gradient-to-r from-primary to-accent hover:opacity-90"
+                className="w-full h-12 text-lg font-semibold bg-linear-to-r from-primary to-accent hover:opacity-90"
               >
                 {isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
               </Button>

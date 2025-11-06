@@ -124,7 +124,7 @@ export default function ChatsPage() {
                   className="flex items-center justify-between p-4 border-b border-gray-100"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#00FFB3] to-[#14B8A6] flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full bg-linear-to-br from-[#00FFB3] to-[#14B8A6] flex items-center justify-center">
                       <span className="text-[#0E2A3E] font-semibold text-sm">
                         {request.senderId.slice(0, 2).toUpperCase()}
                       </span>
