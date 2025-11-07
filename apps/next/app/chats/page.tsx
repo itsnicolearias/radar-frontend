@@ -20,7 +20,7 @@ export default function ChatsPage() {
         const [chatsData, connectionsData, requestsData] = await Promise.all([
           messageService.getChats(),
           connectionService.getConnections("accepted"),
-          connectionService.getConnections("pending"),
+          connectionService.getConnections("pendings"),
         ])
         setChats(chatsData)
         setConnections(connectionsData)
