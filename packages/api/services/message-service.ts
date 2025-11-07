@@ -11,13 +11,16 @@ export interface MessagesResponse {
 }
 
 export interface ChatsResponse {
-  chats: Chat[]
+  success: boolean
+  data: {
+    conversations: Chat[]
+  }
 }
 
 export const messageService = {
   async getChats(): Promise<Chat[]> {
-    const response = await axiosClient.get<ChatsResponse>("/messages/chats")
-    return response.data.chats
+    const response = await axiosClient.get<ChatsResponse>("/messages")
+    return response.data.data.conversations;
   },
 
   async getMessages(userId: string): Promise<Message[]> {

@@ -2,11 +2,11 @@ import { create } from "zustand"
 import type { User, Profile } from "@radar/types"
 
 interface AuthState {
-  user: User | null
+  user: Partial<User> | null
   profile: Profile | null
   token: string | null
   isAuthenticated: boolean
-  setAuth: (user: User, profile: Profile | null, token: string) => void
+  setAuth: (user: Partial<User>, profile: Profile | null, token: string) => void
   setProfile: (profile: Profile) => void
   logout: () => void
 }

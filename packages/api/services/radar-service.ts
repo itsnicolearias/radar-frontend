@@ -11,9 +11,9 @@ export interface NearbyUsersResponse {
 }
 
 export const radarService = {
-  async getNearbyUsers(latitude: number, longitude: number): Promise<NearbyUser[]> {
+  async getNearbyUsers(latitude: number, longitude: number, radius: number = 1000): Promise<NearbyUser[]> {
     const response = await axiosClient.get<NearbyUsersResponse>("/radar/nearby", {
-      params: { latitude, longitude },
+      params: { latitude, longitude, radius },
     })
     return response.data.users
   },

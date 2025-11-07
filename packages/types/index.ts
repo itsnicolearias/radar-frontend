@@ -37,6 +37,11 @@ export interface Connection {
   updatedAt: string
 }
 
+export interface ApiResponseConections {
+  success: boolean,
+  data: Connection[]
+}
+
 export interface Message {
   messageId: string
   senderId: string
@@ -56,9 +61,19 @@ export interface Notification {
 }
 
 export interface AuthResponse {
+  success: boolean,
+  data: {
   token: string
-  user: User
-  profile?: Profile
+  user: {
+    userId: string
+    firstName: string
+    lastName: string
+    email: string
+    isVerified: boolean
+    displayName: string | null
+    birthDate: Date | null
+  }
+  }
 }
 
 export interface Event {

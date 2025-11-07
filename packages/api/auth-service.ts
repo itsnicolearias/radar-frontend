@@ -16,8 +16,8 @@ export interface RegisterInput {
 export const authService = {
   async register(data: RegisterInput): Promise<AuthResponse> {
     const response = await axiosClient.post<AuthResponse>("/auth/register", {
-      first_name: data.firstName,
-      last_name: data.lastName,
+      firstName: data.firstName,
+      lastName: data.lastName,
       email: data.email,
       password: data.password,
     })

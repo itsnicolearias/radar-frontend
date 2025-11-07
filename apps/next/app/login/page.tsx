@@ -40,7 +40,8 @@ export default function LoginPage() {
     setIsLoading(true)
     try {
       const response = await authService.login(formData)
-      setAuth(response.user, response.profile || null, response.token)
+
+      setAuth(response.data.user,  null, response.data.token)
       router.push("/radar")
     } catch (error: any) {
       setErrors({ email: error.response?.data?.message || "Error al iniciar sesión" })

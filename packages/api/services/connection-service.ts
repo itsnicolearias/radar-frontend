@@ -6,9 +6,9 @@ export interface ConnectionsResponse {
 }
 
 export const connectionService = {
-  async getConnections(status?: "pending" | "accepted" | "rejected"): Promise<Connection[]> {
-    const response = await axiosClient.get<ConnectionsResponse>("/connections", {
-      params: status ? { status } : undefined,
+  async getConnections(status?: "pendings" | "accepted" | "rejected"): Promise<Connection[]> {
+    const response = await axiosClient.get<ConnectionsResponse>(`/connections/${status}`, {
+      //params: status ? { status } : undefined,
     })
     return response.data.connections
   },

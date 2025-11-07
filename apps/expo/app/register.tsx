@@ -35,7 +35,7 @@ export default function RegisterScreen() {
     setLoading(true)
     try {
       const response = await authService.register({ firstName, lastName, email, password })
-      setAuth(response.user, response.profile || null, response.token)
+      setAuth(response.data.user, null, response.data.token)
       router.replace("/radar")
     } catch (error) {
       Alert.alert("Error", "No se pudo crear la cuenta")
