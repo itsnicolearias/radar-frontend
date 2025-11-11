@@ -1,5 +1,5 @@
 import { axiosClient } from "../axios-client"
-import type { Message, Chat } from "@radar/types"
+import type { Message, RecentChats } from "@radar/types"
 
 export interface SendMessageInput {
   receiverId: string
@@ -13,13 +13,14 @@ export interface MessagesResponse {
 export interface ChatsResponse {
   success: boolean
   data: {
-    conversations: Chat[]
+    conversations: RecentChats[]
   }
 }
 
 export const messageService = {
-  async getChats(): Promise<Chat[]> {
+  async getChats(): Promise<RecentChats[]> {
     const response = await axiosClient.get<ChatsResponse>("/messages")
+    console.log(response.data.data.conversations)
     return response.data.data.conversations;
   },
 

@@ -38,7 +38,7 @@ export interface Connection {
 }
 
 export interface ApiResponseConections {
-  success: boolean,
+  success: boolean
   data: Connection[]
 }
 
@@ -61,18 +61,18 @@ export interface Notification {
 }
 
 export interface AuthResponse {
-  success: boolean,
+  success: boolean
   data: {
-  token: string
-  user: {
-    userId: string
-    firstName: string
-    lastName: string
-    email: string
-    isVerified: boolean
-    displayName: string | null
-    birthDate: Date | null
-  }
+    token: string
+    user: {
+      userId: string
+      firstName: string
+      lastName: string
+      email: string
+      isVerified: boolean
+      displayName: string | null
+      birthDate: Date | null
+    }
   }
 }
 
@@ -91,20 +91,95 @@ export interface Event {
   createdBy: string
   createdAt: string
   updatedAt: string
+  distance: string
+}
+
+export interface IEventResponse {
+  eventId: string
+  userId: string
+  title: string
+  description: string
+  location: string
+  latitude: number
+  longitude: number
+  startDate: string
+  endDate: string
+  isPublic: boolean
+  maxAttendees: number
+  price: number
+  createdAt: string
+  updatedAt: string
+  distance?: number
+  attendeesCount?: number
+  isInterested?: boolean
+  category?: string
+}
+
+export interface IEventCreatePayload {
+  title: string
+  description: string
+  location: string
+  latitude: number
+  longitude: number
+  startDate: string
+  endDate: string
+  isPublic: boolean
+  maxAttendees: number
+  price: number
+}
+
+export interface IEventsListResponse {
+  rows: IEventResponse[]
+  count: number
+}
+
+export interface IProfileViewResponse {
+  profileViewId: string
+  viewerId: string
+  viewedId: string
+  createdAt: Date
+  updatedAt: Date
+  Viewer: {
+    userId: string
+    firstName: string
+    lastName: string
+    displayName: string | null
+    photoUrl?: string
+  }
 }
 
 export interface NearbyUser {
-  user: User
-  profile: Profile
-  distance: number
+    userId: string
+  firstName: string
+  lastName: string
+  email: string
+  isVerified: boolean
+  invisibleMode: boolean
+  lastLatitude?: number
+  lastLongitude?: number
+  lastSeenAt?: string
+  createdAt: string
+  updatedAt: string
+   Profile: Profile
+    distance: number 
+
+  
 }
 
-export interface Chat {
-  userId: string
-  user: User
-  profile: Profile
+export interface IRadarResponse {
+  success: boolean;
+  data: {
+    users: NearbyUser[]
+    events: Event[]
+    signals: []
+  }
+}
+
+export interface RecentChats {
+  user: NearbyUser
   lastMessage?: Message
   unreadCount: number
+  conversationId: string
 }
 
 export type SocketEvents = {

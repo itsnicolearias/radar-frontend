@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { RadarContainer, RadarUserMarker, RadarEventMarker, BottomNav } from "@radar/ui"
 import { useRadarStore, useAuthStore, useSocket, useSocketEvent } from "@radar/features"
 import { radarService, eventService } from "@radar/api"
-import type { NearbyUser, Event } from "@radar/types"
+import type { NearbyUser, IEventResponse } from "@radar/types"
 
 export default function RadarPage() {
   const router = useRouter()
@@ -29,10 +29,8 @@ export default function RadarPage() {
       if (!currentLocation) return
 
       try {
-        const [users, events] = await Promise.all([
-          radarService.getNearbyUsers(currentLocation.latitude, currentLocation.longitude),
-          eventService.getNearbyEvents(currentLocation.latitude, currentLocation.longitude),
-        ])
+        const { users, events } = await radarService.getNearbyAll(currentLocation.latitude, currentLocation.longitude)
+
         setNearbyUsers(users)
         setNearbyEvents(events)
       } catch (error) {
@@ -50,19 +48,21 @@ export default function RadarPage() {
     },
     [updateUserLocation],
   )
-
+console.log(user)
   useEffect(() => {
-    if (!currentLocation) {
-      setCurrentLocation({ latitude: -34.6037, longitude: -58.3816 }) // Buenos Aires
+    
+    if (!currentLocation && user) {
+      console.log(user.lastLatitude, user.lastLongitude)
+      setCurrentLocation({ latitude: user.lastLatitude!, longitude: user.lastLongitude! }) // Buenos Aires
     }
   }, [currentLocation, setCurrentLocation])
 
   const handleUserClick = (nearbyUser: NearbyUser) => {
     setSelectedUser(nearbyUser)
-    router.push(`/profile/${nearbyUser.user.userId}`)
+    router.push(`/profile/${nearbyUser.userId}`)
   }
 
-  const handleEventClick = (event: Event) => {
+  const handleEventClick = (event: IEventResponse) => {
     router.push(`/events/${event.eventId}`)
   }
 
@@ -93,23 +93,31 @@ export default function RadarPage() {
           />
 
           {/* Nearby users */}
-          {nearbyUsers.map((nearbyUser, index) => {
-            const angle = (index / nearbyUsers.length) * Math.PI * 2
-            return (
-              <RadarUserMarker
-                key={nearbyUser.user.userId}
-                initials={`${nearbyUser.user.firstName[0]}${nearbyUser.user.lastName[0]}`}
-                distance={nearbyUser.distance}
-                angle={angle}
-                maxDistance={1000}
-                photoUrl={nearbyUser.profile.photoUrl}
-                onClick={() => handleUserClick(nearbyUser)}
-              />
-            )
-          })}
+          { nearbyUsers && nearbyUsers.length > 0 && (
+            <>
+             {nearbyUsers.map((nearbyUser, index) => {
+              const angle = (index / nearbyUsers.length) * Math.PI * 2
+              return (
+                <RadarUserMarker
+                  key={nearbyUser.userId}
+                  initials={`${nearbyUser.firstName[0]}${nearbyUser.lastName[0]}`}
+                  distance={nearbyUser.distance}
+                  angle={angle}
+                  maxDistance={1000}
+                  photoUrl={nearbyUser.Profile.photoUrl}
+                  onClick={() => handleUserClick(nearbyUser)}
+                />
+              )
+            })}
+            </>
+             
+          )}
+          
 
           {/* Nearby events */}
-          {nearbyEvents.map((event, index) => {
+          { nearbyEvents && nearbyEvents.length > 0 && (
+            <>
+            {(nearbyEvents as unknown as IEventResponse[]).map((event, index) => {
             const angle = ((index + 0.5) / nearbyEvents.length) * Math.PI * 2
             const distance = 500 + Math.random() * 300
             return (
@@ -123,6 +131,9 @@ export default function RadarPage() {
               />
             )
           })}
+            </>
+          )}
+          
         </RadarContainer>
       </div>
 

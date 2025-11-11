@@ -22,6 +22,7 @@ export default function ChatsScreen() {
           connectionService.getConnections("accepted"),
           connectionService.getConnections("pendings"),
         ])
+        console.log({connectionsData})
         setChats(chatsData)
         setConnections(connectionsData)
         setPendingRequests(requestsData)
@@ -100,9 +101,9 @@ export default function ChatsScreen() {
           <>
             {chats.map((chat) => (
               <TouchableOpacity
-                key={chat.userId}
+                key={chat.user.userId}
                 style={styles.chatItem}
-                onPress={() => router.push(`/chats/${chat.userId}`)}
+                onPress={() => router.push(`/chats/${chat.user.userId}`)}
               >
                 <View style={styles.avatar}>
                   <Text style={styles.avatarText}>

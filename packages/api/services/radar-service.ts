@@ -1,5 +1,5 @@
 import { axiosClient } from "../axios-client"
-import type { NearbyUser, User } from "@radar/types"
+import type { IRadarResponse, NearbyUser, User } from "@radar/types"
 
 export interface UpdateLocationInput {
   latitude: number
@@ -11,11 +11,12 @@ export interface NearbyUsersResponse {
 }
 
 export const radarService = {
-  async getNearbyUsers(latitude: number, longitude: number, radius: number = 1000): Promise<NearbyUser[]> {
-    const response = await axiosClient.get<NearbyUsersResponse>("/radar/nearby", {
+  async getNearbyAll(latitude: number, longitude: number, radius: number = 1000) {
+    const response = await axiosClient.get<IRadarResponse>("/radar/nearby", {
       params: { latitude, longitude, radius },
     })
-    return response.data.users
+    console.log({response})
+    return response.data.data;
   },
 
   async updateLocation(data: UpdateLocationInput): Promise<void> {

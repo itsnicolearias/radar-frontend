@@ -40,21 +40,21 @@ export const useRadarStore = create<RadarState>()(
       }),
     addNearbyUser: (user) =>
       set((state) => {
-        const exists = state.nearbyUsers.find((u) => u.user.userId === user.user.userId)
+        const exists = state.nearbyUsers.find((u) => u.userId === user.userId)
         if (!exists) {
           state.nearbyUsers.push(user)
         }
       }),
     removeNearbyUser: (userId) =>
       set((state) => {
-        state.nearbyUsers = state.nearbyUsers.filter((u) => u.user.userId !== userId)
+        state.nearbyUsers = state.nearbyUsers.filter((u) => u.userId !== userId)
       }),
     updateUserLocation: (userId, latitude, longitude) =>
       set((state) => {
-        const user = state.nearbyUsers.find((u) => u.user.userId === userId)
+        const user = state.nearbyUsers.find((u) => u.userId === userId)
         if (user) {
-          user.user.lastLatitude = latitude
-          user.user.lastLongitude = longitude
+          user.lastLatitude = latitude
+          user.lastLongitude = longitude
         }
       }),
     setLoading: (loading) =>

@@ -25,6 +25,18 @@ export default function UserProfilePage() {
   }, [connections, userId])
 
   useEffect(() => {
+    const registerView = async () => {
+      if (user && userId !== user.userId) {
+        try {
+          await profileViewService.registerProfileView(userId)
+        } catch (error) {
+          console.error("[v0] Error registering profile view:", error)
+        }
+      }
+    }
+
+    registerView()
+
     // TODO: Fetch user profile from API
     setProfileData({
       user: {
@@ -55,7 +67,7 @@ export default function UserProfilePage() {
       },
       distance: 120,
     })
-  }, [userId])
+  }, [userId, user])
 
   const handleConnect = async () => {
     setIsLoading(true)

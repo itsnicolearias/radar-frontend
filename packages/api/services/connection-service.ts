@@ -2,7 +2,7 @@ import { axiosClient } from "../axios-client"
 import type { Connection } from "@radar/types"
 
 export interface ConnectionsResponse {
-  connections: Connection[]
+  data: Connection[]
 }
 
 export const connectionService = {
@@ -10,7 +10,8 @@ export const connectionService = {
     const response = await axiosClient.get<ConnectionsResponse>(`/connections/${status}`, {
       //params: status ? { status } : undefined,
     })
-    return response.data.connections
+    console.log("cooo", response.data.data)
+    return response.data.data;
   },
 
   async sendConnectionRequest(receiverId: string): Promise<Connection> {

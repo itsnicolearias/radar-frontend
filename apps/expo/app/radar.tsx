@@ -4,7 +4,7 @@ import { useEffect } from "react"
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from "react-native"
 import { useRouter } from "expo-router"
 import { useRadarStore, useAuthStore, useSocket, useSocketEvent } from "@radar/features"
-import { radarService, eventService } from "@radar/api"
+import { radarService } from "@radar/api"
 import type { NearbyUser, Event } from "@radar/types"
 
 const { width, height } = Dimensions.get("window")
@@ -29,10 +29,8 @@ export default function RadarScreen() {
       if (!currentLocation) return
 
       try {
-        const [users, events] = await Promise.all([
-          radarService.getNearbyUsers(currentLocation.latitude, currentLocation.longitude),
-          eventService.getNearbyEvents(currentLocation.latitude, currentLocation.longitude),
-        ])
+        const {users, events} = await radarService.getNearbyAll(currentLocation.latitude, currentLocation.longitude)
+
         setNearbyUsers(users)
         setNearbyEvents(events)
       } catch (error) {
@@ -53,7 +51,7 @@ export default function RadarScreen() {
 
   useEffect(() => {
     if (!currentLocation) {
-      setCurrentLocation({ latitude: -34.6037, longitude: -58.3816 })
+      setCurrentLocation({ latitude: user?.lastLatitude!, longitude: user?.lastLongitude! })
     }
   }, [currentLocation, setCurrentLocation])
 
@@ -66,13 +64,13 @@ export default function RadarScreen() {
 
     return (
       <TouchableOpacity
-        key={nearbyUser.user.userId}
+        key={nearbyUser.userId}
         style={[styles.userMarker, { left: x - 24, top: y - 24 }]}
-        onPress={() => router.push(`/profile/${nearbyUser.user.userId}`)}
+        onPress={() => router.push(`/profile/${nearbyUser.userId}`)}
       >
         <Text style={styles.userInitials}>
-          {nearbyUser.user.firstName[0]}
-          {nearbyUser.user.lastName[0]}
+          {nearbyUser.firstName[0]}
+          {nearbyUser.lastName[0]}
         </Text>
       </TouchableOpacity>
     )
@@ -103,7 +101,7 @@ export default function RadarScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Radar</Text>
         <TouchableOpacity style={styles.profileButton}>
-          <Text style={styles.profileInitial}>{user?.firstName?.[0] || "U"}</Text>
+          <Text style={styles.profileInitial}>{"U"}</Text>
         </TouchableOpacity>
       </View>
 
@@ -125,7 +123,7 @@ export default function RadarScreen() {
 
         {/* Current user */}
         <View style={styles.currentUser}>
-          <Text style={styles.currentUserInitials}>{user ? `${user.firstName[0]}${user.lastName[0]}` : "TÚ"}</Text>
+          <Text style={styles.currentUserInitials}>{user && user?.firstName && user.lastName ? `${user.firstName[0]}${user?.lastName[0]}` : "TÚ"}</Text>
         </View>
         <Text style={styles.currentUserLabel}>Tú</Text>
 

@@ -84,11 +84,11 @@ export const useGeolocation = (enableTracking = true) => {
           await radarService.updateLocation({ latitude, longitude })
           emitSocketEvent("update-location", { latitude, longitude })
         } catch (error) {
-          console.error("[v0] Geolocation watch error:", error)
+          console.log("[v0] Geolocation watch error:", error)
         }
       },
       (error) => {
-        console.error("[v0] Geolocation watch error:", error)
+        console.log("[v0] Geolocation watch error:", error)
       },
       {
         enableHighAccuracy: true,

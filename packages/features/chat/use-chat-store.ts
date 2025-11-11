@@ -1,15 +1,15 @@
 import { create } from "zustand"
 import { immer } from "zustand/middleware/immer"
-import type { Chat, Message } from "@radar/types"
+import type { RecentChats, Message } from "@radar/types"
 
 interface ChatState {
-  chats: Chat[]
-  currentChat: Chat | null
+  chats: RecentChats[]
+  currentChat: RecentChats | null
   messages: Record<string, Message[]>
   typingUsers: Set<string>
   isLoading: boolean
-  setChats: (chats: Chat[]) => void
-  setCurrentChat: (chat: Chat | null) => void
+  setChats: (chats: RecentChats[]) => void
+  setCurrentChat: (chat: RecentChats | null) => void
   setMessages: (userId: string, messages: Message[]) => void
   addMessage: (userId: string, message: Message) => void
   updateChatLastMessage: (userId: string, message: Message) => void

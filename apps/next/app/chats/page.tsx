@@ -2,36 +2,41 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { ChatListItem, Tabs, BottomNav } from "@radar/ui"
-import { useChatStore, useConnectionStore, useSocketEvent } from "@radar/features"
-import { messageService, connectionService } from "@radar/api"
+import { ChatListItem, Tabs, BottomNav, ProfileViewItem } from "@radar/ui"
+import { useChatStore, useConnectionStore, useSocketEvent, useProfileViewsStore, useAuthStore } from "@radar/features"
+import { messageService, connectionService, profileViewService } from "@radar/api"
 import type { Message, Connection } from "@radar/types"
 
 export default function ChatsPage() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<"messages" | "requests" | "connected">("messages")
+  const [showProfileViews, setShowProfileViews] = useState(false)
 
+  const { user } = useAuthStore()
   const { chats, setChats, updateChatLastMessage, incrementUnreadCount } = useChatStore()
   const { connections, pendingRequests, setConnections, setPendingRequests } = useConnectionStore()
+  const { profileViews, setProfileViews } = useProfileViewsStore()
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [chatsData, connectionsData, requestsData] = await Promise.all([
+        const [chatsData, connectionsData, requestsData, viewsData] = await Promise.all([
           messageService.getChats(),
           connectionService.getConnections("accepted"),
           connectionService.getConnections("pendings"),
+          profileViewService.getProfileViews(),
         ])
         setChats(chatsData)
         setConnections(connectionsData)
         setPendingRequests(requestsData)
+        setProfileViews(viewsData)
       } catch (error) {
         console.error("[v0] Error fetching chats data:", error)
       }
     }
 
     fetchData()
-  }, [setChats, setConnections, setPendingRequests])
+  }, [setChats, setConnections, setPendingRequests, setProfileViews])
 
   useSocketEvent<Message>(
     "new-message",
@@ -97,14 +102,14 @@ export default function ChatsPage() {
             ) : (
               chats.map((chat) => (
                 <ChatListItem
-                  key={chat.userId}
+                  key={chat.conversationId}
                   name={`${chat.user.firstName} ${chat.user.lastName}`}
                   lastMessage={chat.lastMessage?.content}
                   timestamp={chat.lastMessage ? formatTimestamp(chat.lastMessage.createdAt) : undefined}
                   unreadCount={chat.unreadCount}
-                  photoUrl={chat.profile.photoUrl}
+                  photoUrl={chat.user.Profile.photoUrl}
                   isOnline={true}
-                  onClick={() => handleChatClick(chat.userId)}
+                  onClick={() => handleChatClick(chat.user.userId)}
                 />
               ))
             )}
@@ -124,7 +129,7 @@ export default function ChatsPage() {
                   className="flex items-center justify-between p-4 border-b border-gray-100"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-linear-to-br from-[#00FFB3] to-[#14B8A6] flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#00FFB3] to-[#14B8A6] flex items-center justify-center">
                       <span className="text-[#0E2A3E] font-semibold text-sm">
                         {request.senderId.slice(0, 2).toUpperCase()}
                       </span>
@@ -156,6 +161,45 @@ export default function ChatsPage() {
 
         {activeTab === "connected" && (
           <div>
+            <div className="border-b border-gray-100 pb-4">
+              <button
+                onClick={() => setShowProfileViews(!showProfileViews)}
+                className="w-full px-6 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-[#FF4FD8] text-lg">👁️</span>
+                  <span className="font-semibold text-gray-900">Vieron tu perfil</span>
+                  {profileViews.length > 0 && (
+                    <span className="px-2 py-0.5 bg-[#FF4FD8] text-white text-xs font-bold rounded-full">
+                      {profileViews.length}
+                    </span>
+                  )}
+                </div>
+                <span className="text-gray-400">{showProfileViews ? "▼" : "▶"}</span>
+              </button>
+
+              {showProfileViews && (
+                <div className="mt-2">
+                  {profileViews.length === 0 ? (
+                    <div className="px-6 py-8 text-center">
+                      <p className="text-gray-500 text-sm">Aún nadie ha visto tu perfil</p>
+                    </div>
+                  ) : (
+                    profileViews.map((view) => (
+                      <ProfileViewItem
+                        key={view.profileViewId}
+                        name={`${view.Viewer.firstName} ${view.Viewer.lastName}`}
+                        displayName={view.Viewer.displayName}
+                        photoUrl={view.Viewer.photoUrl}
+                        timestamp={view.createdAt}
+                        onClick={() => router.push(`/profile/${view.viewerId}`)}
+                      />
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+
             {connections.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
                 <p className="text-gray-500">No tienes conexiones aún</p>
