@@ -23,7 +23,6 @@ export default function UserProfileScreen() {
   useEffect(() => {
     // Mock data
     setProfileData({
-      user: {
         userId: userId!,
         firstName: "Ana",
         lastName: "García",
@@ -34,8 +33,7 @@ export default function UserProfileScreen() {
         lastLongitude: -58.3816,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-      },
-      profile: {
+      Profile: {
         profileId: "1",
         userId: userId!,
         bio: "Me encanta explorar cafés nuevos, descubrir música indie y correr por los parques de la ciudad.",
