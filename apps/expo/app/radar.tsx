@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react"
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from "react-native"
 import { useRouter } from "expo-router"
-import { SendSignalModal, SignalDetailModal, RadarSignalMarker } from "@radar/ui"
+import { SendSignalModal, RadarSignalMarker } from "@radar/ui"
+import { SignalDetailModal } from "../../../packages/ui/signals/signal-detail-modal.native"
 import { useRadarStore, useAuthStore, useSocket, useSocketEvent } from "@radar/features"
 import { radarService, signalService } from "@radar/api"
 import type { NearbyUser, Event, ISignal } from "@radar/types"
@@ -36,7 +37,7 @@ export default function RadarScreen() {
 
       try {
         const {users, events, signals} = await radarService.getNearbyAll(currentLocation.latitude, currentLocation.longitude)
-
+console.log({signals})
         setNearbyUsers(users)
         setNearbyEvents(events)
         setNearbySignals(signals)

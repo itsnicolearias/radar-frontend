@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { RadarContainer, RadarUserMarker, RadarEventMarker, BottomNav, SendSignalModal, Button, RadarSignalMarker, SignalDetailModal } from "@radar/ui"
+import { RadarContainer, RadarUserMarker, RadarEventMarker, BottomNav, SendSignalModal, Button, RadarSignalMarker } from "@radar/ui"
 import { useRadarStore, useAuthStore, useSocket, useSocketEvent } from "@radar/features"
 import { radarService, signalService } from "@radar/api"
 import type { NearbyUser, IEventResponse, ISignal } from "@radar/types"
+import { SignalDetailModal } from "../../../../packages/ui/signals/signal-detail-modal"
 
 export default function RadarPage() {
   const router = useRouter()

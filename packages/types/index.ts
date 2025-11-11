@@ -140,6 +140,7 @@ export interface ISignal {
   createdAt: string
   updatedAt: string
   distance: number
+  Sender: NearbyUser
 }
 
 export interface ISignalResponse {

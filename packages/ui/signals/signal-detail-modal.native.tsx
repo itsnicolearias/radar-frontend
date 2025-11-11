@@ -15,7 +15,7 @@ export const SignalDetailModal: React.FC<SignalDetailModalProps> = ({ signal, on
       <View style={styles.container}>
         <View style={styles.modal}>
           <View style={styles.header}>
-            <Text style={styles.title}>Señal de {signal.senderId}</Text>
+            <Text style={styles.title}>Señal de {signal.Sender.firstName}</Text>
             <TouchableOpacity onPress={onClose}>
               <X color="#C5C5C5" />
             </TouchableOpacity>

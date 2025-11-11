@@ -1,6 +1,6 @@
+"use client"
 import React, { useState } from "react"
 import { motion } from "framer-motion"
-import { Button } from "../components/button"
 import { Textarea } from "../components/textarea"
 import { X } from "lucide-react"
 
