@@ -133,6 +133,20 @@ export interface IEventsListResponse {
   count: number
 }
 
+export interface ISignal {
+  signalId: string
+  senderId: string
+  note: string | null
+  createdAt: string
+  updatedAt: string
+  distance: number
+}
+
+export interface ISignalResponse {
+  success: boolean
+  data: ISignal
+}
+
 export interface IProfileView {
   profileViewId: string
   viewerId: string
@@ -176,7 +190,7 @@ export interface IRadarResponse {
   data: {
     users: NearbyUser[]
     events: Event[]
-    signals: []
+    signals: ISignal[]
   }
 }
 

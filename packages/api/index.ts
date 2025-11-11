@@ -9,5 +9,6 @@ export * from "./services/message-service"
 export * from "./services/notification-service"
 export * from "./services/event-service"
 export * from "./services/profile-view-service"
+export * from "./services/signal-service"
 
 export * from "./socket-client"
