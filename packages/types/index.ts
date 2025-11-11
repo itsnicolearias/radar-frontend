@@ -133,7 +133,7 @@ export interface IEventsListResponse {
   count: number
 }
 
-export interface IProfileViewResponse {
+export interface IProfileView {
   profileViewId: string
   viewerId: string
   viewedId: string
@@ -146,6 +146,11 @@ export interface IProfileViewResponse {
     displayName: string | null
     photoUrl?: string
   }
+}
+
+export interface IProfileViewResponse {
+  success: boolean
+  data: IProfileView[]
 }
 
 export interface NearbyUser {
@@ -177,7 +182,7 @@ export interface IRadarResponse {
 
 export interface RecentChats {
   user: NearbyUser
-  lastMessage?: Message
+  lastMessage: Message
   unreadCount: number
   conversationId: string
 }

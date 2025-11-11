@@ -48,11 +48,10 @@ export default function RadarPage() {
     },
     [updateUserLocation],
   )
-console.log(user)
+
   useEffect(() => {
     
     if (!currentLocation && user) {
-      console.log(user.lastLatitude, user.lastLongitude)
       setCurrentLocation({ latitude: user.lastLatitude!, longitude: user.lastLongitude! }) // Buenos Aires
     }
   }, [currentLocation, setCurrentLocation])

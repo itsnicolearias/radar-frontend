@@ -20,13 +20,14 @@ export interface ChatsResponse {
 export const messageService = {
   async getChats(): Promise<RecentChats[]> {
     const response = await axiosClient.get<ChatsResponse>("/messages")
-    console.log(response.data.data.conversations)
+
     return response.data.data.conversations;
   },
 
   async getMessages(userId: string): Promise<Message[]> {
-    const response = await axiosClient.get<MessagesResponse>(`/messages/${userId}`)
-    return response.data.messages
+    const response = await axiosClient.get(`/messages/${userId}`)
+
+    return response.data.data
   },
 
   async sendMessage(data: SendMessageInput): Promise<Message> {

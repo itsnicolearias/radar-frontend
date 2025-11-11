@@ -15,7 +15,7 @@ export const radarService = {
     const response = await axiosClient.get<IRadarResponse>("/radar/nearby", {
       params: { latitude, longitude, radius },
     })
-    console.log({response})
+
     return response.data.data;
   },
 

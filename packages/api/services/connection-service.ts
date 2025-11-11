@@ -10,7 +10,7 @@ export const connectionService = {
     const response = await axiosClient.get<ConnectionsResponse>(`/connections/${status}`, {
       //params: status ? { status } : undefined,
     })
-    console.log("cooo", response.data.data)
+
     return response.data.data;
   },
 

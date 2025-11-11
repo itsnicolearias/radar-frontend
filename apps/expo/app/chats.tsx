@@ -22,7 +22,7 @@ export default function ChatsScreen() {
           connectionService.getConnections("accepted"),
           connectionService.getConnections("pendings"),
         ])
-        console.log({connectionsData})
+
         setChats(chatsData)
         setConnections(connectionsData)
         setPendingRequests(requestsData)

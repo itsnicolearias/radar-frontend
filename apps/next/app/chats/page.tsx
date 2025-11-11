@@ -104,10 +104,10 @@ export default function ChatsPage() {
                 <ChatListItem
                   key={chat.conversationId}
                   name={`${chat.user.firstName} ${chat.user.lastName}`}
-                  lastMessage={chat.lastMessage?.content}
+                  lastMessage={chat.lastMessage.content}
                   timestamp={chat.lastMessage ? formatTimestamp(chat.lastMessage.createdAt) : undefined}
                   unreadCount={chat.unreadCount}
-                  photoUrl={chat.user.Profile.photoUrl}
+                  photoUrl={chat.user.Profile?.photoUrl}
                   isOnline={true}
                   onClick={() => handleChatClick(chat.user.userId)}
                 />

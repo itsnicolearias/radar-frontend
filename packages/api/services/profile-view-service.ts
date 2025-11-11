@@ -1,22 +1,22 @@
 import { axiosClient } from "../axios-client"
-import type { IProfileViewResponse } from "@radar/types"
+import type { IProfileView, IProfileViewResponse } from "@radar/types"
 
-// NOTE: Rename this file to profile-view-service.ts (dot, not comma) for proper imports.
 export const profileViewService = {
-  async getProfileViews(): Promise<IProfileViewResponse[]> {
+  async getProfileViews(): Promise<IProfileView[]> {
     try {
-      const response = await axiosClient.get<IProfileViewResponse[]>("/profile-views")
-      return response.data
+      const response = await axiosClient.get("/profile/views")
+
+      return response.data.data
     } catch (error) {
       console.error("[v0] Error fetching profile views:", error)
       throw error
     }
   },
 
-  async registerProfileView(viewedId: string): Promise<IProfileViewResponse> {
+  async registerProfileView(viewedId: string): Promise<IProfileView> {
     try {
-      const response = await axiosClient.post<IProfileViewResponse>("/profile-views/view", { viewedId })
-      return response.data
+      const response = await axiosClient.post("/profile/views", { viewedId })
+      return response.data.data
     } catch (error) {
       console.error("[v0] Error registering profile view:", error)
       throw error

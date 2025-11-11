@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation"
 import { ArrowLeft } from "lucide-react"
 import { ProfileCard } from "@radar/ui"
 import { useConnectionStore, useAuthStore } from "@radar/features"
-import { connectionService } from "@radar/api"
+import { connectionService, profileViewService } from "@radar/api"
 import type { NearbyUser } from "@radar/types"
 
 export default function UserProfilePage() {
@@ -39,7 +39,7 @@ export default function UserProfilePage() {
 
     // TODO: Fetch user profile from API
     setProfileData({
-      user: {
+
         userId,
         firstName: "Ana",
         lastName: "García",
@@ -50,8 +50,8 @@ export default function UserProfilePage() {
         lastLongitude: -58.3816,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-      },
-      profile: {
+
+      Profile: {
         profileId: "1",
         userId,
         bio: "Me encanta explorar cafés nuevos, descubrir música indie y correr por los parques de la ciudad.",
@@ -107,12 +107,12 @@ export default function UserProfilePage() {
       {/* Profile Card */}
       <div className="px-6 py-8">
         <ProfileCard
-          name={`${profileData.user.firstName} ${profileData.user.lastName}`}
-          age={profileData.profile.age}
-          location={profileData.profile.province}
+          name={`${profileData.firstName} ${profileData.lastName}`}
+          age={profileData.Profile.age}
+          location={profileData.Profile.province}
           distance={profileData.distance}
-          bio={profileData.profile.bio}
-          interests={profileData.profile.interests}
+          bio={profileData.Profile.bio}
+          interests={profileData.Profile.interests}
           isConnected={isConnected}
           onConnect={handleConnect}
           onMessage={handleMessage}
