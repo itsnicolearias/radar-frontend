@@ -17,7 +17,7 @@ export const SignalDetailModal: React.FC<SignalDetailModalProps> = ({ signal, on
           <View style={styles.header}>
             <Text style={styles.title}>Señal de {signal.senderId}</Text>
             <TouchableOpacity onPress={onClose}>
-              <X color="#9CA3AF" />
+              <X color="#C5C5C5" />
             </TouchableOpacity>
           </View>
           <Text style={styles.note}>{signal.note}</Text>
@@ -33,15 +33,17 @@ export const SignalDetailModal: React.FC<SignalDetailModalProps> = ({ signal, on
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.9)",
     justifyContent: "center",
     alignItems: "center",
   },
   modal: {
-    backgroundColor: "#1F2937",
+    backgroundColor: "#1A1A1A",
     padding: 24,
-    borderRadius: 16,
-    width: "80%",
+    borderRadius: 24,
+    width: "90%",
+    borderWidth: 1,
+    borderColor: "rgba(255, 0, 92, 0.3)",
   },
   header: {
     flexDirection: "row",
@@ -55,18 +57,20 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
   },
   note: {
-    color: "#FFFFFF",
-    marginBottom: 16,
+    color: "#C5C5C5",
+    fontSize: 16,
+    lineHeight: 24,
+    marginBottom: 24,
   },
   respondButton: {
-    backgroundColor: "#10B981",
-    padding: 12,
-    borderRadius: 8,
+    backgroundColor: "#00FFB3",
+    padding: 16,
+    borderRadius: 9999,
     alignItems: "center",
     marginTop: 16,
   },
   respondButtonText: {
-    color: "#FFFFFF",
+    color: "#000000",
     fontWeight: "bold",
   },
 })

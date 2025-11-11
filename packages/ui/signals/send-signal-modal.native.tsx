@@ -22,14 +22,14 @@ export const SendSignalModal: React.FC<SendSignalModalProps> = ({ onClose, onSen
           <View style={styles.header}>
             <Text style={styles.title}>Enviar Señal</Text>
             <TouchableOpacity onPress={onClose}>
-              <X color="#9CA3AF" />
+              <X color="#C5C5C5" />
             </TouchableOpacity>
           </View>
           <TextInput
             value={note}
             onChangeText={setNote}
             placeholder="Escribe tu mensaje temporal..."
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor="rgba(255, 255, 255, 0.4)"
             style={styles.textarea}
             maxLength={100}
             multiline
@@ -47,15 +47,17 @@ export const SendSignalModal: React.FC<SendSignalModalProps> = ({ onClose, onSen
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.9)",
     justifyContent: "center",
     alignItems: "center",
   },
   modal: {
-    backgroundColor: "#1F2937",
+    backgroundColor: "#1A1A1A",
     padding: 24,
-    borderRadius: 16,
-    width: "80%",
+    borderRadius: 24,
+    width: "90%",
+    borderWidth: 1,
+    borderColor: "rgba(0, 255, 179, 0.3)",
   },
   header: {
     flexDirection: "row",
@@ -69,28 +71,30 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
   },
   textarea: {
-    backgroundColor: "#374151",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
     color: "#FFFFFF",
-    borderRadius: 8,
-    padding: 8,
-    height: 100,
+    borderRadius: 12,
+    padding: 12,
+    height: 96,
     textAlignVertical: "top",
+    borderWidth: 1,
+    borderColor: "rgba(0, 255, 179, 0.3)",
   },
   charCount: {
     textAlign: "right",
     fontSize: 12,
-    color: "#9CA3AF",
+    color: "#C5C5C5",
     marginTop: 8,
   },
   sendButton: {
-    backgroundColor: "#10B981",
-    padding: 12,
-    borderRadius: 8,
+    backgroundColor: "#00FFB3",
+    padding: 16,
+    borderRadius: 9999,
     alignItems: "center",
-    marginTop: 16,
+    marginTop: 24,
   },
   sendButtonText: {
-    color: "#FFFFFF",
+    color: "#000000",
     fontWeight: "bold",
   },
 })
