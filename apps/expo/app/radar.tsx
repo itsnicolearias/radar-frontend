@@ -37,7 +37,6 @@ export default function RadarScreen() {
 
       try {
         const {users, events, signals} = await radarService.getNearbyAll(currentLocation.latitude, currentLocation.longitude)
-console.log({signals})
         setNearbyUsers(users)
         setNearbyEvents(events)
         setNearbySignals(signals)
