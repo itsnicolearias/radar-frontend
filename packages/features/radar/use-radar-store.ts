@@ -1,15 +1,19 @@
 import { create } from "zustand"
 import { immer } from "zustand/middleware/immer"
-import type { NearbyUser, Event } from "@radar/types"
+import type { NearbyUser, Event, ISignal } from "@radar/types"
 
 interface RadarState {
   nearbyUsers: NearbyUser[]
   nearbyEvents: Event[]
+  nearbySignals: ISignal[]
   currentLocation: { latitude: number; longitude: number } | null
   isLoading: boolean
   error: string | null
   setNearbyUsers: (users: NearbyUser[]) => void
   setNearbyEvents: (events: Event[]) => void
+  setNearbySignals: (signals: ISignal[]) => void
+  addNearbySignal: (signal: ISignal) => void
+  removeNearbySignal: (signalId: string) => void
   setCurrentLocation: (location: { latitude: number; longitude: number }) => void
   addNearbyUser: (user: NearbyUser) => void
   removeNearbyUser: (userId: string) => void
@@ -23,6 +27,7 @@ export const useRadarStore = create<RadarState>()(
   immer((set) => ({
     nearbyUsers: [],
     nearbyEvents: [],
+    nearbySignals: [],
     currentLocation: null,
     isLoading: false,
     error: null,
@@ -33,6 +38,21 @@ export const useRadarStore = create<RadarState>()(
     setNearbyEvents: (events) =>
       set((state) => {
         state.nearbyEvents = events
+      }),
+    setNearbySignals: (signals) =>
+      set((state) => {
+        state.nearbySignals = signals
+      }),
+    addNearbySignal: (signal) =>
+      set((state) => {
+        const exists = state.nearbySignals.find((s) => s.signalId === signal.signalId)
+        if (!exists) {
+          state.nearbySignals.push(signal)
+        }
+      }),
+    removeNearbySignal: (signalId) =>
+      set((state) => {
+        state.nearbySignals = state.nearbySignals.filter((s) => s.signalId !== signalId)
       }),
     setCurrentLocation: (location) =>
       set((state) => {
@@ -69,6 +89,7 @@ export const useRadarStore = create<RadarState>()(
       set((state) => {
         state.nearbyUsers = []
         state.nearbyEvents = []
+        state.nearbySignals = []
         state.currentLocation = null
         state.isLoading = false
         state.error = null

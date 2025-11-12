@@ -1,11 +1,13 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from "react-native"
 import { useRouter } from "expo-router"
+import { SendSignalModal, RadarSignalMarker } from "@radar/ui"
+import { SignalDetailModal } from "../../../packages/ui/signals/signal-detail-modal.native"
 import { useRadarStore, useAuthStore, useSocket, useSocketEvent } from "@radar/features"
-import { radarService } from "@radar/api"
-import type { NearbyUser, Event } from "@radar/types"
+import { radarService, signalService } from "@radar/api"
+import type { NearbyUser, Event, ISignal } from "@radar/types"
 
 const { width, height } = Dimensions.get("window")
 
@@ -15,13 +17,18 @@ export default function RadarScreen() {
   const {
     nearbyUsers,
     nearbyEvents,
+    nearbySignals,
     currentLocation,
     setNearbyUsers,
     setNearbyEvents,
+    setNearbySignals,
     setCurrentLocation,
+    addNearbySignal,
     updateUserLocation,
   } = useRadarStore()
 
+  const [isSendSignalModalOpen, setIsSendSignalModalOpen] = useState(false)
+  const [selectedSignal, setSelectedSignal] = useState<ISignal | null>(null)
   const socket = useSocket()
 
   useEffect(() => {
@@ -29,17 +36,26 @@ export default function RadarScreen() {
       if (!currentLocation) return
 
       try {
-        const {users, events} = await radarService.getNearbyAll(currentLocation.latitude, currentLocation.longitude)
-
+        const {users, events, signals} = await radarService.getNearbyAll(currentLocation.latitude, currentLocation.longitude)
         setNearbyUsers(users)
         setNearbyEvents(events)
+        setNearbySignals(signals)
       } catch (error) {
         console.error("[v0] Error fetching nearby data:", error)
       }
     }
 
     fetchNearbyData()
-  }, [currentLocation, setNearbyUsers, setNearbyEvents])
+  }, [currentLocation, setNearbyUsers, setNearbyEvents, setNearbySignals])
+
+  const handleSendSignal = async (note: string | null) => {
+    try {
+      const newSignal = await signalService.sendSignal(note)
+      addNearbySignal(newSignal)
+    } catch (error) {
+      console.error("[v0] Error sending signal:", error)
+    }
+  }
 
   useSocketEvent<{ userId: string; latitude: number; longitude: number }>(
     "location-updated",
@@ -76,6 +92,16 @@ export default function RadarScreen() {
     )
   }
 
+  const handleSignalClick = (signal: ISignal) => {
+    setSelectedSignal(signal)
+  }
+
+  const handleRespond = (signalId: string) => {
+    // Implement respond logic here
+    console.log("Responding to signal:", signalId)
+    setSelectedSignal(null)
+  }
+
   const renderEventMarker = (event: Event, index: number) => {
     const angle = ((index + 0.5) / nearbyEvents.length) * Math.PI * 2
     const distance = 500 + Math.random() * 300
@@ -100,9 +126,14 @@ export default function RadarScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Radar</Text>
-        <TouchableOpacity style={styles.profileButton}>
-          <Text style={styles.profileInitial}>{"U"}</Text>
-        </TouchableOpacity>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
+          <TouchableOpacity onPress={() => setIsSendSignalModalOpen(true)} style={styles.signalButton}>
+            <Text style={styles.signalButtonText}>Señales: {nearbySignals.length}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.profileButton}>
+            <Text style={styles.profileInitial}>{"U"}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Radar Canvas */}
@@ -132,6 +163,19 @@ export default function RadarScreen() {
 
         {/* Nearby events */}
         {nearbyEvents.map(renderEventMarker)}
+
+        {/* Nearby signals */}
+        {nearbySignals.map((signal, index) => {
+          const angle = ((index + 0.25) / nearbySignals.length) * Math.PI * 2
+          return (
+            <RadarSignalMarker
+              key={signal.signalId}
+              distance={signal.distance}
+              angle={angle}
+              onClick={() => handleSignalClick(signal)}
+            />
+          )
+        })}
       </View>
 
       {/* Bottom Navigation */}
@@ -156,6 +200,23 @@ export default function RadarScreen() {
           <Text style={styles.navLabel}>Perfil</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Send Signal Modal */}
+      {isSendSignalModalOpen && (
+        <SendSignalModal
+          onClose={() => setIsSendSignalModalOpen(false)}
+          onSend={handleSendSignal}
+        />
+      )}
+
+      {/* Signal Detail Modal */}
+      {selectedSignal && (
+        <SignalDetailModal
+          signal={selectedSignal}
+          onClose={() => setSelectedSignal(null)}
+          onRespond={handleRespond}
+        />
+      )}
     </View>
   )
 }
@@ -247,6 +308,16 @@ const styles = StyleSheet.create({
     color: "#0E2A3E",
     fontSize: 14,
     fontWeight: "bold",
+  },
+  signalButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: "rgba(0, 255, 179, 0.2)",
+    borderRadius: 20,
+  },
+  signalButtonText: {
+    color: "#00FFB3",
+    fontWeight: "600",
   },
   eventMarker: {
     position: "absolute",
