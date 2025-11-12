@@ -1,34 +1,38 @@
 import { axiosClient } from "../axios-client"
-import type { Connection } from "@radar/types"
-
-export interface ConnectionsResponse {
-  data: Connection[]
-}
+import type { IConnectionResponse, IDeleteConnectionResponse } from "@radar/types"
 
 export const connectionService = {
-  async getConnections(status?: "pendings" | "accepted" | "rejected"): Promise<Connection[]> {
-    const response = await axiosClient.get<ConnectionsResponse>(`/connections/${status}`, {
-      //params: status ? { status } : undefined,
-    })
-
-    return response.data.data;
+  async getAcceptedConnections(): Promise<IConnectionResponse[]> {
+    const response = await axiosClient.get<IConnectionResponse[]>("/connections/accepted")
+    return response.data
   },
 
-  async sendConnectionRequest(receiverId: string): Promise<Connection> {
-    const response = await axiosClient.post<Connection>("/connections", {
-      receiver_id: receiverId,
+  async getPendingConnections(): Promise<IConnectionResponse[]> {
+    const response = await axiosClient.get<IConnectionResponse[]>("/connections/pendings")
+    return response.data
+  },
+
+  async createConnection(receiverId: string): Promise<IConnectionResponse> {
+    const response = await axiosClient.post<IConnectionResponse>("/connections", {
+      receiverId,
     })
     return response.data
   },
 
-  async updateConnectionStatus(connectionId: string, status: "accepted" | "rejected"): Promise<Connection> {
-    const response = await axiosClient.patch<Connection>(`/connections/${connectionId}`, {
+  async updateConnection(
+    connectionId: string,
+    status: "ACCEPTED" | "REJECTED",
+  ): Promise<IConnectionResponse> {
+    const response = await axiosClient.patch<IConnectionResponse>(`/connections/${connectionId}`, {
       status,
     })
     return response.data
   },
 
-  async deleteConnection(connectionId: string): Promise<void> {
-    await axiosClient.delete(`/connections/${connectionId}`)
+  async deleteConnection(connectionId: string): Promise<IDeleteConnectionResponse> {
+    const response = await axiosClient.delete<IDeleteConnectionResponse>(
+      `/connections/${connectionId}`,
+    )
+    return response.data
   },
 }
