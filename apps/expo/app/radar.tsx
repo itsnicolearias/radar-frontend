@@ -5,7 +5,8 @@ import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from "react-nati
 import { useRouter } from "expo-router"
 import { SendSignalModal, RadarSignalMarker } from "@radar/ui"
 import { SignalDetailModal } from "../../../packages/ui/signals/signal-detail-modal.native"
-import { useRadarStore, useAuthStore, useSocket, useSocketEvent } from "@radar/features"
+import { EventDetailModal } from "../../../packages/ui/events/event-detail-modal.native"
+import { useRadarStore, useAuthStore, useSocket, useSocketEvent, useChatStore } from "@radar/features"
 import { radarService, signalService } from "@radar/api"
 import type { IEventResponse, IRadarUser, IRadarSignal } from "@radar/types"
 
@@ -14,6 +15,7 @@ const { width, height } = Dimensions.get("window")
 export default function RadarScreen() {
   const router = useRouter()
   const { user } = useAuthStore()
+  const { setReplyingToSignal } = useChatStore()
   const {
     nearbyUsers,
     nearbyEvents,
@@ -29,6 +31,7 @@ export default function RadarScreen() {
 
   const [isSendSignalModalOpen, setIsSendSignalModalOpen] = useState(false)
   const [selectedSignal, setSelectedSignal] = useState<IRadarSignal | null>(null)
+  const [selectedEvent, setSelectedEvent] = useState<IEventResponse | null>(null)
   const socket = useSocket()
 
   useEffect(() => {
@@ -96,10 +99,14 @@ export default function RadarScreen() {
     setSelectedSignal(signal)
   }
 
-  const handleRespond = (signalId: string) => {
-    // Implement respond logic here
-    console.log("Responding to signal:", signalId)
+  const handleRespond = (signal: IRadarSignal) => {
+    setReplyingToSignal(signal)
+    router.push(`/chats/${signal.senderId}`)
     setSelectedSignal(null)
+  }
+
+  const handleEventClick = (event: IEventResponse) => {
+    setSelectedEvent(event)
   }
 
   const renderEventMarker = (event: IEventResponse, index: number) => {
@@ -114,7 +121,7 @@ export default function RadarScreen() {
       <TouchableOpacity
         key={event.eventId}
         style={[styles.eventMarker, { left: x - 20, top: y - 20 }]}
-        onPress={() => router.push(`/events/${event.eventId}`)}
+        onPress={() => handleEventClick(event)}
       >
         <View style={styles.eventDot} />
       </TouchableOpacity>
@@ -214,7 +221,14 @@ export default function RadarScreen() {
         <SignalDetailModal
           signal={selectedSignal}
           onClose={() => setSelectedSignal(null)}
-          onRespond={handleRespond}
+          onRespond={() => handleRespond(selectedSignal)}
+        />
+      )}
+
+      {selectedEvent && (
+        <EventDetailModal
+          event={selectedEvent}
+          onClose={() => setSelectedEvent(null)}
         />
       )}
     </View>
