@@ -1,21 +1,21 @@
 import { create } from "zustand"
 import { immer } from "zustand/middleware/immer"
-import type { NearbyUser, Event, ISignal } from "@radar/types"
+import type { IEventResponse, IRadarUser, IRadarSignal } from "@radar/types"
 
 interface RadarState {
-  nearbyUsers: NearbyUser[]
-  nearbyEvents: Event[]
-  nearbySignals: ISignal[]
+  nearbyUsers: IRadarUser[]
+  nearbyEvents: IEventResponse[]
+  nearbySignals: IRadarSignal[]
   currentLocation: { latitude: number; longitude: number } | null
   isLoading: boolean
   error: string | null
-  setNearbyUsers: (users: NearbyUser[]) => void
-  setNearbyEvents: (events: Event[]) => void
-  setNearbySignals: (signals: ISignal[]) => void
-  addNearbySignal: (signal: ISignal) => void
+  setNearbyUsers: (users: IRadarUser[]) => void
+  setNearbyEvents: (events: IEventResponse[]) => void
+  setNearbySignals: (signals: IRadarSignal[]) => void
+  addNearbySignal: (signal: IRadarSignal) => void
   removeNearbySignal: (signalId: string) => void
   setCurrentLocation: (location: { latitude: number; longitude: number }) => void
-  addNearbyUser: (user: NearbyUser) => void
+  addNearbyUser: (user: IRadarUser) => void
   removeNearbyUser: (userId: string) => void
   updateUserLocation: (userId: string, latitude: number, longitude: number) => void
   setLoading: (loading: boolean) => void

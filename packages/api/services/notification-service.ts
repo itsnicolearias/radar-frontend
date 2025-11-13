@@ -1,34 +1,42 @@
 import { axiosClient } from "../axios-client"
-import type { Notification } from "@radar/types"
+import type {
+  INotificationResponse,
+  IUnreadNotificationCountResponse,
+  IMarkNotificationsAsReadResponse,
+  IDeleteNotificationResponse,
+} from "@radar/types"
 
-export interface NotificationsResponse {
-  notifications: Notification[]
-}
-
-export interface UnreadCountResponse {
-  count: number
+export interface MarkNotificationsAsReadInput {
+  notificationIds: string[]
 }
 
 export const notificationService = {
-  async getNotifications(): Promise<Notification[]> {
-    const response = await axiosClient.get<NotificationsResponse>("/notifications")
-    return response.data.notifications
+  async getNotifications(): Promise<INotificationResponse[]> {
+    const response = await axiosClient.get<INotificationResponse[]>("/notifications")
+    return response.data
   },
 
-  async getUnreadCount(): Promise<number> {
-    const response = await axiosClient.get<UnreadCountResponse>("/notifications/unread/count")
-    return response.data.count
+  async getUnreadCount(): Promise<IUnreadNotificationCountResponse> {
+    const response = await axiosClient.get<IUnreadNotificationCountResponse>(
+      "/notifications/unread/count",
+    )
+    return response.data
   },
 
-  async markAsRead(notificationId?: string): Promise<void> {
-    if (notificationId) {
-      await axiosClient.patch(`/notifications/${notificationId}/read`)
-    } else {
-      await axiosClient.patch("/notifications/read")
-    }
+  async markAsRead(
+    data: MarkNotificationsAsReadInput,
+  ): Promise<IMarkNotificationsAsReadResponse> {
+    const response = await axiosClient.patch<IMarkNotificationsAsReadResponse>(
+      "/notifications/read",
+      data,
+    )
+    return response.data
   },
 
-  async deleteNotification(notificationId: string): Promise<void> {
-    await axiosClient.delete(`/notifications/${notificationId}`)
+  async deleteNotification(notificationId: string): Promise<IDeleteNotificationResponse> {
+    const response = await axiosClient.delete<IDeleteNotificationResponse>(
+      `/notifications/${notificationId}`,
+    )
+    return response.data
   },
 }

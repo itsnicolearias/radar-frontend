@@ -4,7 +4,7 @@ import type { IEventResponse, IEventCreatePayload, IEventsListResponse } from "@
 export const eventService = {
   async getAllEvents(): Promise<IEventsListResponse> {
     try {
-      const response = await axiosClient.get<IEventsListResponse>("/api/events")
+      const response = await axiosClient.get<IEventsListResponse>("/events")
       return response.data
     } catch (error) {
       console.error("[v0] Error fetching events:", error)
@@ -14,7 +14,7 @@ export const eventService = {
 
   async getEventById(eventId: string): Promise<IEventResponse> {
     try {
-      const response = await axiosClient.get<IEventResponse>(`/api/events/${eventId}`)
+      const response = await axiosClient.get<IEventResponse>(`/events/${eventId}`)
       return response.data
     } catch (error) {
       console.error("[v0] Error fetching event:", error)
@@ -24,7 +24,7 @@ export const eventService = {
 
   async createEvent(payload: IEventCreatePayload): Promise<IEventResponse> {
     try {
-      const response = await axiosClient.post<IEventResponse>("/api/events", payload)
+      const response = await axiosClient.post<IEventResponse>("/events", payload)
       return response.data
     } catch (error) {
       console.error("[v0] Error creating event:", error)
@@ -34,7 +34,7 @@ export const eventService = {
 
   async updateEvent(eventId: string, payload: Partial<IEventCreatePayload>): Promise<IEventResponse> {
     try {
-      const response = await axiosClient.patch<IEventResponse>(`/api/events/${eventId}`, payload)
+      const response = await axiosClient.patch<IEventResponse>(`/events/${eventId}`, payload)
       return response.data
     } catch (error) {
       console.error("[v0] Error updating event:", error)
@@ -44,7 +44,7 @@ export const eventService = {
 
   async deleteEvent(eventId: string): Promise<void> {
     try {
-      await axiosClient.delete(`/api/events/${eventId}`)
+      await axiosClient.delete(`/events/${eventId}`)
     } catch (error) {
       console.error("[v0] Error deleting event:", error)
       throw error
@@ -53,7 +53,7 @@ export const eventService = {
 
   async markInterest(eventId: string): Promise<void> {
     try {
-      await axiosClient.post(`/api/events/${eventId}/interest`)
+      await axiosClient.post(`/events/${eventId}/interest`)
     } catch (error) {
       console.error("[v0] Error marking interest:", error)
       throw error
@@ -62,7 +62,7 @@ export const eventService = {
 
   async unmarkInterest(eventId: string): Promise<void> {
     try {
-      await axiosClient.delete(`/api/events/${eventId}/interest`)
+      await axiosClient.delete(`/events/${eventId}/interest`)
     } catch (error) {
       console.error("[v0] Error unmarking interest:", error)
       throw error

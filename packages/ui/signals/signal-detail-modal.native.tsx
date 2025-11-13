@@ -1,10 +1,10 @@
 import React from "react"
 import { View, Text, TouchableOpacity, Modal, StyleSheet } from "react-native"
 import { X } from "lucide-react-native"
-import type { ISignal } from "@radar/types"
+import { IRadarSignal } from "@radar/types"
 
 interface SignalDetailModalProps {
-  signal: ISignal
+  signal: IRadarSignal
   onClose: () => void
   onRespond: (signalId: string) => void
 }

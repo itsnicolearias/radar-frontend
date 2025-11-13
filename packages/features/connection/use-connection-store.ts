@@ -1,14 +1,14 @@
 import { create } from "zustand"
 import { immer } from "zustand/middleware/immer"
-import type { Connection } from "@radar/types"
+import type { IConnectionResponse } from "@radar/types"
 
 interface ConnectionState {
-  connections: Connection[]
-  pendingRequests: Connection[]
+  connections: IConnectionResponse[]
+  pendingRequests: IConnectionResponse[]
   isLoading: boolean
-  setConnections: (connections: Connection[]) => void
-  setPendingRequests: (requests: Connection[]) => void
-  addConnection: (connection: Connection) => void
+  setConnections: (connections: IConnectionResponse[]) => void
+  setPendingRequests: (requests: IConnectionResponse[]) => void
+  addConnection: (connection: IConnectionResponse) => void
   updateConnection: (connectionId: string, status: "accepted" | "rejected") => void
   removeConnection: (connectionId: string) => void
   setLoading: (loading: boolean) => void

@@ -6,14 +6,14 @@ import { X } from "lucide-react"
 
 interface SendSignalModalProps {
   onClose: () => void
-  onSend: (note: string | null) => void
+  onSend: (note?: string) => void
 }
 
 export const SendSignalModal: React.FC<SendSignalModalProps> = ({ onClose, onSend }) => {
   const [note, setNote] = useState("")
 
   const handleSend = () => {
-    onSend(note.trim() || null)
+    onSend(note.trim())
     onClose()
   }
 
