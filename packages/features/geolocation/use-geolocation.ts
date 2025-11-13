@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { radarService, emitSocketEvent } from "@radar/api"
+import { emitSocketEvent, userService } from "@radar/api"
 import { useRadarStore } from "../radar/use-radar-store"
 
 interface GeolocationState {
@@ -48,7 +48,7 @@ export const useGeolocation = (enableTracking = true) => {
 
         // Update location on server
         try {
-          await radarService.updateLocation({ latitude, longitude })
+          await userService.updateLocation({ latitude, longitude })
           emitSocketEvent("update-location", { latitude, longitude })
         } catch (error) {
           console.error("[v0] Error updating location:", error)
@@ -81,7 +81,7 @@ export const useGeolocation = (enableTracking = true) => {
 
         // Update location on server
         try {
-          await radarService.updateLocation({ latitude, longitude })
+          await userService.updateLocation({ latitude, longitude })
           emitSocketEvent("update-location", { latitude, longitude })
         } catch (error) {
           console.log("[v0] Geolocation watch error:", error)

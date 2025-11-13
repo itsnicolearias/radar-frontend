@@ -12,7 +12,7 @@ export interface SendMessageInput {
 }
 
 export interface MarkAsReadInput {
-  senderId: string
+  messageIds: string[]
 }
 
 export const messageService = {
@@ -38,8 +38,9 @@ export const messageService = {
     return response.data
   },
 
-  async markAsRead(data: MarkAsReadInput): Promise<IMarkAsReadResponse> {
-    const response = await axiosClient.patch<IMarkAsReadResponse>("/messages/read", data)
+  async markAsRead(messageIds: string[]): Promise<IMarkAsReadResponse> {
+    const requestData = { messageIds: messageIds }
+    const response = await axiosClient.patch<IMarkAsReadResponse>("/messages/read", requestData)
     return response.data
   },
 

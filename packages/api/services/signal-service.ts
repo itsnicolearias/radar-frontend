@@ -8,7 +8,7 @@ export interface SendSignalInput {
 export const signalService = {
   async sendSignal(note?: string): Promise<IRadarSignal> {
     const response = await axiosClient.post("/signals/send", { note })
-    return response.data.data
+    return response.data
   },
   async getSignalById(signalId: string): Promise<IRadarSignal> {
     const response = await axiosClient.get(`/signals/${signalId}`)

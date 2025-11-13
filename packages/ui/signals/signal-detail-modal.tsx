@@ -1,12 +1,12 @@
 import React from "react"
 import { motion } from "framer-motion"
 import { X } from "lucide-react"
-import type { ISignal } from "@radar/types"
+import type { IRadarSignal } from "@radar/types"
 
 interface SignalDetailModalProps {
-  signal: ISignal
+  signal: IRadarSignal
   onClose: () => void
-  onRespond: (signal: ISignal) => void
+  onRespond: (signal: IRadarSignal) => void
 }
 
 export const SignalDetailModal: React.FC<SignalDetailModalProps> = ({ signal, onClose, onRespond }) => {
@@ -19,7 +19,7 @@ export const SignalDetailModal: React.FC<SignalDetailModalProps> = ({ signal, on
     >
       <div className="bg-[#1A1A1A] rounded-3xl p-6 w-full max-w-sm border border-[#FF005C]/30 shadow-2xl">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-white">Señal de {signal.Sender.firstName}</h2>
+          <h2 className="text-xl font-bold text-white">Señal de {signal.Sender.displayName}</h2>
           <button
             onClick={onClose}
             className="w-10 h-10 bg-[#0D0D0D] rounded-full flex items-center justify-center transition-transform hover:scale-110 border border-transparent hover:border-[#FF005C]/30"
