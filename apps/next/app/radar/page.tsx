@@ -3,14 +3,17 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { RadarContainer, RadarUserMarker, RadarEventMarker, BottomNav, SendSignalModal, Button, RadarSignalMarker } from "@radar/ui"
-import { useRadarStore, useAuthStore, useSocket, useSocketEvent } from "@radar/features"
+import { motion } from "framer-motion"
+import { useRadarStore, useAuthStore, useSocket, useSocketEvent, useNotificationStore } from "@radar/features"
 import { radarService, signalService } from "@radar/api"
 import type { IEventResponse, IRadarUser, IRadarSignal } from "@radar/types"
 import { SignalDetailModal } from "../../../../packages/ui/signals/signal-detail-modal"
+import { EventDetailModal } from "../../../../packages/ui/events/event-detail-modal"
 
 export default function RadarPage() {
   const router = useRouter()
   const { user } = useAuthStore()
+  const { addNotification } = useNotificationStore()
   const {
     nearbyUsers,
     nearbyEvents,
@@ -26,9 +29,40 @@ export default function RadarPage() {
   } = useRadarStore()
 
   const [selectedUser, setSelectedUser] = useState<IRadarUser | null>(null)
+  const [selectedEvent, setSelectedEvent] = useState<IEventResponse | null>(null)
   const [selectedSignal, setSelectedSignal] = useState<IRadarSignal | null>(null)
   const [isSendSignalModalOpen, setIsSendSignalModalOpen] = useState(false)
+  const [seenSignals, setSeenSignals] = useState<string[]>([])
+  const [showSignalReplyNotification, setShowSignalReplyNotification] = useState(false)
   const socket = useSocket()
+
+  if (process.env.IS_TEST) {
+    nearbySignals.push({
+      signalId: "test-signal",
+      senderId: "test-sender",
+      note: "This is a test signal",
+      distance: 100,
+      createdAt: new Date(),
+      Sender: {
+        firstName: "Test",
+      },
+    })
+  }
+
+  useSocketEvent<{ senderName: string }>(
+    "signal:reply",
+    (data) => {
+      addNotification({
+        notificationId: new Date().toISOString(),
+        message: `💬 ${data.senderName} respondió a tu señal.`,
+        isRead: false,
+        createdAt: new Date(),
+      })
+      setShowSignalReplyNotification(true)
+      setTimeout(() => setShowSignalReplyNotification(false), 3000)
+    },
+    [addNotification],
+  )
 
   useEffect(() => {
     const fetchNearbyData = async () => {
@@ -78,16 +112,18 @@ export default function RadarPage() {
   }
 
   const handleEventClick = (event: IEventResponse) => {
-    router.push(`/events/${event.eventId}`)
+    setSelectedEvent(event)
   }
 
   const handleSignalClick = (signal: IRadarSignal) => {
     setSelectedSignal(signal)
+    if (!seenSignals.includes(signal.signalId)) {
+      setSeenSignals([...seenSignals, signal.signalId])
+    }
   }
 
-  const handleRespond = (signalId: string) => {
-    // Implement respond logic here
-    console.log("Responding to signal:", signalId)
+  const handleRespond = (signal: IRadarSignal) => {
+    router.push(`/chat/${signal.senderId}?signalId=${signal.signalId}`)
     setSelectedSignal(null)
   }
 
@@ -101,9 +137,6 @@ export default function RadarPage() {
       <header className="relative z-10 flex items-center justify-between px-6 py-4 pt-12">
         <h1 className="text-2xl font-bold text-white">Radar</h1>
         <div className="flex items-center gap-4">
-          <Button onClick={() => setIsSendSignalModalOpen(true)}>
-            Señales: {nearbySignals.length}
-          </Button>
           <button className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
             <span className="text-white text-sm">{user?.firstName?.[0] || "U"}</span>
           </button>
@@ -172,15 +205,60 @@ export default function RadarPage() {
                 key={signal.signalId}
                 distance={signal.distance}
                 angle={angle}
+                note={signal.note}
+                isNew={!seenSignals.includes(signal.signalId)}
                 onClick={() => handleSignalClick(signal)}
               />
             )
           })}
         </RadarContainer>
+        <motion.button
+          data-testid="send-signal-button"
+          onClick={() => setIsSendSignalModalOpen(true)}
+          className="absolute bottom-16 w-20 h-20 bg-gradient-to-br from-[#00FFB3] to-[#1DE3F2] rounded-full flex items-center justify-center shadow-2xl shadow-[#00FFB3]/50"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          animate={{
+            boxShadow: [
+              "0 0 20px rgba(0, 255, 179, 0.5)",
+              "0 0 40px rgba(0, 255, 179, 0.8)",
+              "0 0 20px rgba(0, 255, 179, 0.5)",
+            ],
+          }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          {nearbySignals.length > 0 && (
+            <div className="absolute -top-1 -right-1 w-6 h-6 bg-[#FF005C] rounded-full text-white text-xs flex items-center justify-center">
+              {nearbySignals.length}
+            </div>
+          )}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-black"
+          >
+            <path d="M4.9 12.87a6.3 6.3 0 0 0 8.2 8.2" />
+            <path d="M12 12a6.3 6.3 0 0 0 8.2-8.2" />
+            <path d="M12 12a6.3 6.3 0 0 0-8.2 8.2" />
+            <path d="M12 12a6.3 6.3 0 0 0 8.2 8.2" />
+            <circle cx="12" cy="12" r="2" />
+          </svg>
+        </motion.button>
       </div>
 
       {/* Bottom Navigation */}
-      <BottomNav activeTab="radar" onTabChange={handleTabChange} />
+      <BottomNav
+        activeTab="radar"
+        onTabChange={handleTabChange}
+        showSignalReplyNotification={showSignalReplyNotification}
+      />
 
       {/* Send Signal Modal */}
       {isSendSignalModalOpen && (
@@ -195,8 +273,13 @@ export default function RadarPage() {
         <SignalDetailModal
           signal={selectedSignal}
           onClose={() => setSelectedSignal(null)}
-          onRespond={handleRespond}
+          onRespond={() => handleRespond(selectedSignal)}
         />
+      )}
+
+      {/* Event Detail Modal */}
+      {selectedEvent && (
+        <EventDetailModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />
       )}
     </div>
   )

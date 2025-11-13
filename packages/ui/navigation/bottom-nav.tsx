@@ -8,9 +8,15 @@ interface BottomNavProps {
   activeTab: "radar" | "chats" | "events" | "profile"
   onTabChange: (tab: "radar" | "chats" | "events" | "profile") => void
   className?: string
+  showSignalReplyNotification?: boolean
 }
 
-export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange, className }) => {
+export const BottomNav: React.FC<BottomNavProps> = ({
+  activeTab,
+  onTabChange,
+  className,
+  showSignalReplyNotification,
+}) => {
   const tabs = [
     { id: "radar" as const, label: "Mapa", icon: MapPin },
     { id: "chats" as const, label: "Chats", icon: MessageCircle },
@@ -29,8 +35,11 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange, cl
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
-              className="flex flex-col items-center gap-1 transition-colors"
+              className="relative flex flex-col items-center gap-1 transition-colors"
             >
+              {tab.id === "chats" && showSignalReplyNotification && (
+                <div className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full" />
+              )}
               <Icon className={cn("w-6 h-6 transition-colors", isActive ? "text-[#00FFB3]" : "text-[#5A6E7A]")} />
               <span
                 className={cn("text-xs font-medium transition-colors", isActive ? "text-[#00FFB3]" : "text-[#5A6E7A]")}

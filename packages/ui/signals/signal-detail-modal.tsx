@@ -6,7 +6,7 @@ import type { ISignal } from "@radar/types"
 interface SignalDetailModalProps {
   signal: ISignal
   onClose: () => void
-  onRespond: (signalId: string) => void
+  onRespond: (signal: ISignal) => void
 }
 
 export const SignalDetailModal: React.FC<SignalDetailModalProps> = ({ signal, onClose, onRespond }) => {
@@ -30,7 +30,7 @@ export const SignalDetailModal: React.FC<SignalDetailModalProps> = ({ signal, on
         <p className="text-[#C5C5C5] text-base leading-relaxed">{signal.note}</p>
         <div className="mt-6">
           <button
-            onClick={() => onRespond(signal.signalId)}
+            onClick={() => onRespond(signal)}
             className="w-full h-14 rounded-full bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-bold hover:shadow-lg transition-all duration-300 shadow-[#00FFB3]/30"
           >
             Responder
