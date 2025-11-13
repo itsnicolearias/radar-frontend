@@ -1,22 +1,29 @@
+import { IConversation, IMessageResponse } from "@radar/types"
 import { create } from "zustand"
 import { immer } from "zustand/middleware/immer"
-import type { Chat, Message } from "@radar/types"
 
 interface ChatState {
-  chats: Chat[]
-  currentChat: Chat | null
-  messages: Record<string, Message[]>
+  chats: IConversation[]
+  currentChat: IConversation | null
+  // Clave por conversationId
+  messages: Record<string, IMessageResponse[]>
+  // Maneja conversationIds que están tecleando
   typingUsers: Set<string>
   isLoading: boolean
-  setChats: (chats: Chat[]) => void
-  setCurrentChat: (chat: Chat | null) => void
-  setMessages: (userId: string, messages: Message[]) => void
-  addMessage: (userId: string, message: Message) => void
-  updateChatLastMessage: (userId: string, message: Message) => void
-  incrementUnreadCount: (userId: string) => void
-  resetUnreadCount: (userId: string) => void
-  addTypingUser: (userId: string) => void
-  removeTypingUser: (userId: string) => void
+
+  setChats: (chats: IConversation[]) => void
+  setCurrentChat: (chat: IConversation | null) => void
+
+  // Acciones por conversationId
+  setMessages: (conversationId: string, messages: IMessageResponse[]) => void
+  addMessage: (conversationId: string, message: IMessageResponse) => void
+  updateChatLastMessage: (conversationId: string, message: IMessageResponse) => void
+  incrementUnreadCount: (conversationId: string) => void
+  resetUnreadCount: (conversationId: string) => void
+
+  addTypingUser: (conversationId: string) => void
+  removeTypingUser: (conversationId: string) => void
+
   setLoading: (loading: boolean) => void
   reset: () => void
 }
@@ -28,58 +35,69 @@ export const useChatStore = create<ChatState>()(
     messages: {},
     typingUsers: new Set(),
     isLoading: false,
+
     setChats: (chats) =>
       set((state) => {
         state.chats = chats
       }),
+
     setCurrentChat: (chat) =>
       set((state) => {
         state.currentChat = chat
       }),
-    setMessages: (userId, messages) =>
+
+    setMessages: (conversationId, messages) =>
       set((state) => {
-        state.messages[userId] = messages
+        state.messages[conversationId] = messages
       }),
-    addMessage: (userId, message) =>
+
+    addMessage: (conversationId, message) =>
       set((state) => {
-        if (!state.messages[userId]) {
-          state.messages[userId] = []
+        if (!state.messages[conversationId]) {
+          state.messages[conversationId] = []
         }
-        state.messages[userId].push(message)
+        state.messages[conversationId].push(message)
       }),
-    updateChatLastMessage: (userId, message) =>
+
+    updateChatLastMessage: (conversationId, message) =>
       set((state) => {
-        const chat = state.chats.find((c) => c.userId === userId)
+        const chat = state.chats.find((c) => c.conversationId === conversationId)
         if (chat) {
           chat.lastMessage = message
         }
       }),
-    incrementUnreadCount: (userId) =>
+
+    incrementUnreadCount: (conversationId) =>
       set((state) => {
-        const chat = state.chats.find((c) => c.userId === userId)
+        const chat = state.chats.find((c) => c.conversationId === conversationId)
         if (chat) {
           chat.unreadCount += 1
         }
       }),
-    resetUnreadCount: (userId) =>
+
+    resetUnreadCount: (conversationId) =>
       set((state) => {
-        const chat = state.chats.find((c) => c.userId === userId)
+        const chat = state.chats.find((c) => c.conversationId === conversationId)
         if (chat) {
           chat.unreadCount = 0
         }
       }),
-    addTypingUser: (userId) =>
+
+    addTypingUser: (conversationId) =>
       set((state) => {
-        state.typingUsers.add(userId)
+        state.typingUsers.add(conversationId)
       }),
-    removeTypingUser: (userId) =>
+
+    removeTypingUser: (conversationId) =>
       set((state) => {
-        state.typingUsers.delete(userId)
+        state.typingUsers.delete(conversationId)
       }),
+
     setLoading: (loading) =>
       set((state) => {
         state.isLoading = loading
       }),
+
     reset: () =>
       set((state) => {
         state.chats = []

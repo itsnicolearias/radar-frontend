@@ -33,3 +33,25 @@ export const profileSchema = z.object({
 export type RegisterInput = z.infer<typeof registerSchema>
 export type LoginInput = z.infer<typeof loginSchema>
 export type ProfileInput = z.infer<typeof profileSchema>
+
+export const eventSchema = z
+  .object({
+    title: z.string().min(3, "El título debe tener al menos 3 caracteres"),
+    description: z.string().min(10, "La descripción debe tener al menos 10 caracteres"),
+    location: z.string().min(3, "La ubicación es requerida"),
+    latitude: z.number().min(-90).max(90),
+    longitude: z.number().min(-180).max(180),
+    startDate: z.string().refine((date) => new Date(date) > new Date(), {
+      message: "La fecha de inicio debe ser futura",
+    }),
+    endDate: z.string(),
+    isPublic: z.boolean().default(true),
+    maxAttendees: z.number().min(1, "Debe haber al menos 1 asistente").default(50),
+    price: z.number().min(0, "El precio no puede ser negativo").default(0),
+  })
+  .refine((data) => new Date(data.endDate) > new Date(data.startDate), {
+    message: "La fecha de fin debe ser posterior a la fecha de inicio",
+    path: ["endDate"],
+  })
+
+export type EventInput = z.infer<typeof eventSchema>

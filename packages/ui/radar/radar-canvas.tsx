@@ -11,7 +11,7 @@ interface RadarCanvasProps {
 
 export const RadarCanvas: React.FC<RadarCanvasProps> = ({ className, pulseSpeed = 2000 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const animationRef = useRef<number>()
+  const animationRef = useRef<number>(0)
 
   useEffect(() => {
     const canvas = canvasRef.current

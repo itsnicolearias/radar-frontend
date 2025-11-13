@@ -23,7 +23,6 @@ export default function UserProfileScreen() {
   useEffect(() => {
     // Mock data
     setProfileData({
-      user: {
         userId: userId!,
         firstName: "Ana",
         lastName: "García",
@@ -34,8 +33,7 @@ export default function UserProfileScreen() {
         lastLongitude: -58.3816,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-      },
-      profile: {
+      Profile: {
         profileId: "1",
         userId: userId!,
         bio: "Me encanta explorar cafés nuevos, descubrir música indie y correr por los parques de la ciudad.",
@@ -85,14 +83,14 @@ export default function UserProfileScreen() {
         </View>
 
         <Text style={styles.name}>
-          {profileData.user.firstName} {profileData.user.lastName}, {profileData.profile.age}
+          {profileData.firstName} {profileData.lastName}, {profileData.Profile.age}
         </Text>
-        <Text style={styles.location}>{profileData.profile.province}</Text>
+        <Text style={styles.location}>{profileData.Profile.province}</Text>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Intereses</Text>
           <View style={styles.interests}>
-            {profileData.profile.interests?.map((interest, index) => (
+            {profileData.Profile.interests?.map((interest, index) => (
               <View key={index} style={styles.interestPill}>
                 <Text style={styles.interestText}>{interest}</Text>
               </View>
@@ -102,7 +100,7 @@ export default function UserProfileScreen() {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Sobre mí</Text>
-          <Text style={styles.bio}>{profileData.profile.bio}</Text>
+          <Text style={styles.bio}>{profileData.Profile.bio}</Text>
         </View>
 
         <View style={styles.actions}>

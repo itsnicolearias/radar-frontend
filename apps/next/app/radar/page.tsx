@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { RadarContainer, RadarUserMarker, RadarEventMarker, BottomNav } from "@radar/ui"
+import { RadarContainer, RadarUserMarker, RadarEventMarker, BottomNav, SendSignalModal, Button, RadarSignalMarker } from "@radar/ui"
 import { useRadarStore, useAuthStore, useSocket, useSocketEvent } from "@radar/features"
-import { radarService, eventService } from "@radar/api"
-import type { NearbyUser, Event } from "@radar/types"
+import { radarService, signalService } from "@radar/api"
+import type { IEventResponse, IRadarUser, IRadarSignal } from "@radar/types"
+import { SignalDetailModal } from "../../../../packages/ui/signals/signal-detail-modal"
 
 export default function RadarPage() {
   const router = useRouter()
@@ -13,15 +14,20 @@ export default function RadarPage() {
   const {
     nearbyUsers,
     nearbyEvents,
+    nearbySignals,
     currentLocation,
     setNearbyUsers,
     setNearbyEvents,
+    setNearbySignals,
     setCurrentLocation,
     addNearbyUser,
+    addNearbySignal,
     updateUserLocation,
   } = useRadarStore()
 
-  const [selectedUser, setSelectedUser] = useState<NearbyUser | null>(null)
+  const [selectedUser, setSelectedUser] = useState<IRadarUser | null>(null)
+  const [selectedSignal, setSelectedSignal] = useState<IRadarSignal | null>(null)
+  const [isSendSignalModalOpen, setIsSendSignalModalOpen] = useState(false)
   const socket = useSocket()
 
   useEffect(() => {
@@ -29,19 +35,27 @@ export default function RadarPage() {
       if (!currentLocation) return
 
       try {
-        const [users, events] = await Promise.all([
-          radarService.getNearbyUsers(currentLocation.latitude, currentLocation.longitude),
-          eventService.getNearbyEvents(currentLocation.latitude, currentLocation.longitude),
-        ])
+        const { users, events, signals } = await radarService.getNearby(currentLocation.latitude, currentLocation.longitude)
+
         setNearbyUsers(users)
         setNearbyEvents(events)
+        setNearbySignals(signals)
       } catch (error) {
         console.error("[v0] Error fetching nearby data:", error)
       }
     }
 
     fetchNearbyData()
-  }, [currentLocation, setNearbyUsers, setNearbyEvents])
+  }, [currentLocation, setNearbyUsers, setNearbyEvents, setNearbySignals])
+
+  const handleSendSignal = async (note?: string) => {
+    try {
+      const newSignal = await signalService.sendSignal(note)
+      addNearbySignal(newSignal)
+    } catch (error) {
+      console.error("[v0] Error sending signal:", error)
+    }
+  }
 
   useSocketEvent<{ userId: string; latitude: number; longitude: number }>(
     "location-updated",
@@ -52,18 +66,29 @@ export default function RadarPage() {
   )
 
   useEffect(() => {
-    if (!currentLocation) {
-      setCurrentLocation({ latitude: -34.6037, longitude: -58.3816 }) // Buenos Aires
+    
+    if (!currentLocation && user) {
+      setCurrentLocation({ latitude: user.lastLatitude!, longitude: user.lastLongitude! }) // Buenos Aires
     }
   }, [currentLocation, setCurrentLocation])
 
-  const handleUserClick = (nearbyUser: NearbyUser) => {
+  const handleUserClick = (nearbyUser: IRadarUser) => {
     setSelectedUser(nearbyUser)
-    router.push(`/profile/${nearbyUser.user.userId}`)
+    router.push(`/profile/${nearbyUser.userId}`)
   }
 
-  const handleEventClick = (event: Event) => {
+  const handleEventClick = (event: IEventResponse) => {
     router.push(`/events/${event.eventId}`)
+  }
+
+  const handleSignalClick = (signal: IRadarSignal) => {
+    setSelectedSignal(signal)
+  }
+
+  const handleRespond = (signalId: string) => {
+    // Implement respond logic here
+    console.log("Responding to signal:", signalId)
+    setSelectedSignal(null)
   }
 
   const handleTabChange = (tab: "radar" | "chats" | "events" | "profile") => {
@@ -75,9 +100,14 @@ export default function RadarPage() {
       {/* Header */}
       <header className="relative z-10 flex items-center justify-between px-6 py-4 pt-12">
         <h1 className="text-2xl font-bold text-white">Radar</h1>
-        <button className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
-          <span className="text-white text-sm">{user?.firstName?.[0] || "U"}</span>
-        </button>
+        <div className="flex items-center gap-4">
+          <Button onClick={() => setIsSendSignalModalOpen(true)}>
+            Señales: {nearbySignals.length}
+          </Button>
+          <button className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+            <span className="text-white text-sm">{user?.firstName?.[0] || "U"}</span>
+          </button>
+        </div>
       </header>
 
       {/* Radar Container */}
@@ -93,23 +123,31 @@ export default function RadarPage() {
           />
 
           {/* Nearby users */}
-          {nearbyUsers.map((nearbyUser, index) => {
-            const angle = (index / nearbyUsers.length) * Math.PI * 2
-            return (
-              <RadarUserMarker
-                key={nearbyUser.user.userId}
-                initials={`${nearbyUser.user.firstName[0]}${nearbyUser.user.lastName[0]}`}
-                distance={nearbyUser.distance}
-                angle={angle}
-                maxDistance={1000}
-                photoUrl={nearbyUser.profile.photoUrl}
-                onClick={() => handleUserClick(nearbyUser)}
-              />
-            )
-          })}
+          { nearbyUsers && nearbyUsers.length > 0 && (
+            <>
+             {nearbyUsers.map((nearbyUser, index) => {
+              const angle = (index / nearbyUsers.length) * Math.PI * 2
+              return (
+                <RadarUserMarker
+                  key={nearbyUser.userId}
+                  initials={`${nearbyUser.displayName![0]}`}
+                  distance={nearbyUser.distance}
+                  angle={angle}
+                  maxDistance={1000}
+                  //photoUrl={nearbyUser.Profile.photoUrl}
+                  onClick={() => handleUserClick(nearbyUser)}
+                />
+              )
+            })}
+            </>
+             
+          )}
+          
 
           {/* Nearby events */}
-          {nearbyEvents.map((event, index) => {
+          { nearbyEvents && nearbyEvents.length > 0 && (
+            <>
+            {(nearbyEvents as unknown as IEventResponse[]).map((event, index) => {
             const angle = ((index + 0.5) / nearbyEvents.length) * Math.PI * 2
             const distance = 500 + Math.random() * 300
             return (
@@ -123,11 +161,43 @@ export default function RadarPage() {
               />
             )
           })}
+            </>
+          )}
+          
+          {/* Nearby signals */}
+          {nearbySignals.map((signal, index) => {
+            const angle = ((index + 0.25) / nearbySignals.length) * Math.PI * 2
+            return (
+              <RadarSignalMarker
+                key={signal.signalId}
+                distance={signal.distance}
+                angle={angle}
+                onClick={() => handleSignalClick(signal)}
+              />
+            )
+          })}
         </RadarContainer>
       </div>
 
       {/* Bottom Navigation */}
       <BottomNav activeTab="radar" onTabChange={handleTabChange} />
+
+      {/* Send Signal Modal */}
+      {isSendSignalModalOpen && (
+        <SendSignalModal
+          onClose={() => setIsSendSignalModalOpen(false)}
+          onSend={handleSendSignal}
+        />
+      )}
+
+      {/* Signal Detail Modal */}
+      {selectedSignal && (
+        <SignalDetailModal
+          signal={selectedSignal}
+          onClose={() => setSelectedSignal(null)}
+          onRespond={handleRespond}
+        />
+      )}
     </div>
   )
 }

@@ -15,7 +15,15 @@ export * from "./chat/tabs"
 export * from "./profile/profile-card"
 export * from "./profile/interest-pill"
 
+export * from "./events/event-card"
+export * from "./events/event-category-filter"
+export * from "./profile-views/profile-view-item"
+
 export * from "./components/button"
 export * from "./components/input"
 export * from "./components/label"
 export * from "./components/textarea"
+
+export * from "./signals/radar-signal-marker"
+export * from "./signals/send-signal-modal"
+export * from "./signals/signal-item"
