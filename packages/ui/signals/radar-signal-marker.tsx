@@ -7,7 +7,7 @@ import { SignalPopover } from "./signal-popover"
 interface RadarSignalMarkerProps {
   distance: number
   angle: number
-  note?: string
+  note: string
   isNew?: boolean
   onClick?: () => void
 }

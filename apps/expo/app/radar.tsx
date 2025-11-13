@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react"
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from "react-native"
+import { LinearGradient } from "expo-linear-gradient"
+import Svg, { Path, Circle } from "react-native-svg"
 import { useRouter } from "expo-router"
 import { SendSignalModal, RadarSignalMarker } from "@radar/ui"
 import { SignalDetailModal } from "../../../packages/ui/signals/signal-detail-modal.native"
@@ -134,9 +136,6 @@ export default function RadarScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Radar</Text>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
-          <TouchableOpacity onPress={() => setIsSendSignalModalOpen(true)} style={styles.signalButton}>
-            <Text style={styles.signalButtonText}>Señales: {nearbySignals.length}</Text>
-          </TouchableOpacity>
           <TouchableOpacity style={styles.profileButton}>
             <Text style={styles.profileInitial}>{"U"}</Text>
           </TouchableOpacity>
@@ -183,6 +182,37 @@ export default function RadarScreen() {
             />
           )
         })}
+        <TouchableOpacity
+          style={styles.sendSignalButton}
+          onPress={() => setIsSendSignalModalOpen(true)}
+        >
+          <LinearGradient
+            colors={["#00FFB3", "#1DE3F2"]}
+            style={styles.sendSignalButtonGradient}
+          >
+            <Svg
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="black"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <Path d="M4.9 12.87a6.3 6.3 0 0 0 8.2 8.2" />
+              <Path d="M12 12a6.3 6.3 0 0 0 8.2-8.2" />
+              <Path d="M12 12a6.3 6.3 0 0 0-8.2 8.2" />
+              <Path d="M12 12a6.3 6.3 0 0 0 8.2 8.2" />
+              <Circle cx="12" cy="12" r="2" />
+            </Svg>
+          </LinearGradient>
+          {nearbySignals.length > 0 && (
+            <View style={styles.signalCountBadge}>
+              <Text style={styles.signalCountBadgeText}>{nearbySignals.length}</Text>
+            </View>
+          )}
+        </TouchableOpacity>
       </View>
 
       {/* Bottom Navigation */}
@@ -388,5 +418,39 @@ const styles = StyleSheet.create({
   },
   navLabelActive: {
     color: "#00FFB3",
+  },
+  sendSignalButton: {
+    position: "absolute",
+    bottom: 30,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    shadowColor: "#00FFB3",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  sendSignalButtonGradient: {
+    flex: 1,
+    borderRadius: 35,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  signalCountBadge: {
+    position: "absolute",
+    top: -4,
+    right: -4,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: "#FF005C",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  signalCountBadgeText: {
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontWeight: "bold",
   },
 })

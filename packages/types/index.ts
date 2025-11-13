@@ -188,7 +188,6 @@ export interface IRadarUser {
     bio: string | null
     age: number | null
     interests: string[] | null
-    province?: string
   }
 }
 
@@ -398,7 +397,6 @@ export interface IRadarUser {
     bio: string | null
     age: number | null
     interests: string[] | null
-    province?: string
   }
 }
 

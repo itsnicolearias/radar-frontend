@@ -6,7 +6,7 @@ import { IRadarSignal } from "@radar/types"
 interface SignalDetailModalProps {
   signal: IRadarSignal
   onClose: () => void
-  onRespond: (signal: IRadarSignal) => void
+  onRespond: (signal: ISignal) => void
 }
 
 export const SignalDetailModal: React.FC<SignalDetailModalProps> = ({ signal, onClose, onRespond }) => {

@@ -9,7 +9,6 @@ import { radarService, signalService } from "@radar/api"
 import type { IEventResponse, IRadarUser, IRadarSignal } from "@radar/types"
 import { SignalDetailModal } from "../../../../packages/ui/signals/signal-detail-modal"
 import { EventDetailModal } from "../../../../packages/ui/events/event-detail-modal"
-import { Radio } from "lucide-react"
 
 export default function RadarPage() {
   const router = useRouter()
@@ -37,6 +36,18 @@ export default function RadarPage() {
   const [showSignalReplyNotification, setShowSignalReplyNotification] = useState(false)
   const socket = useSocket()
 
+  if (process.env.IS_TEST) {
+    nearbySignals.push({
+      signalId: "test-signal",
+      senderId: "test-sender",
+      note: "This is a test signal",
+      distance: 100,
+      createdAt: new Date(),
+      Sender: {
+        firstName: "Test",
+      },
+    })
+  }
 
   useSocketEvent<{ senderName: string }>(
     "signal:reply",
@@ -74,7 +85,6 @@ export default function RadarPage() {
   const handleSendSignal = async (note?: string) => {
     try {
       const newSignal = await signalService.sendSignal(note)
-
       addNearbySignal(newSignal)
     } catch (error) {
       console.error("[v0] Error sending signal:", error)
@@ -217,7 +227,29 @@ export default function RadarPage() {
           }}
           transition={{ duration: 2, repeat: Infinity }}
         >
-          <Radio className={`w-8 h-8  text-black relative z-10`} />
+          {nearbySignals.length > 0 && (
+            <div className="absolute -top-1 -right-1 w-6 h-6 bg-[#FF005C] rounded-full text-white text-xs flex items-center justify-center">
+              {nearbySignals.length}
+            </div>
+          )}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-black"
+          >
+            <path d="M4.9 12.87a6.3 6.3 0 0 0 8.2 8.2" />
+            <path d="M12 12a6.3 6.3 0 0 0 8.2-8.2" />
+            <path d="M12 12a6.3 6.3 0 0 0-8.2 8.2" />
+            <path d="M12 12a6.3 6.3 0 0 0 8.2 8.2" />
+            <circle cx="12" cy="12" r="2" />
+          </svg>
         </motion.button>
       </div>
 

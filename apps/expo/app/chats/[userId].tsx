@@ -6,7 +6,7 @@ import { useRouter, useLocalSearchParams } from "expo-router"
 import { ArrowLeft } from "lucide-react-native"
 import { useChatStore, useAuthStore, useSocketEvent } from "@radar/features"
 import { messageService, emitSocketEvent, signalService } from "@radar/api"
-import type { IMessageResponse, IRadarSignal } from "@radar/types"
+import type { Message, IRadarSignal } from "@radar/types"
 
 function ChatConversationPage() {
   const router = useRouter()
@@ -35,13 +35,13 @@ function ChatConversationPage() {
     fetchMessages()
   }, [userId, setMessages, resetUnreadCount])
 
-  useSocketEvent<IMessageResponse>(
+  useSocketEvent<Message>(
     "new-message",
     (message) => {
       if (message.senderId === userId || message.receiverId === userId) {
         addMessage(userId, message)
         if (message.senderId === userId) {
-          messageService.markAsRead([message.messageId])
+          messageService.markAsRead(message.messageId)
         }
       }
     },
@@ -95,7 +95,7 @@ function ChatConversationPage() {
             ]}
           >
             <Text style={styles.messageText}>{msg.content}</Text>
-            <Text style={styles.timestamp}>{formatTimestamp(String(msg.createdAt))}</Text>
+            <Text style={styles.timestamp}>{formatTimestamp(msg.createdAt)}</Text>
           </View>
         ))}
       </ScrollView>
