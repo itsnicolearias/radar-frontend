@@ -7,7 +7,7 @@ import { SendSignalModal, RadarSignalMarker } from "@radar/ui"
 import { SignalDetailModal } from "../../../packages/ui/signals/signal-detail-modal.native"
 import { useRadarStore, useAuthStore, useSocket, useSocketEvent } from "@radar/features"
 import { radarService, signalService } from "@radar/api"
-import type { NearbyUser, Event, ISignal } from "@radar/types"
+import type { IEventResponse, IRadarUser, IRadarSignal } from "@radar/types"
 
 const { width, height } = Dimensions.get("window")
 
@@ -28,7 +28,7 @@ export default function RadarScreen() {
   } = useRadarStore()
 
   const [isSendSignalModalOpen, setIsSendSignalModalOpen] = useState(false)
-  const [selectedSignal, setSelectedSignal] = useState<ISignal | null>(null)
+  const [selectedSignal, setSelectedSignal] = useState<IRadarSignal | null>(null)
   const socket = useSocket()
 
   useEffect(() => {
@@ -36,7 +36,7 @@ export default function RadarScreen() {
       if (!currentLocation) return
 
       try {
-        const {users, events, signals} = await radarService.getNearbyAll(currentLocation.latitude, currentLocation.longitude)
+        const {users, events, signals} = await radarService.getNearby(currentLocation.latitude, currentLocation.longitude)
         setNearbyUsers(users)
         setNearbyEvents(events)
         setNearbySignals(signals)
@@ -48,7 +48,7 @@ export default function RadarScreen() {
     fetchNearbyData()
   }, [currentLocation, setNearbyUsers, setNearbyEvents, setNearbySignals])
 
-  const handleSendSignal = async (note: string | null) => {
+  const handleSendSignal = async (note?: string) => {
     try {
       const newSignal = await signalService.sendSignal(note)
       addNearbySignal(newSignal)
@@ -71,7 +71,7 @@ export default function RadarScreen() {
     }
   }, [currentLocation, setCurrentLocation])
 
-  const renderUserMarker = (nearbyUser: NearbyUser, index: number) => {
+  const renderUserMarker = (nearbyUser: IRadarUser, index: number) => {
     const angle = (index / nearbyUsers.length) * Math.PI * 2
     const normalizedDistance = Math.min(nearbyUser.distance / 1000, 1)
     const radius = normalizedDistance * (width * 0.35)
@@ -92,7 +92,7 @@ export default function RadarScreen() {
     )
   }
 
-  const handleSignalClick = (signal: ISignal) => {
+  const handleSignalClick = (signal: IRadarSignal) => {
     setSelectedSignal(signal)
   }
 
@@ -102,7 +102,7 @@ export default function RadarScreen() {
     setSelectedSignal(null)
   }
 
-  const renderEventMarker = (event: Event, index: number) => {
+  const renderEventMarker = (event: IEventResponse, index: number) => {
     const angle = ((index + 0.5) / nearbyEvents.length) * Math.PI * 2
     const distance = 500 + Math.random() * 300
     const normalizedDistance = Math.min(distance / 1000, 1)

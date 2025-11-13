@@ -5,7 +5,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-nati
 import { useRouter } from "expo-router"
 import { useChatStore, useConnectionStore, useSocketEvent } from "@radar/features"
 import { messageService, connectionService } from "@radar/api"
-import type { Message } from "@radar/types"
+import type { IMessageResponse } from "@radar/types"
 
 export default function ChatsScreen() {
   const router = useRouter()
@@ -18,9 +18,9 @@ export default function ChatsScreen() {
     const fetchData = async () => {
       try {
         const [chatsData, connectionsData, requestsData] = await Promise.all([
-          messageService.getChats(),
-          connectionService.getConnections("accepted"),
-          connectionService.getConnections("pendings"),
+          messageService.getConversations(),
+          connectionService.getAcceptedConnections(),
+          connectionService.getPendingConnections(),
         ])
 
         setChats(chatsData)
@@ -34,7 +34,7 @@ export default function ChatsScreen() {
     fetchData()
   }, [setChats, setConnections, setPendingRequests])
 
-  useSocketEvent<Message>(
+  useSocketEvent<IMessageResponse>(
     "new-message",
     (message) => {
       updateChatLastMessage(message.senderId, message)
@@ -107,17 +107,16 @@ export default function ChatsScreen() {
               >
                 <View style={styles.avatar}>
                   <Text style={styles.avatarText}>
-                    {chat.user.firstName[0]}
-                    {chat.user.lastName[0]}
+                    {chat.user.displayName![0]}
                   </Text>
                 </View>
                 <View style={styles.chatContent}>
                   <View style={styles.chatHeader}>
                     <Text style={styles.chatName}>
-                      {chat.user.firstName} {chat.user.lastName}
+                      {chat.user.displayName} 
                     </Text>
                     {chat.lastMessage && (
-                      <Text style={styles.chatTime}>{formatTimestamp(chat.lastMessage.createdAt)}</Text>
+                      <Text style={styles.chatTime}>{formatTimestamp(String(chat.lastMessage.createdAt))}</Text>
                     )}
                   </View>
                   {chat.lastMessage && (

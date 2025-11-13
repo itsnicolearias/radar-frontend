@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { RadarContainer, RadarUserMarker, RadarEventMarker, BottomNav, SendSignalModal, Button, RadarSignalMarker } from "@radar/ui"
 import { useRadarStore, useAuthStore, useSocket, useSocketEvent } from "@radar/features"
 import { radarService, signalService } from "@radar/api"
-import type { NearbyUser, IEventResponse, ISignal } from "@radar/types"
+import type { IEventResponse, IRadarUser, IRadarSignal } from "@radar/types"
 import { SignalDetailModal } from "../../../../packages/ui/signals/signal-detail-modal"
 
 export default function RadarPage() {
@@ -25,8 +25,8 @@ export default function RadarPage() {
     updateUserLocation,
   } = useRadarStore()
 
-  const [selectedUser, setSelectedUser] = useState<NearbyUser | null>(null)
-  const [selectedSignal, setSelectedSignal] = useState<ISignal | null>(null)
+  const [selectedUser, setSelectedUser] = useState<IRadarUser | null>(null)
+  const [selectedSignal, setSelectedSignal] = useState<IRadarSignal | null>(null)
   const [isSendSignalModalOpen, setIsSendSignalModalOpen] = useState(false)
   const socket = useSocket()
 
@@ -35,7 +35,7 @@ export default function RadarPage() {
       if (!currentLocation) return
 
       try {
-        const { users, events, signals } = await radarService.getNearbyAll(currentLocation.latitude, currentLocation.longitude)
+        const { users, events, signals } = await radarService.getNearby(currentLocation.latitude, currentLocation.longitude)
 
         setNearbyUsers(users)
         setNearbyEvents(events)
@@ -48,7 +48,7 @@ export default function RadarPage() {
     fetchNearbyData()
   }, [currentLocation, setNearbyUsers, setNearbyEvents, setNearbySignals])
 
-  const handleSendSignal = async (note: string | null) => {
+  const handleSendSignal = async (note?: string) => {
     try {
       const newSignal = await signalService.sendSignal(note)
       addNearbySignal(newSignal)
@@ -72,7 +72,7 @@ export default function RadarPage() {
     }
   }, [currentLocation, setCurrentLocation])
 
-  const handleUserClick = (nearbyUser: NearbyUser) => {
+  const handleUserClick = (nearbyUser: IRadarUser) => {
     setSelectedUser(nearbyUser)
     router.push(`/profile/${nearbyUser.userId}`)
   }
@@ -81,7 +81,7 @@ export default function RadarPage() {
     router.push(`/events/${event.eventId}`)
   }
 
-  const handleSignalClick = (signal: ISignal) => {
+  const handleSignalClick = (signal: IRadarSignal) => {
     setSelectedSignal(signal)
   }
 
@@ -130,11 +130,11 @@ export default function RadarPage() {
               return (
                 <RadarUserMarker
                   key={nearbyUser.userId}
-                  initials={`${nearbyUser.firstName[0]}${nearbyUser.lastName[0]}`}
+                  initials={`${nearbyUser.displayName![0]}`}
                   distance={nearbyUser.distance}
                   angle={angle}
                   maxDistance={1000}
-                  photoUrl={nearbyUser.Profile.photoUrl}
+                  //photoUrl={nearbyUser.Profile.photoUrl}
                   onClick={() => handleUserClick(nearbyUser)}
                 />
               )

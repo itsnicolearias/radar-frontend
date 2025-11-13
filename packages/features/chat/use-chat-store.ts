@@ -1,23 +1,23 @@
+import { IConversation, IMessageResponse } from "@radar/types"
 import { create } from "zustand"
 import { immer } from "zustand/middleware/immer"
-import type { RecentChats, Message } from "@radar/types"
 
 interface ChatState {
-  chats: RecentChats[]
-  currentChat: RecentChats | null
+  chats: IConversation[]
+  currentChat: IConversation | null
   // Clave por conversationId
-  messages: Record<string, Message[]>
+  messages: Record<string, IMessageResponse[]>
   // Maneja conversationIds que están tecleando
   typingUsers: Set<string>
   isLoading: boolean
 
-  setChats: (chats: RecentChats[]) => void
-  setCurrentChat: (chat: RecentChats | null) => void
+  setChats: (chats: IConversation[]) => void
+  setCurrentChat: (chat: IConversation | null) => void
 
   // Acciones por conversationId
-  setMessages: (conversationId: string, messages: Message[]) => void
-  addMessage: (conversationId: string, message: Message) => void
-  updateChatLastMessage: (conversationId: string, message: Message) => void
+  setMessages: (conversationId: string, messages: IMessageResponse[]) => void
+  addMessage: (conversationId: string, message: IMessageResponse) => void
+  updateChatLastMessage: (conversationId: string, message: IMessageResponse) => void
   incrementUnreadCount: (conversationId: string) => void
   resetUnreadCount: (conversationId: string) => void
 

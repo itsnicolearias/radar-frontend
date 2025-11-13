@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { ChatListItem, Tabs, BottomNav, ProfileViewItem } from "@radar/ui"
 import { useChatStore, useConnectionStore, useSocketEvent, useProfileViewsStore, useAuthStore } from "@radar/features"
 import { messageService, connectionService, profileViewService } from "@radar/api"
-import type { Message, Connection } from "@radar/types"
+import { IConnectionResponse, IMessageResponse } from "@radar/types"
 
 export default function ChatsPage() {
   const router = useRouter()
@@ -21,9 +21,9 @@ export default function ChatsPage() {
     const fetchData = async () => {
       try {
         const [chatsData, connectionsData, requestsData, viewsData] = await Promise.all([
-          messageService.getChats(),
-          connectionService.getConnections("accepted"),
-          connectionService.getConnections("pendings"),
+          messageService.getConversations(),
+          connectionService.getAcceptedConnections(),
+          connectionService.getPendingConnections(),
           profileViewService.getProfileViews(),
         ])
         setChats(chatsData)
@@ -38,7 +38,7 @@ export default function ChatsPage() {
     fetchData()
   }, [setChats, setConnections, setPendingRequests, setProfileViews])
 
-  useSocketEvent<Message>(
+  useSocketEvent<IMessageResponse>(
     "new-message",
     (message) => {
       updateChatLastMessage(message.senderId, message)
@@ -47,7 +47,7 @@ export default function ChatsPage() {
     [updateChatLastMessage, incrementUnreadCount],
   )
 
-  useSocketEvent<Connection>(
+  useSocketEvent<IConnectionResponse>(
     "new-connection-request",
     (connection) => {
       setPendingRequests([connection, ...pendingRequests])
@@ -103,11 +103,11 @@ export default function ChatsPage() {
               chats.map((chat) => (
                 <ChatListItem
                   key={chat.conversationId}
-                  name={`${chat.user.firstName} ${chat.user.lastName}`}
+                  name={`${chat.user.displayName}`}
                   lastMessage={chat.lastMessage.content}
-                  timestamp={chat.lastMessage ? formatTimestamp(chat.lastMessage.createdAt) : undefined}
+                  timestamp={chat.lastMessage ? formatTimestamp(String(chat.lastMessage.createdAt)) : undefined}
                   unreadCount={chat.unreadCount}
-                  photoUrl={chat.user.Profile?.photoUrl}
+                  photoUrl={chat.user.Profile?.photoUrl!}
                   isOnline={true}
                   onClick={() => handleChatClick(chat.user.userId)}
                 />
@@ -136,18 +136,18 @@ export default function ChatsPage() {
                     </div>
                     <div>
                       <p className="font-semibold text-gray-900">Nueva solicitud</p>
-                      <p className="text-sm text-gray-500">{formatTimestamp(request.createdAt)}</p>
+                      <p className="text-sm text-gray-500">{formatTimestamp(String(request.createdAt))}</p>
                     </div>
                   </div>
                   <div className="flex gap-2">
                     <button
-                      onClick={() => connectionService.updateConnectionStatus(request.connectionId, "accepted")}
+                      onClick={() => connectionService.updateConnection(request.connectionId, "accepted")}
                       className="px-4 py-2 bg-[#00FFB3] text-[#0E2A3E] rounded-full text-sm font-medium"
                     >
                       Aceptar
                     </button>
                     <button
-                      onClick={() => connectionService.updateConnectionStatus(request.connectionId, "rejected")}
+                      onClick={() => connectionService.updateConnection(request.connectionId, "rejected")}
                       className="px-4 py-2 bg-gray-200 text-gray-700 rounded-full text-sm font-medium"
                     >
                       Rechazar

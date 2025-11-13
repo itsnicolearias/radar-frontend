@@ -17,17 +17,17 @@ export interface ToggleVisibilityInput {
 
 export const userService = {
   async updateUser(data: IUser): Promise<IUpdateUserResponse> {
-    const response = await axiosClient.patch<IUpdateUserResponse>("/users", data)
-    return response.data
+    const response = await axiosClient.patch("/users", data)
+    return response.data.data
   },
 
   async updateLocation(data: UpdateLocationInput): Promise<IUpdateLocationResponse> {
-    const response = await axiosClient.patch<IUpdateLocationResponse>("/users/location", data)
-    return response.data
+    const response = await axiosClient.patch("/users/location", data)
+    return response.data.data
   },
 
   async toggleVisibility(data: ToggleVisibilityInput): Promise<IToggleVisibilityResponse> {
-    const response = await axiosClient.patch<IToggleVisibilityResponse>("/users/visibility", data)
-    return response.data
+    const response = await axiosClient.patch("/users/visibility", data)
+    return response.data.data
   },
 }

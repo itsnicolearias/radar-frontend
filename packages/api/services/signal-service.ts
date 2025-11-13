@@ -1,13 +1,13 @@
+import { IRadarSignal } from "@radar/types";
 import { axiosClient } from "../axios-client"
-import type { ISignalResponse } from "@radar/types"
 
 export interface SendSignalInput {
   note?: string
 }
 
 export const signalService = {
-  async sendSignal(data: SendSignalInput): Promise<ISignalResponse> {
-    const response = await axiosClient.post<ISignalResponse>("/signals/send", data)
-    return response.data
+  async sendSignal(note?: string): Promise<IRadarSignal> {
+    const response = await axiosClient.post("/signals/send", { note })
+    return response.data.data;
   },
 }

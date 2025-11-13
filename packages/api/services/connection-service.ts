@@ -3,25 +3,25 @@ import type { IConnectionResponse, IDeleteConnectionResponse } from "@radar/type
 
 export const connectionService = {
   async getAcceptedConnections(): Promise<IConnectionResponse[]> {
-    const response = await axiosClient.get<IConnectionResponse[]>("/connections/accepted")
-    return response.data
+    const response = await axiosClient.get("/connections/accepted")
+    return response.data.data;
   },
 
   async getPendingConnections(): Promise<IConnectionResponse[]> {
-    const response = await axiosClient.get<IConnectionResponse[]>("/connections/pendings")
-    return response.data
+    const response = await axiosClient.get("/connections/pendings")
+    return response.data.data
   },
 
   async createConnection(receiverId: string): Promise<IConnectionResponse> {
-    const response = await axiosClient.post<IConnectionResponse>("/connections", {
+    const response = await axiosClient.post("/connections", {
       receiverId,
     })
-    return response.data
+    return response.data.data
   },
 
   async updateConnection(
     connectionId: string,
-    status: "ACCEPTED" | "REJECTED",
+    status: "accepted" | "rejected" ,
   ): Promise<IConnectionResponse> {
     const response = await axiosClient.patch<IConnectionResponse>(`/connections/${connectionId}`, {
       status,

@@ -72,7 +72,7 @@ export default function EventsScreen() {
             <TouchableOpacity
               key={category}
               style={[styles.categoryChip, selectedCategory === category && styles.categoryChipActive]}
-              onPress={() => setSelectedCategory(category === "Todos" ? null : category)}
+              onPress={() => setSelectedCategory("Todos")}
             >
               <Text style={[styles.categoryText, selectedCategory === category && styles.categoryTextActive]}>
                 {category}

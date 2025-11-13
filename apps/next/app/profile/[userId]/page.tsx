@@ -85,12 +85,12 @@ export default function UserProfilePage() {
       {/* Profile Card */}
       <div className="px-6 py-8">
         <ProfileCard
-          name={`${profileData.firstName} ${profileData.lastName}`}
-          age={profileData.Profile?.age}
-          location={profileData.displayName || "Ubicación no disponible"}
+          name={profileData.displayName!}
+          age={profileData.Profile?.age!}
+          //location={profileData.pro}
           distance={profileData.distance}
-          bio={profileData.Profile?.bio}
-          interests={profileData.Profile?.interests}
+          bio={profileData.Profile?.bio!}
+          interests={profileData.Profile?.interests!}
           isConnected={isConnected}
           onConnect={handleConnect}
           onMessage={handleMessage}

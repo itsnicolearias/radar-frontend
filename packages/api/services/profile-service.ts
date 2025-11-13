@@ -3,22 +3,22 @@ import type { IProfile, IProfileResponse, IDeleteProfileResponse } from "@radar/
 
 export const profileService = {
   async getMyProfile(): Promise<IProfileResponse> {
-    const response = await axiosClient.get<IProfileResponse>("/profiles")
+    const response = await axiosClient.get<IProfileResponse>("/profile")
     return response.data
   },
 
   async createMyProfile(data: IProfile): Promise<IProfileResponse> {
-    const response = await axiosClient.post<IProfileResponse>("/profiles", data)
+    const response = await axiosClient.post<IProfileResponse>("/profile", data)
     return response.data
   },
 
   async updateMyProfile(data: IProfile): Promise<IProfileResponse> {
-    const response = await axiosClient.patch<IProfileResponse>("/profiles", data)
+    const response = await axiosClient.patch<IProfileResponse>("/profile", data)
     return response.data
   },
 
   async deleteMyProfile(): Promise<IDeleteProfileResponse> {
-    const response = await axiosClient.delete<IDeleteProfileResponse>("/profiles")
+    const response = await axiosClient.delete<IDeleteProfileResponse>("/profile")
     return response.data
   },
 }

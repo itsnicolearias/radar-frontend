@@ -16,19 +16,13 @@ export interface IUser {
   Profile?: IProfile
 }
 
-export interface ISignal {
-  signalId: string
-  senderId: string
-  note: string | null
-  createdAt: string
-  updatedAt: string
-  distance: number
-  Sender: IRadarUser
-}
 
 export interface IAuthResponse {
-  token: string
-  user: IUser
+  success: boolean
+  data: {
+    token: string
+    user: IUser
+  }
 }
 
 export interface IResendVerificationEmailResponse {
@@ -51,7 +45,7 @@ export interface IConnectionResponse {
   connectionId: string
   senderId: string
   receiverId: string
-  status: "PENDING" | "ACCEPTED" | "REJECTED"
+  status: "pending" | "accepted" | "rejected"
   createdAt: Date
   updatedAt: Date
   Sender: IConnectionUser
@@ -200,25 +194,17 @@ export interface IRadarUser {
 export interface IRadarSignal {
   signalId: string
   senderId: string
-  note: string | null
+  note?: string
   createdAt: Date
   updatedAt: Date
   distance: number
+  Sender: IRadarUser
 }
 
 export interface IRadarNearbyResponse {
   users: IRadarUser[]
   events: any[]
   signals: IRadarSignal[]
-}
-
-export interface ISignalResponse {
-  signalId: string
-  senderId: string
-  note: string | null
-  createdAt: Date
-  updatedAt: Date
-  distance: number
 }
 
 export interface IUserResponse extends IUser {
@@ -268,7 +254,7 @@ export interface IConnectionResponse {
   connectionId: string
   senderId: string
   receiverId: string
-  status: "PENDING" | "ACCEPTED" | "REJECTED"
+  status: "pending" | "accepted" | "rejected"
   createdAt: Date
   updatedAt: Date
   Sender: IConnectionUser
@@ -414,14 +400,7 @@ export interface IRadarUser {
   }
 }
 
-export interface IRadarSignal {
-  signalId: string
-  senderId: string
-  note: string | null
-  createdAt: Date
-  updatedAt: Date
-  distance: number
-}
+
 
 export interface IRadarNearbyResponse {
   users: IRadarUser[]
@@ -429,14 +408,6 @@ export interface IRadarNearbyResponse {
   signals: IRadarSignal[]
 }
 
-export interface ISignalResponse {
-  signalId: string
-  senderId: string
-  note: string | null
-  createdAt: Date
-  updatedAt: Date
-  distance: number
-}
 
 export interface IUserResponse extends IUser {
   Profile: IProfile

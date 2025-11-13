@@ -3,9 +3,9 @@ import type { IRadarNearbyResponse } from "@radar/types"
 
 export const radarService = {
   async getNearby(latitude: number, longitude: number, radius = 1000): Promise<IRadarNearbyResponse> {
-    const response = await axiosClient.get<IRadarNearbyResponse>("/radar/nearby", {
+    const response = await axiosClient.get("/radar/nearby", {
       params: { latitude, longitude, radius },
     })
-    return response.data
+    return response.data.data;
   },
 }

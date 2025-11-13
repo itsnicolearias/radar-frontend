@@ -17,19 +17,20 @@ export interface MarkAsReadInput {
 
 export const messageService = {
   async getConversations(
-    page: number,
-    limit: number,
-    all: boolean,
-  ): Promise<IConversationsResponse> {
-    const response = await axiosClient.get<IConversationsResponse>("/messages", {
+    page?: number,
+    limit?: number,
+    all?: boolean,
+  ) {
+    const response = await axiosClient.get("/messages", {
       params: { page, limit, all },
     })
-    return response.data
+
+    return response.data.data.conversations;
   },
 
   async getMessages(userId: string): Promise<IMessageResponse[]> {
-    const response = await axiosClient.get<IMessageResponse[]>(`/messages/${userId}`)
-    return response.data
+    const response = await axiosClient.get(`/messages/${userId}`)
+    return response.data.data;
   },
 
   async sendMessage(data: SendMessageInput): Promise<IMessageResponse> {
