@@ -65,12 +65,7 @@ export interface IConversationUser {
   }
 }
 
-export interface ILastMessage {
-  content: string
-  createdAt: Date
-  isRead: boolean
-  senderId: string
-}
+
 
 export interface IConversation {
   conversationId: string
@@ -92,6 +87,8 @@ export interface IMessageResponse {
   isRead: boolean
   createdAt: Date
   updatedAt: Date
+  Sender: IConversationUser
+  Receiver: IConversationUser
 }
 
 export interface IMarkAsReadResponse {
@@ -282,27 +279,12 @@ export interface ILastMessage {
   senderId: string
 }
 
-export interface IConversation {
-  conversationId: string
-  user: IConversationUser
-  lastMessage: ILastMessage
-  unreadCount: number
-}
 
 export interface IConversationsResponse {
   conversations: IConversation[]
   total: number
 }
 
-export interface IMessageResponse {
-  messageId: string
-  senderId: string
-  receiverId: string
-  content: string
-  isRead: boolean
-  createdAt: Date
-  updatedAt: Date
-}
 
 export interface IMarkAsReadResponse {
   message: string

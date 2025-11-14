@@ -4,24 +4,26 @@ import { useEffect, useState } from "react"
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from "react-native"
 import { LinearGradient } from "expo-linear-gradient"
 import { useRouter } from "expo-router"
-import { SendSignalModal, RadarSignalMarker } from "@radar/ui"
+import { SendSignalModal, RadarSignalMarker, GhostButton, InvisibleBadge } from "@radar/ui"
 import { SignalDetailModal } from "../../../packages/ui/signals/signal-detail-modal.native"
 import { EventDetailModal } from "../../../packages/ui/events/event-detail-modal.native"
 import { useRadarStore, useAuthStore, useSocket, useSocketEvent, useChatStore } from "@radar/features"
 import { radarService, signalService } from "@radar/api"
 import type { IEventResponse, IRadarUser, IRadarSignal } from "@radar/types"
+import { AnimatePresence } from "framer-motion"
 import { Radio } from "lucide-react-native"
 
 const { width, height } = Dimensions.get("window")
 
 export default function RadarScreen() {
   const router = useRouter()
-  const { user } = useAuthStore()
+  const { user, isVisible, toggleVisibility } = useAuthStore()
+  const [showInvisibleBadge, setShowInvisibleBadge] = useState(false)
   const { setReplyingToSignal } = useChatStore()
   const {
     nearbyUsers,
-    nearbyEvents,
     nearbySignals,
+    nearbyEvents,
     currentLocation,
     setNearbyUsers,
     setNearbyEvents,
@@ -38,7 +40,7 @@ export default function RadarScreen() {
 
   useEffect(() => {
     const fetchNearbyData = async () => {
-      if (!currentLocation) return
+      if (!currentLocation || !isVisible) return
 
       try {
         const {users, events, signals} = await radarService.getNearby(currentLocation.latitude, currentLocation.longitude)
@@ -50,8 +52,23 @@ export default function RadarScreen() {
       }
     }
 
-    fetchNearbyData()
-  }, [currentLocation, setNearbyUsers, setNearbyEvents, setNearbySignals])
+    if (isVisible) {
+      fetchNearbyData()
+    } else {
+      setNearbyUsers([])
+      setNearbyEvents([])
+      setNearbySignals([])
+    }
+  }, [currentLocation, isVisible, setNearbyUsers, setNearbyEvents, setNearbySignals])
+
+  const handleToggleVisibility = async () => {
+    const wasVisible = isVisible
+    await toggleVisibility()
+    if (wasVisible) {
+      setShowInvisibleBadge(true)
+      setTimeout(() => setShowInvisibleBadge(false), 3000)
+    }
+  }
 
   const handleSendSignal = async (note?: string) => {
     try {
@@ -136,6 +153,11 @@ export default function RadarScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Radar</Text>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
+
+          <TouchableOpacity onPress={() => setIsSendSignalModalOpen(true)} style={styles.signalButton}>
+            <Text style={styles.signalButtonText}>Señales: {nearbySignals.length}</Text>
+          </TouchableOpacity>
+          <GhostButton onClick={handleToggleVisibility} isActive={!isVisible} />
           <TouchableOpacity style={styles.profileButton}>
             <Text style={styles.profileInitial}>{"U"}</Text>
           </TouchableOpacity>
@@ -144,6 +166,7 @@ export default function RadarScreen() {
 
       {/* Radar Canvas */}
       <View style={styles.radarContainer}>
+        <AnimatePresence>{showInvisibleBadge && <InvisibleBadge />}</AnimatePresence>
         {/* Concentric circles */}
         {[1, 2, 3, 4, 5].map((i) => (
           <View
@@ -165,10 +188,10 @@ export default function RadarScreen() {
         <Text style={styles.currentUserLabel}>Tú</Text>
 
         {/* Nearby users */}
-        {nearbyUsers.map(renderUserMarker)}
+        {isVisible && nearbyUsers.map(renderUserMarker)}
 
         {/* Nearby events */}
-        {nearbyEvents.map(renderEventMarker)}
+        {isVisible && nearbyEvents.map(renderEventMarker)}
 
         {/* Nearby signals */}
         {nearbySignals.map((signal, index) => {

@@ -6,7 +6,7 @@ import { ArrowLeft, X } from "lucide-react"
 import { MessageBubble, ChatInput } from "@radar/ui"
 import { useChatStore, useAuthStore, useSocketEvent } from "@radar/features"
 import { messageService, emitSocketEvent, signalService } from "@radar/api"
-import type { Message, IRadarSignal } from "@radar/types"
+import type { IMessageResponse, IRadarSignal } from "@radar/types"
 
 function ChatConversationPage() {
   const router = useRouter()
@@ -52,13 +52,13 @@ function ChatConversationPage() {
     fetchMessages()
   }, [userId, setMessages, resetUnreadCount])
 
-  useSocketEvent<Message>(
+  useSocketEvent<IMessageResponse>(
     "new-message",
     (message) => {
       if (message.senderId === userId || message.receiverId === userId) {
         addMessage(userId, message)
         if (message.senderId === userId) {
-          messageService.markAsRead(message.messageId)
+          messageService.markAsRead([message.messageId])
         }
       }
     },
@@ -128,7 +128,7 @@ function ChatConversationPage() {
         </button>
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-[#00FFB3] flex items-center justify-center">
-            <span className="text-[#0E2A3E] font-semibold text-sm">{userId.slice(0, 2).toUpperCase()}</span>
+            <span className="text-[#0E2A3E] font-semibold text-sm">chat con</span>
           </div>
           <div>
             <h2 className="font-semibold">Usuario</h2>
@@ -143,7 +143,7 @@ function ChatConversationPage() {
           <MessageBubble
             key={message.messageId}
             content={message.content}
-            timestamp={formatTimestamp(message.createdAt)}
+            timestamp={formatTimestamp(String(message.createdAt))}
             isSent={message.senderId === user?.userId}
             isRead={message.isRead}
           />

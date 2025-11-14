@@ -1,28 +1,48 @@
 import { create } from "zustand"
-import type { User, Profile } from "@radar/types"
+import type { IUser, IProfile } from "@radar/types"
+import { userService } from "@radar/api"
 
 interface AuthState {
-  user: Partial<User> | null
-  profile: Profile | null
+  user: Partial<IUser> | null
+  profile: IProfile | null
   token: string | null
   isAuthenticated: boolean
-  setAuth: (user: Partial<User>, profile: Profile | null, token: string) => void
-  setProfile: (profile: Profile) => void
+  isVisible: boolean
+  setAuth: (user: Partial<IUser>, profile: IProfile | null, token: string) => void
+  setProfile: (profile: IProfile) => void
+  toggleVisibility: () => Promise<void>
   logout: () => void
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   profile: null,
   token: null,
   isAuthenticated: false,
+  isVisible: true,
   setAuth: (user, profile, token) => {
     if (globalThis.localStorage) {
       globalThis.localStorage.setItem("radar_token", token)
     }
-    set({ user, profile, token, isAuthenticated: true })
+    set({ user, profile, token, isAuthenticated: true, isVisible: user.isVisible ?? true })
   },
   setProfile: (profile) => set({ profile }),
+  toggleVisibility: async () => {
+    const currentVisibility = get().isVisible
+    const newVisibility = !currentVisibility
+
+    set({ isVisible: newVisibility })
+
+    try {
+      await userService.toggleVisibility({ isVisible: newVisibility })
+      set((state) => ({
+        user: state.user ? { ...state.user, isVisible: newVisibility } : null,
+      }))
+    } catch (error) {
+      console.error("Error toggling visibility:", error)
+      set({ isVisible: currentVisibility })
+    }
+  },
   logout: () => {
     if (globalThis.localStorage) {
       globalThis.localStorage.removeItem("radar_token")

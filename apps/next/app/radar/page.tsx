@@ -2,18 +2,20 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { RadarContainer, RadarUserMarker, RadarEventMarker, BottomNav, SendSignalModal, Button, RadarSignalMarker } from "@radar/ui"
-import { motion } from "framer-motion"
+import { RadarContainer, RadarUserMarker, RadarEventMarker, BottomNav, SendSignalModal, Button, RadarSignalMarker, GhostButton, InvisibleBadge } from "@radar/ui"
 import { useRadarStore, useAuthStore, useSocket, useSocketEvent, useNotificationStore } from "@radar/features"
 import { radarService, signalService } from "@radar/api"
 import type { IEventResponse, IRadarUser, IRadarSignal } from "@radar/types"
 import { SignalDetailModal } from "../../../../packages/ui/signals/signal-detail-modal"
+import { AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import { EventDetailModal } from "../../../../packages/ui/events/event-detail-modal"
 import { Radio } from "lucide-react"
 
 export default function RadarPage() {
   const router = useRouter()
-  const { user } = useAuthStore()
+  const { user, isVisible, toggleVisibility } = useAuthStore()
+  const [showInvisibleBadge, setShowInvisibleBadge] = useState(false)
   const { addNotification } = useNotificationStore()
   const {
     nearbyUsers,
@@ -55,7 +57,7 @@ export default function RadarPage() {
 
   useEffect(() => {
     const fetchNearbyData = async () => {
-      if (!currentLocation) return
+      if (!currentLocation || !isVisible) return
 
       try {
         const { users, events, signals } = await radarService.getNearby(currentLocation.latitude, currentLocation.longitude)
@@ -68,8 +70,23 @@ export default function RadarPage() {
       }
     }
 
-    fetchNearbyData()
-  }, [currentLocation, setNearbyUsers, setNearbyEvents, setNearbySignals])
+    if (isVisible) {
+      fetchNearbyData()
+    } else {
+      setNearbyUsers([])
+      setNearbyEvents([])
+      setNearbySignals([])
+    }
+  }, [currentLocation, isVisible, setNearbyUsers, setNearbyEvents, setNearbySignals])
+
+  const handleToggleVisibility = async () => {
+    const wasVisible = isVisible
+    await toggleVisibility()
+    if (wasVisible) {
+      setShowInvisibleBadge(true)
+      setTimeout(() => setShowInvisibleBadge(false), 3000)
+    }
+  }
 
   const handleSendSignal = async (note?: string) => {
     try {
@@ -127,6 +144,7 @@ export default function RadarPage() {
       <header className="relative z-10 flex items-center justify-between px-6 py-4 pt-12">
         <h1 className="text-2xl font-bold text-white">Radar</h1>
         <div className="flex items-center gap-4">
+          <GhostButton onClick={handleToggleVisibility} isActive={!isVisible} />
           <button className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
             <span className="text-white text-sm">{user?.firstName?.[0] || "U"}</span>
           </button>
@@ -136,6 +154,7 @@ export default function RadarPage() {
       {/* Radar Container */}
       <div className="relative flex-1 flex items-center justify-center px-6 py-8">
         <RadarContainer className="w-full max-w-md aspect-square">
+          <AnimatePresence>{showInvisibleBadge && <InvisibleBadge />}</AnimatePresence>
           {/* Current user in center */}
           <RadarUserMarker
             initials={"TÚ"}
@@ -146,7 +165,7 @@ export default function RadarPage() {
           />
 
           {/* Nearby users */}
-          { nearbyUsers && nearbyUsers.length > 0 && (
+          {isVisible && nearbyUsers && nearbyUsers.length > 0 && (
             <>
              {nearbyUsers.map((nearbyUser, index) => {
               const angle = (index / nearbyUsers.length) * Math.PI * 2
