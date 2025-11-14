@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Plus } from "lucide-react"
-import { EventCard, EventCategoryFilter, BottomNav } from "@radar/ui"
+import { EventCard, EventCategoryFilter, BottomNav, Button, GradientBackground } from "@radar/ui"
 import { useEventsStore, useAuthStore } from "@radar/features"
 import { eventService } from "@radar/api"
+import { motion } from "framer-motion"
 
 const CATEGORIES = ["Todos", "Música", "Gastronomía", "Arte", "Deportes", "Social"]
 
@@ -55,69 +56,75 @@ export default function EventsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0E2A3E] pb-24">
-      {/* Header */}
-      <header className="bg-[#0E2A3E] px-6 py-4 pt-12 sticky top-0 z-10 border-b border-[#00FFB3]/20">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold text-white">Eventos Cercanos</h1>
-          <button
-            onClick={() => router.push("/events/create")}
-            className="p-2 bg-[#00FFB3] rounded-full hover:bg-[#00FFB3]/90 transition-colors"
-          >
-            <Plus className="w-6 h-6 text-[#0E2A3E]" />
-          </button>
-        </div>
-
-        {/* Category filter */}
-        <EventCategoryFilter
-          categories={CATEGORIES.slice(1)}
-          selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
-        />
-
-        {/* My events toggle */}
-        <div className="mt-4">
-          <button
-            onClick={() => setShowMyEvents(!showMyEvents)}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-              showMyEvents ? "bg-[#FF4FD8] text-white" : "bg-[#1A3A4F] text-gray-400 border border-[#00FFB3]/20"
-            }`}
-          >
-            {showMyEvents ? "Mostrando mis eventos" : "Mis eventos"}
-          </button>
-        </div>
-      </header>
-
-      {/* Events list */}
-      <div className="px-6 py-6 space-y-4">
-        {filteredEvents.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <p className="text-gray-400 text-lg">No hay eventos disponibles</p>
-            <p className="text-gray-500 text-sm mt-2">Crea el primer evento de tu zona</p>
+    <GradientBackground>
+      <div className="relative z-10 min-h-screen text-white flex flex-col">
+        {/* Header */}
+        <header className="bg-[#1A1A1A]/50 backdrop-blur-lg p-6 border-b border-[#00FFB3]/20 sticky top-0 z-20">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-2xl font-bold">Eventos</h1>
+            <Button
+              variant="icon"
+              size="icon"
+              onClick={() => router.push("/events/create")}
+            >
+              <Plus className="w-6 h-6" />
+            </Button>
           </div>
-        ) : (
-          filteredEvents.map((event) => (
-            <EventCard
-              key={event.eventId}
-              title={event.title}
-              description={event.description}
-              location={event.location}
-              startDate={event.startDate}
-              attendeesCount={event.attendeesCount}
-              price={event.price}
-              distance={event.distance}
-              category={event.category}
-              isInterested={event.isInterested}
-              isBoosted={false}
-              onInterestClick={() => handleInterestClick(event.eventId, event.isInterested || false)}
-              onClick={() => router.push(`/events/${event.eventId}`)}
-            />
-          ))
-        )}
-      </div>
 
-      {/* Bottom Navigation */}
-      <BottomNav activeTab="events" onTabChange={handleTabChange} />
-    </div>
+          <EventCategoryFilter
+            categories={CATEGORIES.slice(1)}
+            selectedCategory={selectedCategory}
+            onCategoryChange={setSelectedCategory}
+          />
+
+          <div className="mt-4">
+            <Button
+              variant={showMyEvents ? 'primary' : 'secondary'}
+              size="sm"
+              onClick={() => setShowMyEvents(!showMyEvents)}
+            >
+              {showMyEvents ? "Mostrando Mis Eventos" : "Mis Eventos"}
+            </Button>
+          </div>
+        </header>
+
+        {/* Events list */}
+        <div className="px-6 py-6 space-y-4 flex-1 overflow-y-auto">
+          {filteredEvents.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <p className="text-white/70">No hay eventos que coincidan.</p>
+              <p className="text-sm text-white/50 mt-2">Probá cambiando los filtros o creando un nuevo evento.</p>
+            </div>
+          ) : (
+            filteredEvents.map((event, index) => (
+              <motion.div
+                key={event.eventId}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+              >
+                <EventCard
+                  title={event.title}
+                  description={event.description}
+                  location={event.location}
+                  startDate={event.startDate}
+                  attendeesCount={event.attendeesCount}
+                  price={event.price}
+                  distance={event.distance}
+                  category={event.category}
+                  isInterested={event.isInterested}
+                  isBoosted={false}
+                  onInterestClick={() => handleInterestClick(event.eventId, event.isInterested || false)}
+                  onClick={() => router.push(`/events/${event.eventId}`)}
+                />
+              </motion.div>
+            ))
+          )}
+        </div>
+
+        {/* Bottom Navigation */}
+        <BottomNav activeTab="events" onTabChange={handleTabChange} />
+      </div>
+    </GradientBackground>
   )
 }

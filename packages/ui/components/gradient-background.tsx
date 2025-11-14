@@ -1,9 +1,14 @@
 import type React from "react"
 export function GradientBackground({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-background">
-      <div className="absolute inset-0 bg-linear-to-b from-secondary via-background to-background" />
-      <div className="absolute inset-0 bg-linear-to-br from-primary/10 via-transparent to-accent/10" />
+    <div className="h-full bg-black flex flex-col relative overflow-hidden">
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            'radial-gradient(circle at 50% 50%, rgba(0, 255, 179, 0.12) 0%, transparent 70%)',
+        }}
+      />
       {children}
     </div>
   )

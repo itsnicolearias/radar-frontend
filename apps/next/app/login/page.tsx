@@ -10,6 +10,7 @@ import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 import { useAuthStore } from "@radar/features"
 import { LoginInput, loginSchema } from "../../../../packages/api/validations"
+import { motion } from 'framer-motion';
 
 export default function LoginPage() {
   const router = useRouter()
@@ -41,7 +42,7 @@ export default function LoginPage() {
     try {
       const response = await authService.login(formData)
 
-      setAuth(response.data.user,  null, response.data.token)
+      setAuth(response.data.user, null, response.data.token)
       router.push("/radar")
     } catch (error: any) {
       setErrors({ email: error.response?.data?.message || "Error al iniciar sesión" })
@@ -52,66 +53,57 @@ export default function LoginPage() {
 
   return (
     <GradientBackground>
-      <div className="relative z-10 min-h-screen px-6 py-8">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+      <div className="relative z-10 min-h-screen px-6 py-8 text-white flex flex-col justify-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-md mx-auto space-y-8"
         >
-          <ArrowLeft className="w-5 h-5" />
-          <span>Volver</span>
-        </Link>
+          <div className="text-center space-y-2">
+            <h1 className="text-4xl font-bold">Bienvenido de vuelta</h1>
+            <p className="text-white/60">Inicia sesión para ver quién está cerca.</p>
+          </div>
 
-        <div className="flex flex-col items-center justify-center min-h-[calc(100vh-8rem)]">
-          <div className="w-full max-w-md space-y-8">
-            <div className="text-center space-y-2">
-              <h1 className="text-4xl font-bold">Iniciar sesión</h1>
-              <p className="text-muted-foreground">Ingresá a tu cuenta de Radar</p>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="email">Tu Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="ejemplo@radar.com"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                disabled={isLoading}
+              />
+              {errors.email && <p className="text-sm text-[#FF005C] pt-1">{errors.email}</p>}
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="tu@email.com"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="h-12"
-                />
-                {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password">Contraseña</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="h-12"
-                />
-                {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
-              </div>
-
-              <Button
-                type="submit"
+            <div className="space-y-2">
+              <Label htmlFor="password">Tu Contraseña</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••••"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 disabled={isLoading}
-                className="w-full h-12 text-lg font-semibold bg-linear-to-r from-primary to-accent hover:opacity-90"
-              >
-                {isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
-              </Button>
-            </form>
+              />
+              {errors.password && <p className="text-sm text-[#FF005C] pt-1">{errors.password}</p>}
+            </div>
 
-            <p className="text-center text-sm text-muted-foreground">
-              ¿No tenés cuenta?{" "}
-              <Link href="/register" className="text-primary hover:underline font-semibold">
-                Registrate
-              </Link>
-            </p>
-          </div>
-        </div>
+            <Button type="submit" disabled={isLoading} className="w-full">
+              {isLoading ? "Verificando..." : "Iniciar Sesión"}
+            </Button>
+          </form>
+
+          <p className="text-center text-sm text-white/60">
+            ¿Primera vez en Radar?{" "}
+            <Link href="/register" className="font-bold text-[#00FFB3] hover:underline">
+              Creá tu cuenta
+            </Link>
+          </p>
+        </motion.div>
       </div>
     </GradientBackground>
   )

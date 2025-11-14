@@ -24,18 +24,11 @@ export default function WelcomePage() {
 
         {/* Action buttons */}
         <div className="w-full max-w-sm space-y-4">
-          <Button
-            asChild
-            className="w-full h-14 text-lg font-semibold bg-linear-to-r from-primary to-accent hover:opacity-90"
-          >
+          <Button asChild size="lg" className="w-full">
             <Link href="/register">Registrarme</Link>
           </Button>
 
-          <Button
-            asChild
-            variant="outline"
-            className="w-full h-14 text-lg font-semibold border-primary/50 hover:bg-primary/10 bg-transparent"
-          >
+          <Button asChild variant="secondary" size="lg" className="w-full">
             <Link href="/login">Iniciar sesión</Link>
           </Button>
         </div>
