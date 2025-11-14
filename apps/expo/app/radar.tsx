@@ -23,6 +23,7 @@ export default function RadarScreen() {
   const {
     nearbyUsers,
     nearbySignals,
+    nearbyEvents,
     currentLocation,
     setNearbyUsers,
     setNearbyEvents,
