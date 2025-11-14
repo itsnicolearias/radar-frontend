@@ -138,7 +138,7 @@ export default function RadarPage() {
         <RadarContainer className="w-full max-w-md aspect-square">
           {/* Current user in center */}
           <RadarUserMarker
-            initials={user ? `${user?.firstName}${user?.lastName}` : "TÚ"}
+            initials={"TÚ"}
             distance={0}
             angle={0}
             maxDistance={1000}
