@@ -1,10 +1,11 @@
-import { IConversation, IMessageResponse } from "@radar/types"
+import { IConversation, IMessageResponse, IRadarSignal } from "@radar/types"
 import { create } from "zustand"
 import { immer } from "zustand/middleware/immer"
 
 interface ChatState {
   chats: IConversation[]
   currentChat: IConversation | null
+  replyingToSignal: IRadarSignal | null
   // Clave por conversationId
   messages: Record<string, IMessageResponse[]>
   // Maneja conversationIds que están tecleando
@@ -13,6 +14,7 @@ interface ChatState {
 
   setChats: (chats: IConversation[]) => void
   setCurrentChat: (chat: IConversation | null) => void
+  setReplyingToSignal: (signal: IRadarSignal | null) => void
 
   // Acciones por conversationId
   setMessages: (conversationId: string, messages: IMessageResponse[]) => void
@@ -32,6 +34,7 @@ export const useChatStore = create<ChatState>()(
   immer((set) => ({
     chats: [],
     currentChat: null,
+    replyingToSignal: null,
     messages: {},
     typingUsers: new Set(),
     isLoading: false,
@@ -44,6 +47,11 @@ export const useChatStore = create<ChatState>()(
     setCurrentChat: (chat) =>
       set((state) => {
         state.currentChat = chat
+      }),
+
+    setReplyingToSignal: (signal) =>
+      set((state) => {
+        state.replyingToSignal = signal
       }),
 
     setMessages: (conversationId, messages) =>

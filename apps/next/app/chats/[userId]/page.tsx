@@ -1,14 +1,14 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
-import { useRouter, useParams } from "next/navigation"
-import { ArrowLeft } from "lucide-react"
+import { useEffect, useState, useRef, Suspense } from "react"
+import { useRouter, useParams, useSearchParams } from "next/navigation"
+import { ArrowLeft, X } from "lucide-react"
 import { MessageBubble, ChatInput } from "@radar/ui"
 import { useChatStore, useAuthStore, useSocketEvent } from "@radar/features"
-import { messageService, emitSocketEvent } from "@radar/api"
-import type { Message } from "@radar/types"
+import { messageService, emitSocketEvent, signalService } from "@radar/api"
+import type { Message, IRadarSignal } from "@radar/types"
 
-export default function ChatConversationPage() {
+function ChatConversationPage() {
   const router = useRouter()
   const params = useParams()
   const userId = params.userId as string
@@ -16,7 +16,25 @@ export default function ChatConversationPage() {
   const { user } = useAuthStore()
   const { messages, setMessages, addMessage, resetUnreadCount, typingUsers } = useChatStore()
   const [isTyping, setIsTyping] = useState(false)
+  const [replyingTo, setReplyingTo] = useState<IRadarSignal | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const searchParams = useSearchParams()
+  const signalId = searchParams.get("signalId")
+
+  useEffect(() => {
+    if (!signalId) return
+
+    const fetchSignal = async () => {
+      try {
+        const signal = await signalService.getSignalById(signalId)
+        setReplyingTo(signal)
+      } catch (error) {
+        console.error("Error fetching signal:", error)
+      }
+    }
+
+    fetchSignal()
+  }, [signalId])
 
   const userMessages = messages[userId] || []
 
@@ -73,8 +91,14 @@ export default function ChatConversationPage() {
 
   const handleSendMessage = async (content: string) => {
     try {
-      await messageService.sendMessage({ receiverId: userId, content })
-      emitSocketEvent("send-message", { receiverId: userId, content })
+      const messageData = {
+        receiverId: userId,
+        content,
+        signalId: replyingTo ? replyingTo.signalId : undefined,
+      }
+      await messageService.sendMessage(messageData)
+      emitSocketEvent("send-message", messageData)
+      setReplyingTo(null)
     } catch (error) {
       console.error("[v0] Error sending message:", error)
     }
@@ -127,8 +151,29 @@ export default function ChatConversationPage() {
         <div ref={messagesEndRef} />
       </div>
 
+      {replyingTo && (
+        <div className="bg-[#1A1A1A] p-3 mx-4 mb-2 rounded-lg border border-[#00FFB3]/20 relative">
+          <p className="text-xs text-white/70">Respondiendo a la señal:</p>
+          <p className="text-sm text-white">{replyingTo.note}</p>
+          <button
+            onClick={() => setReplyingTo(null)}
+            className="absolute top-2 right-2 p-1 bg-black/50 rounded-full"
+          >
+            <X className="w-4 h-4 text-white/70" />
+          </button>
+        </div>
+      )}
+
       {/* Input */}
       <ChatInput onSend={handleSendMessage} onTyping={handleTyping} onStopTyping={handleStopTyping} />
     </div>
+  )
+}
+
+export default function ChatConversationPageWithSuspense() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ChatConversationPage />
+    </Suspense>
   )
 }

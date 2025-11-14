@@ -1,29 +1,33 @@
 import React from "react"
 import { View, Text, TouchableOpacity, Modal, StyleSheet } from "react-native"
 import { X } from "lucide-react-native"
-import { IRadarSignal } from "@radar/types"
+import type { IEventResponse } from "@radar/types"
 
-interface SignalDetailModalProps {
-  signal: IRadarSignal
+interface EventDetailModalProps {
+  event: IEventResponse
   onClose: () => void
-  onRespond: (signal: IRadarSignal) => void
 }
 
-export const SignalDetailModal: React.FC<SignalDetailModalProps> = ({ signal, onClose, onRespond }) => {
+export const EventDetailModal: React.FC<EventDetailModalProps> = ({ event, onClose }) => {
   return (
     <Modal visible transparent onRequestClose={onClose}>
       <View style={styles.container}>
         <View style={styles.modal}>
           <View style={styles.header}>
-            <Text style={styles.title}>Señal de {signal.Sender.firstName}</Text>
+            <Text style={styles.title}>{event.title}</Text>
             <TouchableOpacity onPress={onClose}>
               <X color="#C5C5C5" />
             </TouchableOpacity>
           </View>
-          <Text style={styles.note}>{signal.note}</Text>
-          <TouchableOpacity style={styles.respondButton} onPress={() => onRespond(signal)}>
-            <Text style={styles.respondButtonText}>Responder</Text>
-          </TouchableOpacity>
+          <Text style={styles.description}>{event.description}</Text>
+          <View style={styles.details}>
+            <Text style={styles.detailText}>
+              <Text style={styles.bold}>Ubicación:</Text> {event.location}
+            </Text>
+            <Text style={styles.detailText}>
+              <Text style={styles.bold}>Fecha:</Text> {new Date(event.startDate).toLocaleDateString("es-AR")}
+            </Text>
+          </View>
         </View>
       </View>
     </Modal>
@@ -43,7 +47,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     width: "90%",
     borderWidth: 1,
-    borderColor: "rgba(255, 0, 92, 0.3)",
+    borderColor: "rgba(0, 255, 179, 0.3)",
   },
   header: {
     flexDirection: "row",
@@ -56,21 +60,21 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#FFFFFF",
   },
-  note: {
+  description: {
     color: "#C5C5C5",
     fontSize: 16,
     lineHeight: 24,
     marginBottom: 24,
   },
-  respondButton: {
-    backgroundColor: "#00FFB3",
-    padding: 16,
-    borderRadius: 9999,
-    alignItems: "center",
+  details: {
     marginTop: 16,
   },
-  respondButtonText: {
-    color: "#000000",
+  detailText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    marginBottom: 8,
+  },
+  bold: {
     fontWeight: "bold",
   },
 })

@@ -2,13 +2,16 @@
 
 import { useEffect, useState } from "react"
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from "react-native"
+import { LinearGradient } from "expo-linear-gradient"
 import { useRouter } from "expo-router"
 import { SendSignalModal, RadarSignalMarker, GhostButton, InvisibleBadge } from "@radar/ui"
 import { SignalDetailModal } from "../../../packages/ui/signals/signal-detail-modal.native"
-import { useRadarStore, useAuthStore, useSocket, useSocketEvent } from "@radar/features"
+import { EventDetailModal } from "../../../packages/ui/events/event-detail-modal.native"
+import { useRadarStore, useAuthStore, useSocket, useSocketEvent, useChatStore } from "@radar/features"
 import { radarService, signalService } from "@radar/api"
 import type { IEventResponse, IRadarUser, IRadarSignal } from "@radar/types"
 import { AnimatePresence } from "framer-motion"
+import { Radio } from "lucide-react-native"
 
 const { width, height } = Dimensions.get("window")
 
@@ -16,9 +19,9 @@ export default function RadarScreen() {
   const router = useRouter()
   const { user, isVisible, toggleVisibility } = useAuthStore()
   const [showInvisibleBadge, setShowInvisibleBadge] = useState(false)
+  const { setReplyingToSignal } = useChatStore()
   const {
     nearbyUsers,
-    nearbyEvents,
     nearbySignals,
     currentLocation,
     setNearbyUsers,
@@ -31,6 +34,7 @@ export default function RadarScreen() {
 
   const [isSendSignalModalOpen, setIsSendSignalModalOpen] = useState(false)
   const [selectedSignal, setSelectedSignal] = useState<IRadarSignal | null>(null)
+  const [selectedEvent, setSelectedEvent] = useState<IEventResponse | null>(null)
   const socket = useSocket()
 
   useEffect(() => {
@@ -113,10 +117,14 @@ export default function RadarScreen() {
     setSelectedSignal(signal)
   }
 
-  const handleRespond = (signalId: string) => {
-    // Implement respond logic here
-    console.log("Responding to signal:", signalId)
+  const handleRespond = (signal: IRadarSignal) => {
+    setReplyingToSignal(signal)
+    router.push(`/chats/${signal.senderId}`)
     setSelectedSignal(null)
+  }
+
+  const handleEventClick = (event: IEventResponse) => {
+    setSelectedEvent(event)
   }
 
   const renderEventMarker = (event: IEventResponse, index: number) => {
@@ -131,7 +139,7 @@ export default function RadarScreen() {
       <TouchableOpacity
         key={event.eventId}
         style={[styles.eventMarker, { left: x - 20, top: y - 20 }]}
-        onPress={() => router.push(`/events/${event.eventId}`)}
+        onPress={() => handleEventClick(event)}
       >
         <View style={styles.eventDot} />
       </TouchableOpacity>
@@ -144,10 +152,14 @@ export default function RadarScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Radar</Text>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
+
           <TouchableOpacity onPress={() => setIsSendSignalModalOpen(true)} style={styles.signalButton}>
             <Text style={styles.signalButtonText}>Señales: {nearbySignals.length}</Text>
           </TouchableOpacity>
           <GhostButton onClick={handleToggleVisibility} isActive={!isVisible} />
+          <TouchableOpacity style={styles.profileButton}>
+            <Text style={styles.profileInitial}>{"U"}</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -192,6 +204,17 @@ export default function RadarScreen() {
             />
           )
         })}
+        <TouchableOpacity
+          style={styles.sendSignalButton}
+          onPress={() => setIsSendSignalModalOpen(true)}
+        >
+          <LinearGradient
+            colors={["#00FFB3", "#1DE3F2"]}
+            style={styles.sendSignalButtonGradient}
+          >
+            <Radio color="black" style={{ width: 32, height: 32, position: "relative", zIndex: 10 }} />
+          </LinearGradient>
+        </TouchableOpacity>
       </View>
 
       {/* Bottom Navigation */}
@@ -230,7 +253,14 @@ export default function RadarScreen() {
         <SignalDetailModal
           signal={selectedSignal}
           onClose={() => setSelectedSignal(null)}
-          onRespond={handleRespond}
+          onRespond={() => handleRespond(selectedSignal)}
+        />
+      )}
+
+      {selectedEvent && (
+        <EventDetailModal
+          event={selectedEvent}
+          onClose={() => setSelectedEvent(null)}
         />
       )}
     </View>
@@ -390,5 +420,39 @@ const styles = StyleSheet.create({
   },
   navLabelActive: {
     color: "#00FFB3",
+  },
+  sendSignalButton: {
+    position: "absolute",
+    bottom: 30,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    shadowColor: "#00FFB3",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  sendSignalButtonGradient: {
+    flex: 1,
+    borderRadius: 35,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  signalCountBadge: {
+    position: "absolute",
+    top: -4,
+    right: -4,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: "#FF005C",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  signalCountBadgeText: {
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontWeight: "bold",
   },
 })
