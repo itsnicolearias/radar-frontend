@@ -44,7 +44,7 @@ export default function RegisterPage() {
     setIsLoading(true)
     try {
       const response = await authService.register(formData)
-      setAuth(response.data.user, null, response.data.token)
+      setAuth(response.user, null, response.token)
       router.push("/radar")
     } catch (error: any) {
       setErrors({ email: error.response?.data?.message || "Error al registrarse" })
