@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter } from 'next/navigation'
 import { ChatListItem, Tabs, BottomNav, ProfileViewItem } from "@radar/ui"
 import { useChatStore, useConnectionStore, useSocketEvent, useProfileViewsStore, useAuthStore } from "@radar/features"
 import { messageService, connectionService, profileViewService } from "@radar/api"
@@ -81,23 +81,26 @@ export default function ChatsPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-black flex flex-col">
+      {/* Radial gradient background */}
+      <div className="absolute inset-0 bg-gradient-radial from-[#1DE3F2]/5 via-transparent to-transparent pointer-events-none" />
+
       {/* Header */}
-      <header className="bg-[#2C5F8D] text-white px-6 py-4 pt-12">
-        <h1 className="text-2xl font-bold">Chats</h1>
+      <header className="relative z-10 bg-black px-6 py-4 pt-12 border-b border-[#00FFB3]/10">
+        <h1 className="text-2xl font-bold text-white">Chats</h1>
       </header>
 
       {/* Tabs */}
       <Tabs tabs={tabs} activeTab={activeTab} onTabChange={(id) => setActiveTab(id as typeof activeTab)} />
 
       {/* Content */}
-      <div className="flex-1 bg-white overflow-y-auto">
+      <div className="relative flex-1 bg-black overflow-y-auto">
         {activeTab === "messages" && (
           <div>
             {chats.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-                <p className="text-gray-500">No tienes conversaciones aún</p>
-                <p className="text-sm text-gray-400 mt-2">Conecta con personas cercanas para empezar a chatear</p>
+                <p className="text-[#C5C5C5]">No tienes conversaciones aún</p>
+                <p className="text-sm text-[#8B8B8B] mt-2">Conecta con personas cercanas para empezar a chatear</p>
               </div>
             ) : (
               chats.map((chat) => (
@@ -120,35 +123,35 @@ export default function ChatsPage() {
           <div>
             {pendingRequests.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-                <p className="text-gray-500">No tienes solicitudes pendientes</p>
+                <p className="text-[#C5C5C5]">No tienes solicitudes pendientes</p>
               </div>
             ) : (
               pendingRequests.map((request) => (
                 <div
                   key={request.connectionId}
-                  className="flex items-center justify-between p-4 border-b border-gray-100"
+                  className="flex items-center justify-between p-4 border-b border-[#1A1A1A]/50"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#00FFB3] to-[#14B8A6] flex items-center justify-center">
-                      <span className="text-[#0E2A3E] font-semibold text-sm">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#00FFB3] to-[#1DE3F2] flex items-center justify-center">
+                      <span className="text-black font-semibold text-sm">
                         {request.senderId.slice(0, 2).toUpperCase()}
                       </span>
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">Nueva solicitud</p>
-                      <p className="text-sm text-gray-500">{formatTimestamp(String(request.createdAt))}</p>
+                      <p className="font-semibold text-white">Nueva solicitud</p>
+                      <p className="text-sm text-[#8B8B8B]">{formatTimestamp(String(request.createdAt))}</p>
                     </div>
                   </div>
                   <div className="flex gap-2">
                     <button
                       onClick={() => connectionService.updateConnection(request.connectionId, "accepted")}
-                      className="px-4 py-2 bg-[#00FFB3] text-[#0E2A3E] rounded-full text-sm font-medium"
+                      className="px-4 py-2 bg-[#00FFB3] text-black rounded-full text-sm font-medium hover:opacity-90 transition-all shadow-lg shadow-[#00FFB3]/30"
                     >
                       Aceptar
                     </button>
                     <button
                       onClick={() => connectionService.updateConnection(request.connectionId, "rejected")}
-                      className="px-4 py-2 bg-gray-200 text-gray-700 rounded-full text-sm font-medium"
+                      className="px-4 py-2 bg-[#1A1A1A] text-[#C5C5C5] rounded-full text-sm font-medium border border-[#1DE3F2]/30 hover:border-[#1DE3F2] transition-all"
                     >
                       Rechazar
                     </button>
@@ -161,28 +164,28 @@ export default function ChatsPage() {
 
         {activeTab === "connected" && (
           <div>
-            <div className="border-b border-gray-100 pb-4">
+            <div className="border-b border-[#1A1A1A]/50 pb-4">
               <button
                 onClick={() => setShowProfileViews(!showProfileViews)}
-                className="w-full px-6 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                className="w-full px-6 py-3 flex items-center justify-between hover:bg-[#1A1A1A]/30 transition-colors"
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-[#FF4FD8] text-lg">👁️</span>
-                  <span className="font-semibold text-gray-900">Vieron tu perfil</span>
+                  <span className="text-[#FF005C] text-lg">👁️</span>
+                  <span className="font-semibold text-white">Vieron tu perfil</span>
                   {profileViews.length > 0 && (
-                    <span className="px-2 py-0.5 bg-[#FF4FD8] text-white text-xs font-bold rounded-full">
+                    <span className="px-2 py-0.5 bg-[#FF005C] text-white text-xs font-bold rounded-full">
                       {profileViews.length}
                     </span>
                   )}
                 </div>
-                <span className="text-gray-400">{showProfileViews ? "▼" : "▶"}</span>
+                <span className="text-[#8B8B8B]">{showProfileViews ? "▼" : "▶"}</span>
               </button>
 
               {showProfileViews && (
                 <div className="mt-2">
                   {profileViews.length === 0 ? (
                     <div className="px-6 py-8 text-center">
-                      <p className="text-gray-500 text-sm">Aún nadie ha visto tu perfil</p>
+                      <p className="text-[#8B8B8B] text-sm">Aún nadie ha visto tu perfil</p>
                     </div>
                   ) : (
                     profileViews.map((view) => (
@@ -202,7 +205,7 @@ export default function ChatsPage() {
 
             {connections.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-                <p className="text-gray-500">No tienes conexiones aún</p>
+                <p className="text-[#C5C5C5]">No tienes conexiones aún</p>
               </div>
             ) : (
               connections.map((connection) => (

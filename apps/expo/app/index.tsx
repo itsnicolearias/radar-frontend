@@ -1,125 +1,167 @@
-import { View, Text, Pressable, StyleSheet } from "react-native"
+import { View, Text, StyleSheet, Dimensions } from "react-native"
 import { Link } from "expo-router"
-import { LinearGradient } from "expo-linear-gradient"
+
+const { width, height } = Dimensions.get("window")
 
 export default function WelcomeScreen() {
   return (
-    <LinearGradient colors={["#0A1628", "#0A1628", "#14B8A6"]} style={styles.container}>
-      <View style={styles.content}>
-        {/* Logo */}
-        <View style={styles.logoContainer}>
-          <View style={styles.logo}>
-            <View style={styles.logoCircle} />
-          </View>
-        </View>
-
-        {/* Title */}
-        <Text style={styles.title}>Radar</Text>
-
-        {/* Subtitle */}
-        <Text style={styles.subtitle}>Descubrí quién está cerca de vos</Text>
+    <View style={styles.container}>
+      <View style={styles.background}>
+        {[...Array(12)].map((_, i) => (
+          <View
+            key={i}
+            style={[
+              styles.particle,
+              {
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                opacity: 0.3 + Math.random() * 0.4,
+              },
+            ]}
+          />
+        ))}
       </View>
 
-      {/* Buttons */}
+      <View style={styles.content}>
+        <View style={styles.radarPoint}>
+          <View style={styles.radarPointGlow} />
+          <View style={styles.radarPointInner} />
+        </View>
+
+        <Text style={styles.title}>RADAR</Text>
+
+        <Text style={styles.subtitle}>Descubrí quién está cerca de vos en tiempo real</Text>
+      </View>
+
       <View style={styles.buttonContainer}>
         <Link href="/register" asChild>
-          <Pressable style={styles.primaryButton}>
+          <View style={styles.primaryButton}>
             <Text style={styles.primaryButtonText}>Registrarme</Text>
-          </Pressable>
+          </View>
         </Link>
 
         <Link href="/login" asChild>
-          <Pressable style={styles.secondaryButton}>
+          <View style={styles.secondaryButton}>
             <Text style={styles.secondaryButtonText}>Iniciar sesión</Text>
-          </Pressable>
+          </View>
         </Link>
       </View>
-    </LinearGradient>
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#000000",
     paddingHorizontal: 24,
     paddingVertical: 48,
+    justifyContent: "space-between",
+  },
+  background: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    overflow: "hidden",
+  },
+  particle: {
+    position: "absolute",
+    width: 2,
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: "#00FFB3",
   },
   content: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     gap: 32,
+    zIndex: 10,
   },
-  logoContainer: {
+  radarPoint: {
     width: 96,
     height: 96,
     borderRadius: 48,
-    backgroundColor: "#14B8A6",
+    backgroundColor: "#00FFB3",
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#14B8A6",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.5,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  logo: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    shadowColor: "#00FFB3",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 20,
+    elevation: 15,
     borderWidth: 2,
-    borderColor: "#fff",
-    justifyContent: "center",
-    alignItems: "center",
+    borderColor: "#1DE3F2",
   },
-  logoCircle: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: "#fff",
+  radarPointGlow: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    borderRadius: 48,
+    backgroundColor: "transparent",
+    borderWidth: 2,
+    borderColor: "#1DE3F2",
+    opacity: 0.5,
+  },
+  radarPointInner: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: "#1DE3F2",
   },
   title: {
-    fontSize: 48,
-    fontWeight: "bold",
-    color: "#F8FAFC",
+    fontSize: 52,
+    fontWeight: "800",
+    color: "#FFFFFF",
     textAlign: "center",
+    letterSpacing: 2,
   },
   subtitle: {
-    fontSize: 20,
-    color: "#94A3B8",
+    fontSize: 16,
+    color: "#CCCCCC",
     textAlign: "center",
-    maxWidth: 300,
+    lineHeight: 24,
+    marginHorizontal: 16,
+    fontWeight: "500",
   },
   buttonContainer: {
     width: "100%",
-    gap: 16,
+    gap: 12,
+    zIndex: 10,
   },
   primaryButton: {
     width: "100%",
-    height: 56,
-    backgroundColor: "#14B8A6",
+    height: 48,
+    backgroundColor: "#00FFB3",
     borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
+    shadowColor: "#00FFB3",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
   primaryButtonText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#fff",
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#000000",
+    letterSpacing: 0.5,
   },
   secondaryButton: {
     width: "100%",
-    height: 56,
+    height: 48,
     backgroundColor: "transparent",
-    borderWidth: 1,
-    borderColor: "#14B8A6",
+    borderWidth: 2,
+    borderColor: "#00FFB3",
     borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
   },
   secondaryButtonText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#14B8A6",
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#00FFB3",
+    letterSpacing: 0.5,
   },
 })

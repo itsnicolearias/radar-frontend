@@ -1,9 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { Button, GradientBackground, Input, Label, Textarea } from "@radar/ui"
+import { Button, Input, Label, Textarea } from "@radar/ui"
 import { useAuthStore } from "@radar/features"
-import { ArrowLeft, Camera } from "lucide-react"
+import { ArrowLeft, Camera } from 'lucide-react'
 import Link from "next/link"
 
 export default function ProfilePage() {
@@ -11,12 +11,15 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false)
 
   return (
-    <GradientBackground>
+    <div className="relative min-h-screen bg-black overflow-hidden">
+      {/* Radial gradient background */}
+      <div className="absolute inset-0 bg-gradient-radial from-[#1DE3F2]/5 via-transparent to-transparent pointer-events-none" />
+
       <div className="relative z-10 min-h-screen px-6 py-8">
         <div className="flex items-center justify-between mb-8">
           <Link
             href="/radar"
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+            className="inline-flex items-center gap-2 text-[#C5C5C5] hover:text-[#00FFB3] transition-all duration-300"
           >
             <ArrowLeft className="w-5 h-5" />
             <span>Volver</span>
@@ -25,7 +28,7 @@ export default function ProfilePage() {
           <Button
             variant="ghost"
             onClick={() => setIsEditing(!isEditing)}
-            className="text-primary hover:text-primary/80"
+            className="text-[#00FFB3] hover:text-[#1DE3F2] transition-colors"
           >
             {isEditing ? "Cancelar" : "Editar"}
           </Button>
@@ -35,7 +38,7 @@ export default function ProfilePage() {
           {/* Profile photo */}
           <div className="flex flex-col items-center gap-4">
             <div className="relative">
-              <div className="w-32 h-32 rounded-full bg-linear-to-br from-primary to-accent flex items-center justify-center">
+              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#00FFB3] via-[#1DE3F2] to-[#197387] flex items-center justify-center shadow-lg shadow-[#00FFB3]/50 border-2 border-[#00FFB3]/30">
                 {profile?.photoUrl ? (
                   <img
                     src={profile.photoUrl || "/placeholder.svg"}
@@ -50,58 +53,82 @@ export default function ProfilePage() {
                 )}
               </div>
               {isEditing && (
-                <Button size="icon" className="absolute bottom-0 right-0 rounded-full bg-primary hover:bg-primary/90">
+                <Button 
+                  size="icon" 
+                  className="absolute bottom-0 right-0 rounded-full bg-[#00FFB3] hover:bg-[#1DE3F2] transition-all shadow-lg shadow-[#00FFB3]/30 text-black"
+                >
                   <Camera className="w-4 h-4" />
                 </Button>
               )}
             </div>
 
             <div className="text-center">
-              <h1 className="text-2xl font-bold">
+              <h1 className="text-2xl font-bold text-white">
                 {user?.firstName} {user?.lastName}
               </h1>
-              <p className="text-muted-foreground">{user?.email}</p>
+              <p className="text-[#C5C5C5]">{user?.email}</p>
             </div>
           </div>
 
           {/* Profile form */}
-          <div className="space-y-6 bg-card/50 backdrop-blur-lg rounded-lg p-6 border border-border">
+          <div className="space-y-6 bg-[#0a0e27] backdrop-blur-lg rounded-2xl p-6 border border-[#1DE3F2]/20">
             <div className="space-y-2">
-              <Label htmlFor="bio">Biografía</Label>
+              <Label htmlFor="bio" className="text-white">Biografía</Label>
               <Textarea
                 id="bio"
                 placeholder="Contanos sobre vos..."
                 value={profile?.bio || ""}
                 disabled={!isEditing}
-                className="min-h-24"
+                className="min-h-24 bg-[#1A1A1A] border border-[#1DE3F2]/30 rounded-2xl text-white placeholder-[#C5C5C5]/40 focus:border-[#00FFB3] focus:outline-none transition-all disabled:opacity-60"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="age">Edad</Label>
-                <Input id="age" type="number" placeholder="25" value={profile?.age || ""} disabled={!isEditing} />
+                <Label htmlFor="age" className="text-white">Edad</Label>
+                <Input 
+                  id="age" 
+                  type="number" 
+                  placeholder="25" 
+                  value={profile?.age || ""} 
+                  disabled={!isEditing}
+                  className="bg-[#1A1A1A] border border-[#1DE3F2]/30 rounded-2xl text-white placeholder-[#C5C5C5]/40 focus:border-[#00FFB3] focus:outline-none transition-all disabled:opacity-60"
+                />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="country">País</Label>
-                <Input id="country" placeholder="Argentina" value={profile?.country || ""} disabled={!isEditing} />
+                <Label htmlFor="country" className="text-white">País</Label>
+                <Input 
+                  id="country" 
+                  placeholder="Argentina" 
+                  value={profile?.country || ""} 
+                  disabled={!isEditing}
+                  className="bg-[#1A1A1A] border border-[#1DE3F2]/30 rounded-2xl text-white placeholder-[#C5C5C5]/40 focus:border-[#00FFB3] focus:outline-none transition-all disabled:opacity-60"
+                />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="province">Provincia</Label>
-              <Input id="province" placeholder="Buenos Aires" value={profile?.province || ""} disabled={!isEditing} />
+              <Label htmlFor="province" className="text-white">Provincia</Label>
+              <Input 
+                id="province" 
+                placeholder="Buenos Aires" 
+                value={profile?.province || ""} 
+                disabled={!isEditing}
+                className="bg-[#1A1A1A] border border-[#1DE3F2]/30 rounded-2xl text-white placeholder-[#C5C5C5]/40 focus:border-[#00FFB3] focus:outline-none transition-all disabled:opacity-60"
+              />
             </div>
 
             {isEditing && (
-              <Button className="w-full h-12 bg-linear-to-r from-primary to-accent hover:opacity-90">
+              <Button 
+                className="w-full h-12 bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-semibold rounded-2xl hover:opacity-90 transition-all shadow-lg shadow-[#00FFB3]/50 active:scale-95"
+              >
                 Guardar cambios
               </Button>
             )}
           </div>
         </div>
       </div>
-    </GradientBackground>
+    </div>
   )
 }

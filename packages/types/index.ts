@@ -140,6 +140,8 @@ export interface IProfile {
   updatedAt?: Date
   User?: IUser
   age?: number | null
+  province?: string
+  country?: string
 }
 
 export interface IProfileResponse extends IProfile {

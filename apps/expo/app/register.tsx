@@ -47,7 +47,7 @@ export default function RegisterScreen() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.title}>Crear cuenta</Text>
-      <Text style={styles.subtitle}>Únete a Radar</Text>
+      <Text style={styles.subtitle}>Unite a Radar y empezá a conectar</Text>
 
       <View style={styles.form}>
         <TextInput
@@ -105,7 +105,7 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0A1628",
+    backgroundColor: "#000000",
   },
   content: {
     paddingHorizontal: 24,
@@ -115,34 +115,41 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#F8FAFC",
+    color: "#FFFFFF",
   },
   subtitle: {
     fontSize: 16,
-    color: "#94A3B8",
+    color: "#C5C5C5",
   },
   form: {
     gap: 16,
   },
   input: {
     height: 56,
-    backgroundColor: "#1E293B",
+    backgroundColor: "#1A1A1A",
     borderRadius: 12,
     paddingHorizontal: 16,
-    color: "#F8FAFC",
+    color: "#FFFFFF",
     fontSize: 16,
+    borderWidth: 1,
+    borderColor: "#1DE3F2",
   },
   button: {
     height: 56,
-    backgroundColor: "#14B8A6",
+    backgroundColor: "#00FFB3",
     borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
     marginTop: 16,
+    shadowColor: "#00FFB3",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
   buttonText: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#fff",
+    color: "#000000",
   },
 })

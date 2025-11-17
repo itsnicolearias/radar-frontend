@@ -1,8 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter, useParams } from "next/navigation"
-import { ArrowLeft } from "lucide-react"
+import { useRouter, useParams } from 'next/navigation'
+import { ArrowLeft } from 'lucide-react'
 import { ProfileCard } from "@radar/ui"
 import { useConnectionStore, useAuthStore, useRadarStore } from "@radar/features"
 import { connectionService, profileViewService } from "@radar/api"
@@ -66,17 +66,19 @@ export default function UserProfilePage() {
 
   if (!profileData) {
     return (
-      <div className="min-h-screen bg-[#0E2A3E] flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <p className="text-white">Cargando perfil...</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#0E2A3E] pb-20">
-      {/* Header */}
-      <header className="relative z-10 flex items-center gap-3 px-6 py-4 pt-12">
-        <button onClick={() => router.back()} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+    <div className="min-h-screen bg-black pb-20">
+      <header className="relative z-10 flex items-center gap-3 px-6 py-4 pt-12 border-b border-[#00FFB3]/20">
+        <button 
+          onClick={() => router.back()} 
+          className="p-2 hover:bg-[#1A1A1A] rounded-full transition-colors"
+        >
           <ArrowLeft className="w-6 h-6 text-white" />
         </button>
         <h1 className="text-xl font-bold text-white">Perfil</h1>
@@ -87,7 +89,6 @@ export default function UserProfilePage() {
         <ProfileCard
           name={profileData.displayName!}
           age={profileData.Profile?.age!}
-          //location={profileData.pro}
           distance={profileData.distance}
           bio={profileData.Profile?.bio!}
           interests={profileData.Profile?.interests!}

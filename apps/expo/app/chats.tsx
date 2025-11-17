@@ -162,13 +162,15 @@ export default function ChatsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#000000",
   },
   header: {
-    backgroundColor: "#2C5F8D",
+    backgroundColor: "#000000",
     paddingHorizontal: 24,
     paddingTop: 60,
     paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(0, 255, 179, 0.2)",
   },
   title: {
     fontSize: 24,
@@ -177,33 +179,38 @@ const styles = StyleSheet.create({
   },
   tabs: {
     flexDirection: "row",
-    backgroundColor: "#2C5F8D",
+    backgroundColor: "#000000",
     paddingHorizontal: 16,
     paddingBottom: 12,
     gap: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(0, 255, 179, 0.1)",
   },
   tab: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
     position: "relative",
+    borderWidth: 1,
+    borderColor: "rgba(0, 255, 179, 0.2)",
   },
   tabActive: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#00FFB3",
+    borderColor: "#00FFB3",
   },
   tabText: {
     fontSize: 14,
     fontWeight: "500",
-    color: "rgba(255, 255, 255, 0.7)",
+    color: "#8B8B8B",
   },
   tabTextActive: {
-    color: "#2C5F8D",
+    color: "#000000",
   },
   badge: {
     position: "absolute",
     top: -4,
     right: -4,
-    backgroundColor: "#FF4FD8",
+    backgroundColor: "#FF005C",
     borderRadius: 10,
     minWidth: 20,
     height: 20,
@@ -218,14 +225,14 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#000000",
   },
   chatItem: {
     flexDirection: "row",
     alignItems: "center",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
+    borderBottomColor: "rgba(0, 255, 179, 0.1)",
   },
   avatar: {
     width: 48,
@@ -237,7 +244,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   avatarText: {
-    color: "#0E2A3E",
+    color: "#000000",
     fontSize: 16,
     fontWeight: "600",
   },
@@ -252,21 +259,21 @@ const styles = StyleSheet.create({
   chatName: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#111827",
+    color: "#FFFFFF",
   },
   chatTime: {
     fontSize: 12,
-    color: "#6B7280",
+    color: "#8B8B8B",
   },
   chatMessage: {
     fontSize: 14,
-    color: "#6B7280",
+    color: "#8B8B8B",
   },
   unreadBadge: {
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: "#FF4FD8",
+    backgroundColor: "#FF005C",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -279,16 +286,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    backgroundColor: "#000000",
+    borderTopWidth: 1,
+    borderTopColor: "rgba(0, 255, 179, 0.2)",
     paddingVertical: 16,
     paddingHorizontal: 24,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 10,
   },
   navItem: {
     alignItems: "center",
@@ -298,7 +300,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: "#5A6E7A",
+    backgroundColor: "#1A1A1A",
   },
   navIconActive: {
     backgroundColor: "#00FFB3",
@@ -306,7 +308,7 @@ const styles = StyleSheet.create({
   navLabel: {
     fontSize: 12,
     fontWeight: "500",
-    color: "#5A6E7A",
+    color: "#8B8B8B",
   },
   navLabelActive: {
     color: "#00FFB3",

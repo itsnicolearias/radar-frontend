@@ -72,7 +72,7 @@ export default function EventsScreen() {
             <TouchableOpacity
               key={category}
               style={[styles.categoryChip, selectedCategory === category && styles.categoryChipActive]}
-              onPress={() => setSelectedCategory("Todos")}
+              onPress={() => setSelectedCategory(selectedCategory === category ? "Todos" : category)}
             >
               <Text style={[styles.categoryText, selectedCategory === category && styles.categoryTextActive]}>
                 {category}
@@ -168,10 +168,10 @@ export default function EventsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0E2A3E",
+    backgroundColor: "#000000",
   },
   header: {
-    backgroundColor: "#0E2A3E",
+    backgroundColor: "#000000",
     paddingHorizontal: 24,
     paddingTop: 60,
     paddingBottom: 16,
@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
   createButtonText: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#0E2A3E",
+    color: "#000000",
   },
   categoriesScroll: {
     marginBottom: 12,
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: "#1A3A4F",
+    backgroundColor: "#1A1A1A",
     marginRight: 8,
     borderWidth: 1,
     borderColor: "rgba(0, 255, 179, 0.2)",
@@ -221,28 +221,28 @@ const styles = StyleSheet.create({
   categoryText: {
     fontSize: 14,
     fontWeight: "500",
-    color: "#94A3B8",
+    color: "#8B8B8B",
   },
   categoryTextActive: {
-    color: "#0E2A3E",
+    color: "#000000",
   },
   myEventsButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: "#1A3A4F",
+    backgroundColor: "#1A1A1A",
     alignSelf: "flex-start",
     borderWidth: 1,
     borderColor: "rgba(0, 255, 179, 0.2)",
   },
   myEventsButtonActive: {
-    backgroundColor: "#FF4FD8",
-    borderColor: "#FF4FD8",
+    backgroundColor: "#FF005C",
+    borderColor: "#FF005C",
   },
   myEventsText: {
     fontSize: 14,
     fontWeight: "500",
-    color: "#94A3B8",
+    color: "#8B8B8B",
   },
   myEventsTextActive: {
     color: "#FFFFFF",
@@ -251,6 +251,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 24,
     paddingVertical: 16,
+    backgroundColor: "#000000",
   },
   emptyState: {
     flex: 1,
@@ -260,7 +261,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 18,
-    color: "#94A3B8",
+    color: "#8B8B8B",
     marginBottom: 8,
   },
   emptySubtext: {
@@ -268,7 +269,7 @@ const styles = StyleSheet.create({
     color: "#5A6E7A",
   },
   eventCard: {
-    backgroundColor: "#1A3A4F",
+    backgroundColor: "#0a0e27",
     borderRadius: 16,
     marginBottom: 16,
     borderWidth: 1,
@@ -285,7 +286,7 @@ const styles = StyleSheet.create({
   eventImageText: {
     fontSize: 48,
     fontWeight: "bold",
-    color: "#0E2A3E",
+    color: "#000000",
   },
   eventInfo: {
     padding: 16,
@@ -298,7 +299,7 @@ const styles = StyleSheet.create({
   },
   eventLocation: {
     fontSize: 14,
-    color: "#94A3B8",
+    color: "#8B8B8B",
     marginBottom: 8,
   },
   eventMeta: {
@@ -308,11 +309,11 @@ const styles = StyleSheet.create({
   },
   eventDate: {
     fontSize: 14,
-    color: "#94A3B8",
+    color: "#8B8B8B",
   },
   eventAttendees: {
     fontSize: 14,
-    color: "#94A3B8",
+    color: "#8B8B8B",
   },
   eventFooter: {
     flexDirection: "row",
@@ -337,12 +338,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#00FFB3",
   },
   interestButtonActive: {
-    backgroundColor: "#FF4FD8",
+    backgroundColor: "#FF005C",
   },
   interestButtonText: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#0E2A3E",
+    color: "#000000",
   },
   interestButtonTextActive: {
     color: "#FFFFFF",
@@ -351,16 +352,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    backgroundColor: "#000000",
+    borderTopWidth: 1,
+    borderTopColor: "rgba(0, 255, 179, 0.2)",
     paddingVertical: 16,
     paddingHorizontal: 24,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 10,
   },
   navItem: {
     alignItems: "center",
@@ -370,7 +366,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: "#5A6E7A",
+    backgroundColor: "#1A1A1A",
   },
   navIconActive: {
     backgroundColor: "#00FFB3",
@@ -378,7 +374,7 @@ const styles = StyleSheet.create({
   navLabel: {
     fontSize: 12,
     fontWeight: "500",
-    color: "#5A6E7A",
+    color: "#8B8B8B",
   },
   navLabelActive: {
     color: "#00FFB3",

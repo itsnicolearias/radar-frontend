@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { MapPin, Calendar, Users, Heart, DollarSign } from "lucide-react"
+import { MapPin, Calendar, Users, Heart, DollarSign } from 'lucide-react'
 import { cn } from "../lib/utils"
 
 interface EventCardProps {
@@ -59,8 +59,8 @@ export const EventCard: React.FC<EventCardProps> = ({
   return (
     <div
       className={cn(
-        "bg-[#1A3A4F] rounded-2xl border-2 border-[#00FFB3]/20 overflow-hidden hover:border-[#00FFB3]/40 transition-colors",
-        isBoosted && "border-[#00FFB3]",
+        "bg-[#0a0e27] rounded-2xl border-2 border-[#1DE3F2]/20 overflow-hidden hover:border-[#00FFB3]/40 transition-all shadow-lg shadow-[#00FFB3]/10",
+        isBoosted && "border-[#00FFB3] shadow-lg shadow-[#00FFB3]/40",
         className,
       )}
       onClick={onClick}
@@ -69,12 +69,12 @@ export const EventCard: React.FC<EventCardProps> = ({
       {(isBoosted || category) && (
         <div className="px-4 pt-3 flex gap-2">
           {isBoosted && (
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[#00FFB3] text-[#0E2A3E]">
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[#00FFB3] text-black shadow-lg shadow-[#00FFB3]/30">
               💎 BOOSTED
             </span>
           )}
           {category && (
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[#FF4FD8]/20 text-[#FF4FD8] border border-[#FF4FD8]/30">
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[#FF005C]/20 text-[#FF005C] border border-[#FF005C]/30">
               {category}
             </span>
           )}
@@ -83,7 +83,7 @@ export const EventCard: React.FC<EventCardProps> = ({
 
       {/* Image */}
       <div className="p-4">
-        <div className="w-full aspect-video bg-gradient-to-br from-[#00FFB3]/30 to-[#14B8A6]/30 rounded-xl flex items-center justify-center overflow-hidden">
+        <div className="w-full aspect-video bg-gradient-to-br from-[#00FFB3]/20 to-[#1DE3F2]/20 rounded-xl flex items-center justify-center overflow-hidden border border-[#1DE3F2]/20">
           {photoUrl ? (
             <img src={photoUrl || "/placeholder.svg"} alt={title} className="w-full h-full object-cover" />
           ) : (
@@ -96,10 +96,10 @@ export const EventCard: React.FC<EventCardProps> = ({
       <div className="px-4 pb-4 space-y-3">
         <h3 className="text-white font-bold text-lg">{title}</h3>
 
-        {description && <p className="text-gray-400 text-sm line-clamp-2">{description}</p>}
+        {description && <p className="text-[#C5C5C5] text-sm line-clamp-2">{description}</p>}
 
         {/* Info row */}
-        <div className="flex items-center gap-4 text-sm text-gray-400">
+        <div className="flex items-center gap-4 text-sm text-[#8B8B8B]">
           <div className="flex items-center gap-1">
             <MapPin className="w-4 h-4 text-[#00FFB3]" />
             <span>{location}</span>
@@ -107,9 +107,9 @@ export const EventCard: React.FC<EventCardProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-4 text-sm text-gray-400">
+        <div className="flex items-center gap-4 text-sm text-[#8B8B8B]">
           <div className="flex items-center gap-1">
-            <Calendar className="w-4 h-4 text-[#00FFB3]" />
+            <Calendar className="w-4 h-4 text-[#1DE3F2]" />
             <span>{formatDate(startDate)}</span>
           </div>
           <div className="flex items-center gap-1">
@@ -125,9 +125,9 @@ export const EventCard: React.FC<EventCardProps> = ({
             onInterestClick?.()
           }}
           className={cn(
-            "w-full py-3 rounded-full font-semibold text-sm transition-all flex items-center justify-center gap-2",
+            "w-full py-3 rounded-full font-semibold text-sm transition-all flex items-center justify-center gap-2 shadow-lg",
             isInterested
-              ? "bg-[#00FFB3] text-[#0E2A3E] hover:bg-[#00FFB3]/90"
+              ? "bg-[#00FFB3] text-black hover:opacity-90 shadow-[#00FFB3]/30"
               : "bg-[#00FFB3]/10 text-[#00FFB3] hover:bg-[#00FFB3]/20 border border-[#00FFB3]/30",
           )}
         >
@@ -137,7 +137,7 @@ export const EventCard: React.FC<EventCardProps> = ({
 
         {price > 0 && (
           <div className="flex items-center gap-1 text-white">
-            <DollarSign className="w-4 h-4" />
+            <DollarSign className="w-4 h-4 text-[#00FFB3]" />
             <span className="font-semibold">${price}</span>
           </div>
         )}

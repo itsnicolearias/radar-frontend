@@ -27,6 +27,8 @@ function ChatConversationPage() {
         const data = await messageService.getMessages(userId)
         setMessages(userId, data)
         resetUnreadCount(userId)
+
+        console.log(userMessages)
       } catch (error) {
         console.error("[v0] Error fetching messages:", error)
       }
@@ -73,13 +75,16 @@ function ChatConversationPage() {
     })
   }
 
+  const firstMsg = userMessages[0];
+  const name = firstMsg ? (firstMsg.Sender.userId === userId ? firstMsg.Sender.displayName : firstMsg.Receiver.displayName) : "Chat";
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <ArrowLeft color="#FFFFFF" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{userId}</Text>
+        <Text style={styles.headerTitle}>{ name }</Text>
       </View>
       <ScrollView
         ref={scrollViewRef}

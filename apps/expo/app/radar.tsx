@@ -154,9 +154,7 @@ export default function RadarScreen() {
         <Text style={styles.title}>Radar</Text>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
 
-          <TouchableOpacity onPress={() => setIsSendSignalModalOpen(true)} style={styles.signalButton}>
-            <Text style={styles.signalButtonText}>Señales: {nearbySignals.length}</Text>
-          </TouchableOpacity>
+
           <GhostButton onClick={handleToggleVisibility} isActive={!isVisible} />
           <TouchableOpacity style={styles.profileButton}>
             <Text style={styles.profileInitial}>{"U"}</Text>
@@ -271,7 +269,7 @@ export default function RadarScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0E2A3E",
+    backgroundColor: "#000000",
   },
   header: {
     flexDirection: "row",
@@ -280,6 +278,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 60,
     paddingBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(0, 255, 179, 0.2)",
   },
   title: {
     fontSize: 28,
@@ -304,6 +304,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     position: "relative",
+    backgroundColor: "#000000",
   },
   radarCircle: {
     position: "absolute",
@@ -325,7 +326,7 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   currentUserInitials: {
-    color: "#0E2A3E",
+    color: "#000000",
     fontSize: 18,
     fontWeight: "bold",
   },
@@ -342,28 +343,28 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "#00FFB3",
+    backgroundColor: "#FF005C",
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#00FFB3",
+    shadowColor: "#FF005C",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.4,
     shadowRadius: 15,
     elevation: 8,
   },
   userInitials: {
-    color: "#0E2A3E",
+    color: "#FFFFFF",
     fontSize: 14,
     fontWeight: "bold",
   },
   signalButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    backgroundColor: "rgba(0, 255, 179, 0.2)",
+    backgroundColor: "rgba(255, 0, 92, 0.2)",
     borderRadius: 20,
   },
   signalButtonText: {
-    color: "#00FFB3",
+    color: "#FF005C",
     fontWeight: "600",
   },
   eventMarker: {
@@ -371,10 +372,10 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#FF4FD8",
+    backgroundColor: "#00FFB3",
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#FF4FD8",
+    shadowColor: "#00FFB3",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.6,
     shadowRadius: 20,
@@ -384,22 +385,17 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#000000",
   },
   bottomNav: {
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    backgroundColor: "#000000",
+    borderTopWidth: 1,
+    borderTopColor: "rgba(0, 255, 179, 0.2)",
     paddingVertical: 16,
     paddingHorizontal: 24,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 10,
   },
   navItem: {
     alignItems: "center",
@@ -409,7 +405,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: "#5A6E7A",
+    backgroundColor: "#1A1A1A",
   },
   navIconActive: {
     backgroundColor: "#00FFB3",
@@ -417,7 +413,7 @@ const styles = StyleSheet.create({
   navLabel: {
     fontSize: 12,
     fontWeight: "500",
-    color: "#5A6E7A",
+    color: "#8B8B8B",
   },
   navLabelActive: {
     color: "#00FFB3",
@@ -439,21 +435,6 @@ const styles = StyleSheet.create({
     borderRadius: 35,
     justifyContent: "center",
     alignItems: "center",
-  },
-  signalCountBadge: {
-    position: "absolute",
-    top: -4,
-    right: -4,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: "#FF005C",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  signalCountBadgeText: {
-    color: "#FFFFFF",
-    fontSize: 12,
-    fontWeight: "bold",
+    backgroundColor: "#00FFB3",
   },
 })
