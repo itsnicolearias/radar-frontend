@@ -61,14 +61,14 @@ export default function LoginPage() {
           <span>Volver</span>
         </Link>
 
-        <div className="flex flex-col items-center justify-center min-h-[calc(100vh-8rem)]">
+        <div className="flex flex-col items-center justify-center flex-1">
           <div className="w-full max-w-md space-y-8">
             <div className="text-center space-y-2">
-              <h1 className="text-4xl font-bold">Iniciar sesión</h1>
-              <p className="text-muted-foreground">Ingresá a tu cuenta de Radar</p>
+              <h1 className="text-4xl font-bold text-primary animate-fade-in-down">Iniciar sesión</h1>
+              <p className="text-muted-foreground animate-fade-in-up">Ingresá a tu cuenta de Radar</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6 animate-fade-in-up delay-200">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -77,7 +77,6 @@ export default function LoginPage() {
                   placeholder="tu@email.com"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="h-12"
                 />
                 {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
               </div>
@@ -90,21 +89,16 @@ export default function LoginPage() {
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="h-12"
                 />
                 {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
               </div>
 
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="w-full h-12 text-lg font-semibold bg-linear-to-r from-primary to-accent hover:opacity-90"
-              >
+              <Button type="submit" disabled={isLoading} className="w-full text-lg font-semibold">
                 {isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
               </Button>
             </form>
 
-            <p className="text-center text-sm text-muted-foreground">
+            <p className="text-center text-sm text-muted-foreground animate-fade-in-up delay-400">
               ¿No tenés cuenta?{" "}
               <Link href="/register" className="text-primary hover:underline font-semibold">
                 Registrate

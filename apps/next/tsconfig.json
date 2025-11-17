@@ -14,7 +14,10 @@
       {
         "name": "next"
       }
-    ]
+    ],
+    "paths": {
+      "react-native": ["react-native-web"]
+    }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "next.config.js"],
   "exclude": ["node_modules"]

@@ -1,114 +1,98 @@
 "use client"
 
-import { View, Text, TextInput, Pressable, StyleSheet, Alert } from "react-native"
+import { View, Text, Alert } from "react-native"
 import { useState } from "react"
-import { useRouter } from "expo-router"
+import { Link, useRouter } from "expo-router"
 import { authService } from "@radar/api"
 import { useAuthStore } from "@radar/features"
+import { GradientBackground, Button, Input, Label } from "@radar/ui"
+import { LoginInput, loginSchema } from "../../../../packages/api/validations"
 
 export default function LoginScreen() {
   const router = useRouter()
   const setAuth = useAuthStore((state) => state.setAuth)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [loading, setLoading] = useState(false)
+  const [formData, setFormData] = useState<LoginInput>({
+    email: "",
+    password: "",
+  })
+  const [errors, setErrors] = useState<Partial<Record<keyof LoginInput, string>>>({})
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert("Error", "Por favor completa todos los campos")
+  const handleSubmit = async () => {
+    setErrors({})
+
+    const validation = loginSchema.safeParse(formData)
+    if (!validation.success) {
+      const fieldErrors: Partial<Record<keyof LoginInput, string>> = {}
+      validation.error.issues.forEach((err) => {
+        if (err.path[0]) {
+          fieldErrors[err.path[0] as keyof LoginInput] = err.message
+        }
+      })
+      setErrors(fieldErrors)
       return
     }
 
-    setLoading(true)
+    setIsLoading(true)
     try {
-      const response = await authService.login({ email, password })
-
+      const response = await authService.login(formData)
       setAuth(response.data.user, null, response.data.token)
       router.replace("/radar")
-    } catch (error) {
-      Alert.alert("Error", "Credenciales inválidas")
+    } catch (error: any) {
+      Alert.alert("Error", error.response?.data?.message || "Error al iniciar sesión")
     } finally {
-      setLoading(false)
+      setIsLoading(false)
     }
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>Iniciar sesión</Text>
-        <Text style={styles.subtitle}>Bienvenido de vuelta</Text>
+    <GradientBackground>
+      <View className="flex-1 items-center justify-center p-6">
+        <View className="w-full max-w-md space-y-8">
+          <View className="items-center space-y-2">
+            <Text className="text-4xl font-bold text-primary">Iniciar sesión</Text>
+            <Text className="text-muted-foreground">Ingresá a tu cuenta de Radar</Text>
+          </View>
 
-        <View style={styles.form}>
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            placeholderTextColor="#64748B"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
+          <View className="space-y-6">
+            <View className="space-y-2">
+              <Label>Email</Label>
+              <Input
+                placeholder="tu@email.com"
+                value={formData.email}
+                onChangeText={(email) => setFormData({ ...formData, email })}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+              {errors.email && <Text className="text-sm text-destructive">{errors.email}</Text>}
+            </View>
 
-          <TextInput
-            style={styles.input}
-            placeholder="Contraseña"
-            placeholderTextColor="#64748B"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
+            <View className="space-y-2">
+              <Label>Contraseña</Label>
+              <Input
+                placeholder="••••••••"
+                value={formData.password}
+                onChangeText={(password) => setFormData({ ...formData, password })}
+                secureTextEntry
+              />
+              {errors.password && <Text className="text-sm text-destructive">{errors.password}</Text>}
+            </View>
 
-          <Pressable style={styles.button} onPress={handleLogin} disabled={loading}>
-            <Text style={styles.buttonText}>{loading ? "Cargando..." : "Iniciar sesión"}</Text>
-          </Pressable>
+            <Button onPress={handleSubmit} disabled={isLoading} className="w-full">
+              <Text className="text-lg font-semibold">
+                {isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
+              </Text>
+            </Button>
+          </View>
+
+          <Text className="text-center text-sm text-muted-foreground">
+            ¿No tenés cuenta?{" "}
+            <Link href="/register" className="text-primary font-semibold">
+              <Text>Registrate</Text>
+            </Link>
+          </Text>
         </View>
       </View>
-    </View>
+    </GradientBackground>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#0A1628",
-    paddingHorizontal: 24,
-  },
-  content: {
-    flex: 1,
-    justifyContent: "center",
-    gap: 32,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#F8FAFC",
-  },
-  subtitle: {
-    fontSize: 16,
-    color: "#94A3B8",
-  },
-  form: {
-    gap: 16,
-  },
-  input: {
-    height: 56,
-    backgroundColor: "#1E293B",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    color: "#F8FAFC",
-    fontSize: 16,
-  },
-  button: {
-    height: 56,
-    backgroundColor: "#14B8A6",
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 16,
-  },
-  buttonText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#fff",
-  },
-})

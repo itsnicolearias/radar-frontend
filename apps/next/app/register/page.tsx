@@ -55,7 +55,7 @@ export default function RegisterPage() {
 
   return (
     <GradientBackground>
-      <div className="relative z-10 min-h-screen px-6 py-8 text-white flex flex-col justify-center">
+      <div className="relative z-10 min-h-screen px-6 py-8 flex flex-col justify-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -63,8 +63,8 @@ export default function RegisterPage() {
           className="w-full max-w-md mx-auto space-y-8"
         >
           <div className="text-center space-y-2">
-            <h1 className="text-4xl font-bold">Creá tu cuenta en Radar</h1>
-            <p className="text-white/60">Es rápido, fácil y gratis.</p>
+            <h1 className="text-4xl font-bold text-primary">Creá tu cuenta en Radar</h1>
+            <p className="text-muted-foreground">Es rápido, fácil y gratis.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -78,7 +78,7 @@ export default function RegisterPage() {
                   onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                   disabled={isLoading}
                 />
-                {errors.firstName && <p className="text-sm text-[#FF005C] pt-1">{errors.firstName}</p>}
+                {errors.firstName && <p className="text-sm text-destructive pt-1">{errors.firstName}</p>}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="lastName">Apellido</Label>
@@ -89,7 +89,7 @@ export default function RegisterPage() {
                   onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                   disabled={isLoading}
                 />
-                {errors.lastName && <p className="text-sm text-[#FF005C] pt-1">{errors.lastName}</p>}
+                {errors.lastName && <p className="text-sm text-destructive pt-1">{errors.lastName}</p>}
               </div>
             </div>
 
@@ -103,7 +103,7 @@ export default function RegisterPage() {
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 disabled={isLoading}
               />
-              {errors.email && <p className="text-sm text-[#FF005C] pt-1">{errors.email}</p>}
+              {errors.email && <p className="text-sm text-destructive pt-1">{errors.email}</p>}
             </div>
 
             <div className="space-y-2">
@@ -116,7 +116,7 @@ export default function RegisterPage() {
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 disabled={isLoading}
               />
-              {errors.password && <p className="text-sm text-[#FF005C] pt-1">{errors.password}</p>}
+              {errors.password && <p className="text-sm text-destructive pt-1">{errors.password}</p>}
             </div>
 
             <div className="space-y-2">
@@ -129,7 +129,7 @@ export default function RegisterPage() {
                 onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                 disabled={isLoading}
               />
-              {errors.confirmPassword && <p className="text-sm text-[#FF005C] pt-1">{errors.confirmPassword}</p>}
+              {errors.confirmPassword && <p className="text-sm text-destructive pt-1">{errors.confirmPassword}</p>}
             </div>
 
             <Button type="submit" disabled={isLoading} className="w-full">
@@ -137,9 +137,9 @@ export default function RegisterPage() {
             </Button>
           </form>
 
-          <p className="text-center text-sm text-white/60">
+          <p className="text-center text-sm text-muted-foreground">
             ¿Ya tenés una cuenta?{" "}
-            <Link href="/login" className="font-bold text-[#00FFB3] hover:underline">
+            <Link href="/login" className="font-bold text-primary hover:underline">
               Iniciá Sesión
             </Link>
           </p>

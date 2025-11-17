@@ -1,0 +1,775 @@
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --font-size: 16px;
+  /* RADAR Color Palette - Original */
+  --radar-primary: #00FFB3;
+  --radar-secondary: #197387;
+  --radar-bg-primary: #000000;
+  --radar-bg-secondary: #1A1A1A;
+  --radar-bg-depth: #0D0D0D;
+  --radar-active: #1DE3F2;
+  --radar-signal: #FF005C;
+  --radar-text-primary: #FFFFFF;
+  --radar-text-secondary: #C5C5C5;
+
+  /* Legacy compatibility */
+  --background: #ffffff;
+  --foreground: oklch(0.145 0 0);
+  --card: #ffffff;
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: #030213;
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.95 0.0058 264.53);
+  --secondary-foreground: #030213;
+  --muted: #ececf0;
+  --muted-foreground: #717182;
+  --accent: #e9ebef;
+  --accent-foreground: #030213;
+  --destructive: #d4183d;
+  --destructive-foreground: #ffffff;
+  --border: rgba(0, 0, 0, 0.1);
+  --input: transparent;
+  --input-background: #f3f3f5;
+  --switch-background: #cbced4;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: #030213;
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.145 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.985 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.637 0.237 25.331);
+  --border: oklch(0.269 0 0);
+  --input: oklch(0.269 0 0);
+  --ring: oklch(0.439 0 0);
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.269 0 0);
+  --sidebar-ring: oklch(0.439 0 0);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-switch-background: var(--switch-background);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/**
+ * Base typography. This is not applied to elements which have an ancestor with a Tailwind text class.
+ */
+@layer base {
+  :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) {
+    h1 {
+      font-size: var(--text-2xl);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    h2 {
+      font-size: var(--text-xl);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    h3 {
+      font-size: var(--text-lg);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    h4 {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    p {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-normal);
+      line-height: 1.5;
+    }
+
+    label {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    button {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    input {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-normal);
+      line-height: 1.5;
+    }
+  }
+}
+
+html {
+  font-size: var(--font-size);
+}
+
+/* Custom animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  25% {
+    transform: translateY(-20px) translateX(10px);
+  }
+  50% {
+    transform: translateY(-10px) translateX(-10px);
+  }
+  75% {
+    transform: translateY(-15px) translateX(5px);
+  }
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-up-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.5s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.5s ease-out forwards;
+}
+
+.animate-slide-up-delay {
+  animation: slide-up 0.5s ease-out 0.3s forwards;
+  opacity: 0;
+}
+
+.animate-slide-up-delay-2 {
+  animation: slide-up 0.5s ease-out 0.5s forwards;
+  opacity: 0;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.animate-float {
+  animation: float linear infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+
+.animate-slide-down {
+  animation: slide-down 0.3s ease-out forwards;
+}
+
+.animate-slide-up-out {
+  animation: slide-up-out 0.3s ease-out forwards;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* ===== RADAR ANIMATIONS ===== */
+
+/* Radar pulse rings */
+@keyframes radar-pulse {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+}
+
+.animate-radar-pulse {
+  animation: radar-pulse 2s ease-in-out infinite;
+}
+
+/* Radar scan effect */
+@keyframes radar-scan {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-radar-scan {
+  animation: radar-scan 4s linear infinite;
+}
+
+/* Radar blip appearance */
+@keyframes radar-blip {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-radar-blip {
+  animation: radar-blip 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Concentric radar waves */
+@keyframes radar-wave {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+.radar-wave {
+  animation: radar-wave 3s ease-out infinite;
+}
+
+/* User icon heartbeat */
+@keyframes heartbeat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  10%, 30% {
+    transform: scale(1.1);
+  }
+  20% {
+    transform: scale(0.95);
+  }
+}
+
+.animate-heartbeat {
+  animation: heartbeat 2s ease-in-out infinite;
+}
+
+/* Connection line draw */
+@keyframes draw-line {
+  0% {
+    stroke-dashoffset: 100;
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+.animate-draw-line {
+  stroke-dasharray: 100;
+  animation: draw-line 1s ease-out forwards;
+}
+
+/* Radar glow effect */
+@keyframes radar-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(62, 200, 167, 0.5),
+                0 0 40px rgba(62, 200, 167, 0.3),
+                0 0 60px rgba(62, 200, 167, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(62, 200, 167, 0.8),
+                0 0 60px rgba(62, 200, 167, 0.5),
+                0 0 90px rgba(62, 200, 167, 0.3);
+  }
+}
+
+.animate-radar-glow {
+  animation: radar-glow 3s ease-in-out infinite;
+}
+
+/* ===== NOTIFICATION ANIMATIONS ===== */
+
+/* Notification pulse glow */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(62, 200, 167, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(62, 200, 167, 0.6),
+                0 0 35px rgba(29, 227, 242, 0.4);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Message blip */
+@keyframes message-blip {
+  0% {
+    transform: scale(0) translateY(20px);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.1) translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-message-blip {
+  animation: message-blip 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ===== UI ANIMATIONS ===== */
+
+/* Ghost mode fade */
+@keyframes ghost-fade {
+  0% {
+    opacity: 1;
+    filter: blur(0px);
+  }
+  50% {
+    opacity: 0.3;
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 0.5;
+    filter: blur(1px);
+  }
+}
+
+.animate-ghost-fade {
+  animation: ghost-fade 0.8s ease-out forwards;
+}
+
+/* Chip appear with rotation */
+@keyframes chip-appear {
+  0% {
+    transform: rotateY(-90deg) scale(0.8);
+    opacity: 0;
+  }
+  60% {
+    transform: rotateY(10deg) scale(1.05);
+  }
+  100% {
+    transform: rotateY(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-chip-appear {
+  animation: chip-appear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Avatar pulse on activity */
+@keyframes avatar-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(62, 200, 167, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(62, 200, 167, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(62, 200, 167, 0);
+  }
+}
+
+.animate-avatar-pulse {
+  animation: avatar-pulse 2s infinite;
+}
+
+/* Connection expand */
+@keyframes connection-expand {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-connection-expand {
+  animation: connection-expand 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Futuristic click */
+@keyframes futuristic-click {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.95);
+    box-shadow: 0 0 20px rgba(62, 200, 167, 0.6);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-futuristic-click {
+  animation: futuristic-click 0.3s ease-out;
+}
+
+/* ===== HOME SCREEN ANIMATIONS ===== */
+
+/* Radar particle float */
+@keyframes particle-float {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.3;
+  }
+  25% {
+    transform: translate(10px, -10px) scale(1.2);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate(-5px, -20px) scale(0.8);
+    opacity: 0.4;
+  }
+  75% {
+    transform: translate(-15px, -10px) scale(1.1);
+    opacity: 0.5;
+  }
+}
+
+.radar-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: linear-gradient(135deg, #3EC8A7, #1DE3F2);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(62, 200, 167, 0.8);
+  animation: particle-float 6s ease-in-out infinite;
+}
+
+/* Notification glow effect */
+.notification-glow {
+  position: relative;
+}
+
+.notification-glow::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(62, 200, 167, 0.3), rgba(29, 227, 242, 0.3));
+  filter: blur(8px);
+  opacity: 0;
+  animation: notification-glow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes notification-glow-pulse {
+  0%, 100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* Radar icon glow */
+.radar-icon-glow {
+  position: relative;
+}
+
+.radar-icon-glow::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #3EC8A7, #1DE3F2);
+  filter: blur(12px);
+  opacity: 0.6;
+  animation: icon-glow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes icon-glow-pulse {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+/* Radar pulse ring */
+@keyframes pulse-ring {
+  0% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+.radar-pulse-ring {
+  background: linear-gradient(135deg, rgba(62, 200, 167, 0.4), rgba(29, 227, 242, 0.4));
+  animation: pulse-ring 2s ease-out infinite;
+}
+
+/* Radar app icon special glow */
+.radar-app-icon {
+  position: relative;
+  background-size: 200% 200%;
+  animation: radar-app-glow 3s ease infinite;
+}
+
+@keyframes radar-app-glow {
+  0%, 100% {
+    background-position: 0% 50%;
+    box-shadow: 0 0 20px rgba(62, 200, 167, 0.6),
+                0 0 40px rgba(29, 227, 242, 0.4);
+  }
+  50% {
+    background-position: 100% 50%;
+    box-shadow: 0 0 30px rgba(62, 200, 167, 0.8),
+                0 0 60px rgba(29, 227, 242, 0.6);
+  }
+}
+
+/* Bounce slow */
+@keyframes bounce-slow {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-bounce-slow {
+  animation: bounce-slow 2s ease-in-out infinite;
+}
+
+/* Zoom in/out dynamic */
+@keyframes zoom-dynamic {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.animate-zoom-dynamic {
+  animation: zoom-dynamic 4s ease-in-out infinite;
+}
+
+/* Ripple effect */
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.animate-ripple {
+  animation: ripple 1s ease-out;
+}
+
+/* Shake for alerts */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}

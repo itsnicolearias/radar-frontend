@@ -124,10 +124,10 @@ export default function RadarPage() {
 
   return (
     <GradientBackground>
-      <div className="relative z-10 min-h-screen text-white flex flex-col">
+      <div className="relative z-10 min-h-screen text-foreground flex flex-col">
         {/* Header */}
-        <header className="bg-[#1A1A1A]/50 backdrop-blur-lg p-6 border-b border-[#00FFB3]/20 flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Radar</h1>
+        <header className="bg-background/80 backdrop-blur-lg p-6 border-b border-primary/20 flex items-center justify-between sticky top-0 z-50">
+          <h1 className="text-2xl font-bold text-primary">Radar</h1>
           <Button
             variant="icon"
             size="icon"
