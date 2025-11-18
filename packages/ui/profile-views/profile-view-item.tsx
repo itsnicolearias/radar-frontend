@@ -5,8 +5,7 @@ import { Eye } from "lucide-react"
 import { cn } from "../lib/utils"
 
 interface ProfileViewItemProps {
-  name: string
-  displayName?: string | null
+  displayName: string
   photoUrl?: string
   timestamp: string | Date
   onClick?: () => void
@@ -14,7 +13,6 @@ interface ProfileViewItemProps {
 }
 
 export const ProfileViewItem: React.FC<ProfileViewItemProps> = ({
-  name,
   displayName,
   photoUrl,
   timestamp,
@@ -35,12 +33,7 @@ export const ProfileViewItem: React.FC<ProfileViewItemProps> = ({
     return `Hace ${diffDays} días`
   }
 
-  const initials = name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2)
+  const initials = displayName![0];
 
   return (
     <div
@@ -51,7 +44,7 @@ export const ProfileViewItem: React.FC<ProfileViewItemProps> = ({
       <div className="relative shrink-0">
         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#00FFB3] to-[#14B8A6] flex items-center justify-center">
           {photoUrl ? (
-            <img src={photoUrl || "/placeholder.svg"} alt={name} className="w-full h-full rounded-full object-cover" />
+            <img src={photoUrl || "/placeholder.svg"} alt={displayName} className="w-full h-full rounded-full object-cover" />
           ) : (
             <span className="text-[#0E2A3E] font-semibold text-sm">{initials}</span>
           )}
@@ -63,7 +56,7 @@ export const ProfileViewItem: React.FC<ProfileViewItemProps> = ({
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <h3 className="font-semibold text-gray-900 truncate">{displayName || name}</h3>
+        <h3 className="font-semibold text-gray-900 truncate">{displayName}</h3>
         <p className="text-sm text-gray-600">{formatRelativeTime(timestamp)}</p>
       </div>
     </div>

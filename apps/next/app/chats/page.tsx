@@ -191,7 +191,6 @@ export default function ChatsPage() {
                     profileViews.map((view) => (
                       <ProfileViewItem
                         key={view.profileViewId}
-                        name={`${view.Viewer.firstName} ${view.Viewer.lastName}`}
                         displayName={view.Viewer.displayName}
                         photoUrl={view.Viewer.photoUrl}
                         timestamp={view.createdAt}
@@ -211,7 +210,7 @@ export default function ChatsPage() {
               connections.map((connection) => (
                 <ChatListItem
                   key={connection.connectionId}
-                  name={connection.receiverId}
+                  name={connection.senderId === user.userId ? connection.Receiver.displayName : connection.Sender.displayName}
                   photoUrl={undefined}
                   isOnline={false}
                   onClick={() => handleChatClick(connection.receiverId)}

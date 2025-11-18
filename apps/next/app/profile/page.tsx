@@ -73,6 +73,38 @@ export default function ProfilePage() {
           {/* Profile form */}
           <div className="space-y-6 bg-[#0a0e27] backdrop-blur-lg rounded-2xl p-6 border border-[#1DE3F2]/20">
             <div className="space-y-2">
+              <Label htmlFor="displayName" className="text-white">Nombre visible</Label>
+              <Textarea
+                id="displayName"
+                placeholder="Nombre visible para todos los usuarios en el radar"
+                value={user.displayName|| ""}
+                disabled={!isEditing}
+                className="min-h-24 bg-[#1A1A1A] border border-[#1DE3F2]/30 rounded-2xl text-white placeholder-[#C5C5C5]/40 focus:border-[#00FFB3] focus:outline-none transition-all disabled:opacity-60"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="firstName" className="text-white">Nombre</Label>
+              <Textarea
+                id="firstName"
+                placeholder="Tu nombre"
+                value={user.firstName || ""}
+                disabled={!isEditing}
+                className="min-h-24 bg-[#1A1A1A] border border-[#1DE3F2]/30 rounded-2xl text-white placeholder-[#C5C5C5]/40 focus:border-[#00FFB3] focus:outline-none transition-all disabled:opacity-60"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="lastName" className="text-white">Apellido</Label>
+              <Textarea
+                id="bio"
+                placeholder="Tu apellido"
+                value={user.lastName || ""}
+                disabled={!isEditing}
+                className="min-h-24 bg-[#1A1A1A] border border-[#1DE3F2]/30 rounded-2xl text-white placeholder-[#C5C5C5]/40 focus:border-[#00FFB3] focus:outline-none transition-all disabled:opacity-60"
+              />
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="bio" className="text-white">Biografía</Label>
               <Textarea
                 id="bio"

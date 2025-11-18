@@ -36,9 +36,8 @@ export interface IVerifyEmailResponse {
 
 export interface IConnectionUser {
   userId: string
-  firstName: string
-  lastName: string
   email: string
+  displayName: string
 }
 
 export interface IConnectionResponse {

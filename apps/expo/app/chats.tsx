@@ -140,7 +140,7 @@ export default function ChatsScreen() {
       <View style={styles.bottomNav}>
         <TouchableOpacity style={styles.navItem} onPress={() => router.push("/radar")}>
           <View style={styles.navIcon} />
-          <Text style={styles.navLabel}>Mapa</Text>
+          <Text style={styles.navLabel}>Radar</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem}>
           <View style={[styles.navIcon, styles.navIconActive]} />
