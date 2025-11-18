@@ -203,9 +203,6 @@ export default function RadarPage() {
           </div>
           <h1 className="text-white font-bold text-lg">RADAR</h1>
           <div className="flex items-center gap-3">
-            <div className="px-3 py-1 rounded-full bg-[#FF005C]/20 border border-[#FF005C]/50 text-xs text-[#FF005C]">
-              Señales: <span className="font-semibold">{nearbySignals.length}</span>
-            </div>
             <GhostButton onClick={handleToggleVisibility} isActive={!isVisible} />
           </div>
         </div>

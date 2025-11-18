@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from "react-native"
 import { LinearGradient } from "expo-linear-gradient"
 import { useRouter } from "expo-router"
-import { SendSignalModal, RadarSignalMarker, GhostButton, InvisibleBadge } from "@radar/ui"
+import { SendSignalModal, RadarSignalMarker } from "@radar/ui"
 import { SignalDetailModal } from "../../../packages/ui/signals/signal-detail-modal.native"
 import { EventDetailModal } from "../../../packages/ui/events/event-detail-modal.native"
 import { useRadarStore, useAuthStore, useSocket, useSocketEvent, useChatStore } from "@radar/features"
@@ -12,6 +12,8 @@ import { radarService, signalService } from "@radar/api"
 import type { IEventResponse, IRadarUser, IRadarSignal } from "@radar/types"
 import { AnimatePresence } from "framer-motion"
 import { Radio } from "lucide-react-native"
+import  GhostButton from "../../../packages/ui/components/ghost-button.native"
+import  InvisibleBadge from "../../../packages/ui/components/invisible-badge.native"
 
 const { width, height } = Dimensions.get("window")
 
@@ -107,8 +109,7 @@ export default function RadarScreen() {
         onPress={() => router.push(`/profile/${nearbyUser.userId}`)}
       >
         <Text style={styles.userInitials}>
-          {nearbyUser.firstName[0]}
-          {nearbyUser.lastName[0]}
+          {nearbyUser?.displayName![0]}
         </Text>
       </TouchableOpacity>
     )
@@ -142,7 +143,9 @@ export default function RadarScreen() {
         style={[styles.eventMarker, { left: x - 20, top: y - 20 }]}
         onPress={() => handleEventClick(event)}
       >
-        <View style={styles.eventDot} />
+        <Text style={styles.userInitials}>
+          {event.title[0]}
+        </Text>
       </TouchableOpacity>
     )
   }
@@ -155,10 +158,8 @@ export default function RadarScreen() {
         <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
 
 
-          <GhostButton onClick={handleToggleVisibility} isActive={!isVisible} />
-          <TouchableOpacity style={styles.profileButton}>
-            <Text style={styles.profileInitial}>{"U"}</Text>
-          </TouchableOpacity>
+          <GhostButton onPress={handleToggleVisibility} isActive={!isVisible} />
+
         </View>
       </View>
 
@@ -181,9 +182,8 @@ export default function RadarScreen() {
 
         {/* Current user */}
         <View style={styles.currentUser}>
-          <Text style={styles.currentUserInitials}>{user && user?.firstName && user.lastName ? `${user.firstName[0]}${user?.lastName[0]}` : "TÚ"}</Text>
+          <Text style={styles.currentUserInitials}>Tu</Text>
         </View>
-        <Text style={styles.currentUserLabel}>Tú</Text>
 
         {/* Nearby users */}
         {isVisible && nearbyUsers.map(renderUserMarker)}
@@ -316,7 +316,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: "#00FFB3",
+    backgroundColor: "#C5C5C5",
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#00FFB3",
@@ -343,17 +343,18 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "#FF005C",
+    backgroundColor: "#C5C5C5",
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#FF005C",
+    shadowColor: "#00FFB3",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.4,
     shadowRadius: 15,
     elevation: 8,
+    borderColor: "#00FFB3"
   },
   userInitials: {
-    color: "#FFFFFF",
+    color: "#000000",
     fontSize: 14,
     fontWeight: "bold",
   },
@@ -372,14 +373,15 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#00FFB3",
+    backgroundColor: "#C5C5C5",
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#00FFB3",
+    shadowColor: "FF005C",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.6,
     shadowRadius: 20,
     elevation: 10,
+    borderColor: "FF005C"
   },
   eventDot: {
     width: 12,
