@@ -1,13 +1,13 @@
 import { create } from "zustand"
 import { immer } from "zustand/middleware/immer"
-import type { IProfileView } from "@radar/types"
+import type { IProfileViewResponse } from "@radar/types"
 
 interface ProfileViewsState {
-  profileViews: IProfileView[]
+  profileViews: IProfileViewResponse[]
   isLoading: boolean
   error: string | null
-  setProfileViews: (views: IProfileView[]) => void
-  addProfileView: (view: IProfileView) => void
+  setProfileViews: (views: IProfileViewResponse[]) => void
+  addProfileView: (view: IProfileViewResponse) => void
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
   reset: () => void

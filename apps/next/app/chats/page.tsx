@@ -1,15 +1,16 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from 'next/navigation'
-import { ChatListItem, Tabs, BottomNav, ProfileViewItem } from "@radar/ui"
+import { useRouter } from "next/navigation"
+import { MessageCircle, Users, Check, X, Crown } from "lucide-react"
+import { motion } from "framer-motion"
 import { useChatStore, useConnectionStore, useSocketEvent, useProfileViewsStore, useAuthStore } from "@radar/features"
 import { messageService, connectionService, profileViewService } from "@radar/api"
-import { IConnectionResponse, IMessageResponse } from "@radar/types"
+import type { IConnectionResponse, IMessageResponse } from "@radar/types"
 
 export default function ChatsPage() {
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState<"messages" | "requests" | "connected">("messages")
+  const [activeTab, setActiveTab] = useState<"chats" | "solicitudes" | "conectados">("chats")
   const [showProfileViews, setShowProfileViews] = useState(false)
 
   const { user } = useAuthStore()
@@ -74,155 +75,320 @@ export default function ChatsPage() {
     return messageDate.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit" })
   }
 
-  const tabs = [
-    { id: "messages", label: "Mensajes", badge: chats.reduce((sum, chat) => sum + chat.unreadCount, 0) },
-    { id: "requests", label: "Solicitudes", badge: pendingRequests.length },
-    { id: "connected", label: "Conectados" },
-  ]
+  const formatDistance = (distance?: number) => {
+    if (!distance) return "Cerca"
+    if (distance < 1000) return `${Math.round(distance)}m`
+    return `${(distance / 1000).toFixed(1)}km`
+  }
+
+  const handleAcceptConnection = async (connectionId: string) => {
+    try {
+      await connectionService.updateConnection(connectionId, "accepted")
+      setPendingRequests(pendingRequests.filter((r) => r.connectionId !== connectionId))
+    } catch (error) {
+      console.error("[v0] Error accepting connection:", error)
+    }
+  }
+
+  const handleRejectConnection = async (connectionId: string) => {
+    try {
+      await connectionService.updateConnection(connectionId, "rejected")
+      setPendingRequests(pendingRequests.filter((r) => r.connectionId !== connectionId))
+    } catch (error) {
+      console.error("[v0] Error rejecting connection:", error)
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-black flex flex-col">
-      {/* Radial gradient background */}
-      <div className="absolute inset-0 bg-gradient-radial from-[#1DE3F2]/5 via-transparent to-transparent pointer-events-none" />
+    <div className="h-screen bg-black flex flex-col relative overflow-hidden">
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: "radial-gradient(circle at 50% 50%, rgba(0, 255, 179, 0.12) 0%, transparent 70%)",
+        }}
+      />
 
-      {/* Header */}
-      <header className="relative z-10 bg-black px-6 py-4 pt-12 border-b border-[#00FFB3]/10">
-        <h1 className="text-2xl font-bold text-white">Chats</h1>
+      <header className="relative z-10 bg-[#1A1A1A]/50 backdrop-blur-lg p-6 pb-4 border-b border-[#00FFB3]/20">
+        <h1 className="text-2xl font-bold text-white">Conexiones</h1>
       </header>
 
-      {/* Tabs */}
-      <Tabs tabs={tabs} activeTab={activeTab} onTabChange={(id) => setActiveTab(id as typeof activeTab)} />
+      <div className="relative z-10 flex bg-[#1A1A1A] backdrop-blur-sm rounded-full p-1 mx-6 mt-4 mb-4 border border-[#00FFB3]/20">
+        <button
+          onClick={() => setActiveTab("chats")}
+          className={`flex-1 py-3 rounded-full transition-all duration-300 flex items-center justify-center gap-2 relative ${
+            activeTab === "chats"
+              ? "bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black shadow-lg"
+              : "text-white/70"
+          }`}
+        >
+          <MessageCircle className="w-4 h-4" />
+          <span className="text-sm font-medium">Chats</span>
+        </button>
 
-      {/* Content */}
-      <div className="relative flex-1 bg-black overflow-y-auto">
-        {activeTab === "messages" && (
-          <div>
+        <button
+          onClick={() => setActiveTab("solicitudes")}
+          className={`flex-1 py-3 rounded-full transition-all duration-300 flex items-center justify-center gap-2 relative ${
+            activeTab === "solicitudes"
+              ? "bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black shadow-lg"
+              : "text-white/70"
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          <span className="text-sm font-medium">Solicitudes</span>
+          {pendingRequests.length > 0 && (
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#FF005C] rounded-full text-white text-xs flex items-center justify-center font-bold">
+              {pendingRequests.length}
+            </span>
+          )}
+        </button>
+
+        <button
+          onClick={() => setActiveTab("conectados")}
+          className={`flex-1 py-3 rounded-full transition-all duration-300 flex items-center justify-center gap-2 ${
+            activeTab === "conectados"
+              ? "bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black shadow-lg"
+              : "text-white/70"
+          }`}
+        >
+          <Check className="w-4 h-4" />
+          <span className="text-sm font-medium">Conectados</span>
+        </button>
+      </div>
+
+      <div className="relative flex-1 overflow-y-auto px-6 pb-24">
+        {/* Chats Tab */}
+        {activeTab === "chats" && (
+          <div className="space-y-3">
             {chats.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
                 <p className="text-[#C5C5C5]">No tienes conversaciones aún</p>
-                <p className="text-sm text-[#8B8B8B] mt-2">Conecta con personas cercanas para empezar a chatear</p>
+                <p className="text-sm text-white/50 mt-2">Conecta con personas cercanas para empezar a chatear</p>
               </div>
             ) : (
-              chats.map((chat) => (
-                <ChatListItem
+              chats.map((chat, index) => (
+                <motion.div
                   key={chat.conversationId}
-                  name={`${chat.user.displayName}`}
-                  lastMessage={chat.lastMessage.content}
-                  timestamp={chat.lastMessage ? formatTimestamp(String(chat.lastMessage.createdAt)) : undefined}
-                  unreadCount={chat.unreadCount}
-                  photoUrl={chat.user.Profile?.photoUrl!}
-                  isOnline={true}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05 }}
                   onClick={() => handleChatClick(chat.user.userId)}
-                />
+                  className="bg-[#1A1A1A] border border-[#00FFB3]/20 rounded-2xl p-4 cursor-pointer hover:border-[#00FFB3]/50 transition-all"
+                >
+                  <div className="flex items-center gap-3">
+                    {/* Avatar */}
+                    <div className="relative flex-shrink-0">
+                      <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center border-2 border-[#00FFB3]/50">
+                        <span className="text-[#1A1A1A] font-semibold text-base">
+                          {chat.user.displayName?.[0] || "U"}
+                        </span>
+                      </div>
+                      {chat.unreadCount > 0 && (
+                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-[#FF005C] rounded-full text-white text-xs flex items-center justify-center font-bold">
+                          {chat.unreadCount}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <h3 className="font-semibold text-white">{chat.user.displayName}</h3>
+                        {chat.lastMessage && (
+                          <span className="text-xs text-[#C5C5C5]">
+                            {formatTimestamp(String(chat.lastMessage.createdAt))}
+                          </span>
+                        )}
+                      </div>
+                      {chat.lastMessage && (
+                        <p className="text-sm text-[#C5C5C5] truncate">{chat.lastMessage.content}</p>
+                      )}
+                      <div className="flex items-center gap-1 mt-1">
+                        <div className="w-2 h-2 bg-[#1DE3F2] rounded-full" />
+                        <span className="text-xs text-[#1DE3F2]">120m</span>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
               ))
             )}
           </div>
         )}
 
-        {activeTab === "requests" && (
-          <div>
+        {/* Solicitudes Tab */}
+        {activeTab === "solicitudes" && (
+          <div className="space-y-4">
             {pendingRequests.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
                 <p className="text-[#C5C5C5]">No tienes solicitudes pendientes</p>
               </div>
             ) : (
-              pendingRequests.map((request) => (
-                <div
+              pendingRequests.map((request, index) => (
+                <motion.div
                   key={request.connectionId}
-                  className="flex items-center justify-between p-4 border-b border-[#1A1A1A]/50"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="rounded-2xl p-5 bg-gradient-to-br from-[#00FFB3]/10 to-[#1DE3F2]/5 border border-[#00FFB3]/30"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#00FFB3] to-[#1DE3F2] flex items-center justify-center">
-                      <span className="text-black font-semibold text-sm">
-                        {request.senderId.slice(0, 2).toUpperCase()}
-                      </span>
+                  <div className="flex items-start gap-4">
+                    {/* Avatar */}
+                    <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center border-2 border-[#00FFB3]">
+                      <span className="text-[#1A1A1A] font-bold text-lg">{request.Sender.displayName[0]}</span>
                     </div>
-                    <div>
-                      <p className="font-semibold text-white">Nueva solicitud</p>
-                      <p className="text-sm text-[#8B8B8B]">{formatTimestamp(String(request.createdAt))}</p>
+
+                    {/* Content */}
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-2">
+                        <div>
+                          <h3 className="font-semibold text-white text-base">{request.Sender.age ?  `${request.Sender.displayName}, ${request.Sender.age}`: request.Sender.displayName}</h3>
+                          <div className="flex items-center gap-1 mt-1">
+                            <div className="w-2 h-2 bg-[#1DE3F2] rounded-full" />
+                            <span className="text-xs text-[#1DE3F2]">Cerca</span>
+                            {/**  <span className="text-xs text-[#1DBF73]"> • 3 intereses en común</span>*/}
+
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Action buttons */}
+                      <div className="flex gap-2 mt-4">
+                        <button
+                          onClick={() => handleAcceptConnection(request.connectionId)}
+                          className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-medium shadow-lg shadow-[#00FFB3]/30 hover:scale-105 transition-transform"
+                        >
+                          Aceptar
+                        </button>
+                        <button
+                          onClick={() => handleRejectConnection(request.connectionId)}
+                          className="flex-1 h-10 rounded-xl bg-[#1A1A1A] border border-[#FF005C]/30 hover:bg-[#FF005C]/10 text-[#FF005C] transition-all"
+                        >
+                          <X className="w-4 h-4 inline mr-1" />
+                          Rechazar
+                        </button>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => connectionService.updateConnection(request.connectionId, "accepted")}
-                      className="px-4 py-2 bg-[#00FFB3] text-black rounded-full text-sm font-medium hover:opacity-90 transition-all shadow-lg shadow-[#00FFB3]/30"
-                    >
-                      Aceptar
-                    </button>
-                    <button
-                      onClick={() => connectionService.updateConnection(request.connectionId, "rejected")}
-                      className="px-4 py-2 bg-[#1A1A1A] text-[#C5C5C5] rounded-full text-sm font-medium border border-[#1DE3F2]/30 hover:border-[#1DE3F2] transition-all"
-                    >
-                      Rechazar
-                    </button>
-                  </div>
-                </div>
+                </motion.div>
               ))
             )}
           </div>
         )}
 
-        {activeTab === "connected" && (
+        {/* Conectados Tab */}
+        {activeTab === "conectados" && (
           <div>
-            <div className="border-b border-[#1A1A1A]/50 pb-4">
-              <button
-                onClick={() => setShowProfileViews(!showProfileViews)}
-                className="w-full px-6 py-3 flex items-center justify-between hover:bg-[#1A1A1A]/30 transition-colors"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-[#FF005C] text-lg">👁️</span>
-                  <span className="font-semibold text-white">Vieron tu perfil</span>
-                  {profileViews.length > 0 && (
-                    <span className="px-2 py-0.5 bg-[#FF005C] text-white text-xs font-bold rounded-full">
-                      {profileViews.length}
-                    </span>
-                  )}
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-10 h-10 bg-[#1A1A1A] rounded-full flex items-center justify-center border border-[#00FFB3]/30">
+                  <span className="text-2xl">👁️</span>
                 </div>
-                <span className="text-[#8B8B8B]">{showProfileViews ? "▼" : "▶"}</span>
-              </button>
+                <h2 className="text-white font-semibold">Vieron tu perfil</h2>
+              </div>
 
-              {showProfileViews && (
-                <div className="mt-2">
-                  {profileViews.length === 0 ? (
-                    <div className="px-6 py-8 text-center">
-                      <p className="text-[#8B8B8B] text-sm">Aún nadie ha visto tu perfil</p>
+              <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+                {profileViews.slice(0, 5).map((view, index) => (
+                  <motion.div
+                    key={view.profileViewId}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="flex-shrink-0 text-center cursor-pointer"
+                    onClick={() => router.push(`/profile/${view.viewerId}`)}
+                  >
+                    <div className="relative">
+                      <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center border-2 border-[#1DE3F2] shadow-lg shadow-[#1DE3F2]/30">
+                        <span className="text-[#1A1A1A] font-semibold text-lg">{view.Viewer.displayName[0]}</span>
+                      </div>
+                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-[#1DE3F2] border-2 border-black rounded-full" />
                     </div>
-                  ) : (
-                    profileViews.map((view) => (
-                      <ProfileViewItem
-                        key={view.profileViewId}
-                        displayName={view.Viewer.displayName}
-                        photoUrl={view.Viewer.photoUrl}
-                        timestamp={view.createdAt}
-                        onClick={() => router.push(`/profile/${view.viewerId}`)}
-                      />
-                    ))
-                  )}
-                </div>
-              )}
+                    <p className="text-white text-xs font-medium mt-2">{view.Viewer.displayName}</p>
+                    <p className="text-[#1DE3F2] text-xs">Hace 15 min</p>
+                  </motion.div>
+                ))}
+              </div>
             </div>
 
-            {connections.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-                <p className="text-[#C5C5C5]">No tienes conexiones aún</p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] cursor-pointer hover:scale-[1.02] transition-transform"
+            >
+              <div className="flex items-center gap-2">
+                <Crown className="w-5 h-5 text-black" />
+                <p className="text-black font-semibold flex-1">Desbloquea todos los visitantes con Premium</p>
               </div>
-            ) : (
-              connections.map((connection) => (
-                <ChatListItem
-                  key={connection.connectionId}
-                  name={connection.senderId === user.userId ? connection.Receiver.displayName : connection.Sender.displayName}
-                  photoUrl={undefined}
-                  isOnline={false}
-                  onClick={() => handleChatClick(connection.receiverId)}
-                />
-              ))
-            )}
+            </motion.div>
+
+            <div className="space-y-3">
+              {connections.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+                  <p className="text-[#C5C5C5]">No tienes conexiones aún</p>
+                </div>
+              ) : (
+                connections.map((connection, index) => {
+                  const connectedUser = connection.senderId === user?.userId ? connection.Receiver : connection.Sender
+                  return (
+                    <motion.div
+                      key={connection.connectionId}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="bg-[#1A1A1A] border border-[#00FFB3]/20 rounded-2xl p-4 flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center border-2 border-[#00FFB3]/50">
+                          <span className="text-[#1A1A1A] font-semibold">{connectedUser.displayName?.[0] || "A"}</span>
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-white">{connectedUser.displayName}</h3>
+                          <div className="flex items-center gap-1 mt-1">
+                            <div className="w-2 h-2 bg-[#1DE3F2] rounded-full" />
+                            <span className="text-xs text-[#1DE3F2]">120m</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() =>
+                          handleChatClick(
+                            connection.senderId === user?.userId ? connection.receiverId : connection.senderId,
+                          )
+                        }
+                        className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-medium shadow-lg shadow-[#00FFB3]/30 hover:scale-105 transition-transform flex items-center gap-2"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        <span>Chat</span>
+                      </button>
+                    </motion.div>
+                  )
+                })
+              )}
+            </div>
           </div>
         )}
       </div>
 
-      {/* Bottom Navigation */}
-      <BottomNav activeTab="chats" onTabChange={handleTabChange} />
+      <div className="absolute bottom-0 left-0 right-0 bg-[#1A1A1A]/90 backdrop-blur-lg rounded-t-3xl px-6 py-4 shadow-lg border-t border-[#00FFB3]/20 z-20">
+        <div className="flex items-center justify-around max-w-md mx-auto">
+          {[
+            { id: "radar", label: "Radar", icon: "📡" },
+            { id: "chats", label: "Chats", icon: "💬" },
+            { id: "events", label: "Eventos", icon: "📅" },
+            { id: "profile", label: "Perfil", icon: "👤" },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => handleTabChange(tab.id as any)}
+              className="flex flex-col items-center gap-1 p-2 transition-colors"
+            >
+              <span className="text-2xl">{tab.icon}</span>
+              <span className={`text-xs font-medium ${tab.id === "chats" ? "text-[#00FFB3]" : "text-[#C5C5C5]"}`}>
+                {tab.label}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }
