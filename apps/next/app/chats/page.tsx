@@ -233,19 +233,18 @@ export default function ChatsPage() {
                   <div className="flex items-start gap-4">
                     {/* Avatar */}
                     <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center border-2 border-[#00FFB3]">
-                      <span className="text-[#1A1A1A] font-bold text-lg">{request.Sender.displayName[0]}</span>
+                      <span className="text-[#1A1A1A] font-bold text-lg">S</span>
                     </div>
 
                     {/* Content */}
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
                         <div>
-                          <h3 className="font-semibold text-white text-base">{request.Sender.age ?  `${request.Sender.displayName}, ${request.Sender.age}`: request.Sender.displayName}</h3>
+                          <h3 className="font-semibold text-white text-base">Sofia, 24</h3>
                           <div className="flex items-center gap-1 mt-1">
                             <div className="w-2 h-2 bg-[#1DE3F2] rounded-full" />
-                            <span className="text-xs text-[#1DE3F2]">Cerca</span>
-                            {/**  <span className="text-xs text-[#1DBF73]"> • 3 intereses en común</span>*/}
-
+                            <span className="text-xs text-[#1DE3F2]">35m</span>
+                            <span className="text-xs text-[#1DBF73]"> • 3 intereses en común</span>
                           </div>
                         </div>
                       </div>
@@ -301,7 +300,7 @@ export default function ChatsPage() {
                       </div>
                       <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-[#1DE3F2] border-2 border-black rounded-full" />
                     </div>
-                    <p className="text-white text-xs font-medium mt-2">{view.Viewer.displayName}</p>
+                    <p className="text-white text-xs font-medium mt-2">{view.Viewer.displayName.split(" ")[0]}</p>
                     <p className="text-[#1DE3F2] text-xs">Hace 15 min</p>
                   </motion.div>
                 ))}

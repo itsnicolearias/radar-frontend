@@ -171,7 +171,7 @@ export default function ChatsScreen() {
                         )}
                         <View style={styles.distanceContainer}>
                           <View style={styles.distanceDot} />
-                          <Text style={styles.distanceText}>Cerca</Text>
+                          <Text style={styles.distanceText}>120m</Text>
                         </View>
                       </View>
                     </View>
@@ -200,15 +200,15 @@ export default function ChatsScreen() {
                   <View style={styles.requestCard}>
                     <View style={styles.requestContent}>
                       <View style={styles.requestAvatar}>
-                        <Text style={styles.requestAvatarText}>{request.Sender.displayName[0]}</Text>
+                        <Text style={styles.requestAvatarText}>S</Text>
                       </View>
 
                       <View style={styles.requestInfo}>
-                        <Text style={styles.requestName}>{request.Sender.age ?  `${request.Sender.displayName}, ${request.Sender.age}`: request.Sender.displayName}</Text>
+                        <Text style={styles.requestName}>Sofia, 24</Text>
                         <View style={styles.requestMeta}>
                           <View style={styles.distanceDot} />
-                          <Text style={styles.distanceText}>Cerca</Text>
-                          {/**<Text style={styles.interestText}> • 3 intereses en común</Text> */}
+                          <Text style={styles.distanceText}>35m</Text>
+                          <Text style={styles.interestText}> • 3 intereses en común</Text>
                         </View>
 
                         <View style={styles.requestActions}>
@@ -260,11 +260,11 @@ export default function ChatsScreen() {
                     >
                       <View style={styles.profileViewAvatarContainer}>
                         <View style={styles.profileViewAvatar}>
-                          <Text style={styles.profileViewAvatarText}>{view.Viewer.displayName![0]}</Text>
+                          <Text style={styles.profileViewAvatarText}>{view.Viewer.displayName[0]}</Text>
                         </View>
                         <View style={styles.onlineIndicator} />
                       </View>
-                      <Text style={styles.profileViewName}>{view.Viewer.displayName}</Text>
+                      <Text style={styles.profileViewName}>{view.Viewer.displayName.split(" ")[0]}</Text>
                       <Text style={styles.profileViewTime}>Hace 15 min</Text>
                     </TouchableOpacity>
                   </MotiView>

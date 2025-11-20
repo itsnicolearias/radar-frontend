@@ -38,9 +38,18 @@ export interface IConnectionUser {
   userId: string
   email: string
   displayName: string
-  age?: number
 }
 
+export interface IConnectionResponse {
+  connectionId: string
+  senderId: string
+  receiverId: string
+  status: "pending" | "accepted" | "rejected"
+  createdAt: Date
+  updatedAt: Date
+  Sender: IConnectionUser
+  Receiver: IConnectionUser
+}
 
 export interface IDeleteConnectionResponse {
   message: string

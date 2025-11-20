@@ -1,21 +1,24 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from 'next/navigation'
-import { useRadarStore, useAuthStore, useSocket, useSocketEvent, useNotificationStore } from "@radar/features"
+import { useRouter } from "next/navigation"
+import { useRadarStore, useAuthStore, useSocket, useSocketEvent } from "@radar/features"
 import { radarService, signalService } from "@radar/api"
 import type { IEventResponse, IRadarUser, IRadarSignal } from "@radar/types"
-import { SendSignalModal, GhostButton, InvisibleBadge } from "@radar/ui"
+import { BottomNav, GhostButton, InvisibleBadge } from "@radar/ui"
+import { SendSignalModal } from "../../../../packages/ui/modals/send-signal-modal"
 import { SignalDetailModal } from "../../../../packages/ui/signals/signal-detail-modal"
+import { UserProfileModal } from "../../../../packages/ui/profile/user-profile-modal"
 import { EventDetailModal } from "../../../../packages/ui/events/event-detail-modal"
+import { UserMarker } from "../../../../packages/ui/radar/user-marker"
+import { EventMarker } from "../../../../packages/ui/radar/event-marker"
+import { CentralUserMarker } from "../../../../packages/ui/radar/central-user-marker"
 import { AnimatePresence, motion } from "framer-motion"
-import { Radio } from 'lucide-react'
+import { Radio, MapPin } from "lucide-react"
 
 export default function RadarPage() {
   const router = useRouter()
   const { user, isVisible, toggleVisibility } = useAuthStore()
-  const [showInvisibleBadge, setShowInvisibleBadge] = useState(false)
-  const { addNotification } = useNotificationStore()
   const {
     nearbyUsers,
     nearbyEvents,
@@ -29,17 +32,23 @@ export default function RadarPage() {
     updateUserLocation,
   } = useRadarStore()
 
+  const [radius, setRadius] = useState(10000) // default 10km
+  const [selectedUser, setSelectedUser] = useState<IRadarUser | null>(null)
   const [selectedEvent, setSelectedEvent] = useState<IEventResponse | null>(null)
   const [selectedSignal, setSelectedSignal] = useState<IRadarSignal | null>(null)
   const [isSendSignalModalOpen, setIsSendSignalModalOpen] = useState(false)
-  const [seenSignals, setSeenSignals] = useState<string[]>([])
+  const [isAnimatingSignal, setIsAnimatingSignal] = useState(false)
   const socket = useSocket()
 
   useEffect(() => {
     const fetchNearbyData = async () => {
       if (!currentLocation || !isVisible) return
       try {
-        const { users, events, signals } = await radarService.getNearby(currentLocation.latitude, currentLocation.longitude)
+        const { users, events, signals } = await radarService.getNearby(
+          currentLocation.latitude,
+          currentLocation.longitude,
+          radius,
+        )
         setNearbyUsers(users)
         setNearbyEvents(events)
         setNearbySignals(signals)
@@ -54,23 +63,17 @@ export default function RadarPage() {
       setNearbyEvents([])
       setNearbySignals([])
     }
-  }, [currentLocation, isVisible, setNearbyUsers, setNearbyEvents, setNearbySignals])
-
-  const handleToggleVisibility = async () => {
-    const wasVisible = isVisible
-    await toggleVisibility()
-    if (wasVisible) {
-      setShowInvisibleBadge(true)
-      setTimeout(() => setShowInvisibleBadge(false), 3000)
-    }
-  }
+  }, [currentLocation, isVisible, radius, setNearbyUsers, setNearbyEvents, setNearbySignals])
 
   const handleSendSignal = async (note?: string) => {
     try {
+      setIsAnimatingSignal(true)
       const newSignal = await signalService.sendSignal(note)
       addNearbySignal(newSignal)
+      setTimeout(() => setIsAnimatingSignal(false), 2000)
     } catch (error) {
       console.error("[v0] Error sending signal:", error)
+      setIsAnimatingSignal(false)
     }
   }
 
@@ -86,10 +89,10 @@ export default function RadarPage() {
     if (!currentLocation && user) {
       setCurrentLocation({ latitude: user.lastLatitude!, longitude: user.lastLongitude! })
     }
-  }, [currentLocation, setCurrentLocation])
+  }, [currentLocation, setCurrentLocation, user])
 
   const handleUserClick = (nearbyUser: IRadarUser) => {
-    router.push(`/profile/${nearbyUser.userId}`)
+    setSelectedUser(nearbyUser)
   }
 
   const handleEventClick = (event: IEventResponse) => {
@@ -98,164 +101,188 @@ export default function RadarPage() {
 
   const handleSignalClick = (signal: IRadarSignal) => {
     setSelectedSignal(signal)
-    if (!seenSignals.includes(signal.signalId)) {
-      setSeenSignals([...seenSignals, signal.signalId])
-    }
   }
 
   const handleRespond = (signal: IRadarSignal) => {
-    router.push(`/chat/${signal.senderId}?signalId=${signal.signalId}`)
+    router.push(`/chats/${signal.senderId}?signalId=${signal.signalId}`)
     setSelectedSignal(null)
   }
 
-  const renderUserMarker = (user: IRadarUser, index: number) => {
-    const angle = (index / (nearbyUsers.length || 1)) * Math.PI * 2
-    const normalizedDistance = Math.min(user.distance / 1000, 1)
-    const radius = normalizedDistance * 180
-    const x = 50 + (radius * Math.cos(angle)) / 200
-    const y = 50 + (radius * Math.sin(angle)) / 200
-
-    return (
-      <motion.button
-        key={user.userId}
-        initial={{ opacity: 0, scale: 0 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="absolute w-14 h-14 rounded-full flex items-center justify-center font-bold text-white text-sm border-2 cursor-pointer"
-        style={{
-          left: `${x}%`,
-          top: `${y}%`,
-          transform: "translate(-50%, -50%)",
-          backgroundColor: "#FF1493",
-          borderColor: "#FF1493",
-          boxShadow: "0 0 20px rgba(255, 20, 147, 0.6), 0 0 40px rgba(255, 20, 147, 0.3)",
-        }}
-        onClick={() => handleUserClick(user)}
-      >
-        {user.firstName?.[0]}{user.lastName?.[0]}
-      </motion.button>
-    )
+  const handleViewProfile = (userId: string) => {
+    setSelectedSignal(null)
+    router.push(`/profile/${userId}`)
   }
 
-  const renderEventMarker = (event: IEventResponse, index: number) => {
-    const angle = ((index + 0.5) / (nearbyEvents.length || 1)) * Math.PI * 2
-    const radius = 150
-    const x = 50 + (radius * Math.cos(angle)) / 200
-    const y = 50 + (radius * Math.sin(angle)) / 200
+  const getMarkerPosition = (index: number, total: number, distance: number, type: "user" | "event") => {
+    const normalizedDistance = Math.min(distance / radius, 1)
+    // Events closer to center (15-30%), users further out (20-45%)
+    const minRadius = type === "event" ? 15 : 20
+    const maxRadius = type === "event" ? 30 : 45
+    const radiusPercent = minRadius + normalizedDistance * (maxRadius - minRadius)
 
-    return (
-      <motion.button
-        key={event.eventId}
-        initial={{ opacity: 0, scale: 0 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="absolute w-12 h-12 rounded-full flex items-center justify-center cursor-pointer border-2"
-        style={{
-          left: `${x}%`,
-          top: `${y}%`,
-          transform: "translate(-50%, -50%)",
-          backgroundColor: "#FF1493",
-          borderColor: "#FF1493",
-          boxShadow: "0 0 20px rgba(255, 20, 147, 0.6)",
-        }}
-        onClick={() => handleEventClick(event)}
-      >
-        <div className="w-2 h-2 rounded-full bg-white" />
-      </motion.button>
-    )
-  }
+    // Distribute evenly around circle with offset to avoid center overlap
+    const angleOffset = type === "event" ? Math.PI / 4 : 0
+    const angle = (index / Math.max(total, 1)) * Math.PI * 2 + angleOffset
 
-  const renderSignalMarker = (signal: IRadarSignal, index: number) => {
-    const angle = ((index + 0.25) / (nearbySignals.length || 1)) * Math.PI * 2
-    const radius = 140
-    const x = 50 + (radius * Math.cos(angle)) / 200
-    const y = 50 + (radius * Math.sin(angle)) / 200
+    const x = 50 + radiusPercent * Math.cos(angle)
+    const y = 50 + radiusPercent * Math.sin(angle)
 
-    return (
-      <motion.button
-        key={signal.signalId}
-        initial={{ opacity: 0, scale: 0 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="absolute w-10 h-10 rounded-full flex items-center justify-center cursor-pointer border-2"
-        style={{
-          left: `${x}%`,
-          top: `${y}%`,
-          transform: "translate(-50%, -50%)",
-          backgroundColor: "#00FFB3",
-          borderColor: "#00FFB3",
-          boxShadow: "0 0 15px rgba(0, 255, 179, 0.6), 0 0 30px rgba(29, 227, 242, 0.3)",
-        }}
-        onClick={() => handleSignalClick(signal)}
-      >
-        {!seenSignals.includes(signal.signalId) && (
-          <div className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 rounded-full border border-white text-xs flex items-center justify-center text-white font-bold">
-            !
-          </div>
-        )}
-      </motion.button>
-    )
+    return { x, y }
   }
 
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden flex flex-col">
-      <header className="relative z-20 px-6 py-4 border-b border-[#00FFB3]/20 bg-black/80 backdrop-blur-sm">
-        <div className="flex justify-between items-center">
-          <div className="text-sm text-gray-400">
-            Radio: <span className="text-[#00FFB3] font-semibold">10 km</span>
+      {/* Radial gradient background */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: "radial-gradient(circle at 50% 50%, rgba(0, 255, 179, 0.12) 0%, transparent 70%)",
+        }}
+      />
+
+      <header className="relative z-20 bg-[#1A1A1A]/50 backdrop-blur-lg p-6 border-b border-[#00FFB3]/20">
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center gap-2 text-sm text-white">
+            <MapPin className="w-4 h-4 text-[#00FFB3]" />
+            <span className="text-[#C5C5C5]">Radio:</span>
+            <span className="text-[#00FFB3] font-semibold">{radius / 1000} km</span>
           </div>
-          <h1 className="text-white font-bold text-lg">RADAR</h1>
+          <h1 className="text-white font-bold text-xl absolute left-1/2 -translate-x-1/2">RADAR</h1>
           <div className="flex items-center gap-3">
-            <GhostButton onClick={handleToggleVisibility} isActive={!isVisible} />
+            <GhostButton onClick={toggleVisibility} isActive={!isVisible} />
+            <button className="px-4 py-1.5 bg-[#1A1A1A] border border-[#FF005C]/30 rounded-full text-[#FF005C] text-sm flex items-center gap-1.5">
+              <Radio className="w-3 h-3" />
+              Señales: {nearbySignals.length}
+            </button>
           </div>
+        </div>
+
+        {/* Radius filter */}
+        <div className="flex gap-2">
+          {[2000, 5000, 10000].map((r) => (
+            <button
+              key={r}
+              onClick={() => setRadius(r)}
+              className={`flex-1 py-2 rounded-full text-sm font-medium transition-all ${
+                radius === r
+                  ? "bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black"
+                  : "bg-[#1A1A1A] text-[#C5C5C5] border border-[#00FFB3]/20"
+              }`}
+            >
+              {r / 1000} km
+            </button>
+          ))}
         </div>
       </header>
 
+      <AnimatePresence>{!isVisible && <InvisibleBadge />}</AnimatePresence>
+
       <div className="relative flex-1 flex items-center justify-center overflow-hidden">
-        {/* Radial gradient background grid */}
-        <svg className="absolute inset-0 w-full h-full opacity-30" style={{ pointerEvents: "none" }}>
-          <defs>
-            <radialGradient id="radarGrid" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#00FFB3" stopOpacity="0.2" />
-              <stop offset="70%" stopColor="#00FFB3" stopOpacity="0.05" />
-              <stop offset="100%" stopColor="#00FFB3" stopOpacity="0" />
-            </radialGradient>
-          </defs>
-          <circle cx="50%" cy="50%" r="25%" fill="url(#radarGrid)" />
-          <circle cx="50%" cy="50%" r="50%" fill="url(#radarGrid)" />
-          <circle cx="50%" cy="50%" r="75%" fill="url(#radarGrid)" />
-          
-          {/* Grid lines */}
-          <circle cx="50%" cy="50%" r="25%" fill="none" stroke="#00FFB3" strokeWidth="1" opacity="0.2" />
-          <circle cx="50%" cy="50%" r="50%" fill="none" stroke="#00FFB3" strokeWidth="1" opacity="0.15" />
-          <circle cx="50%" cy="50%" r="75%" fill="none" stroke="#00FFB3" strokeWidth="1" opacity="0.1" />
-        </svg>
+        <div className="relative w-full max-w-2xl aspect-square">
+          {/* Scan wave animations - perfectly circular */}
+          <AnimatePresence>
+            {[1, 2, 3].map((i) => (
+              <motion.div
+                key={`scan-${i}`}
+                className="absolute inset-0 border-2 border-[#00FFB3] rounded-full"
+                style={{
+                  left: "25%",
+                  top: "25%",
+                  width: "50%",
+                  height: "50%",
+                }}
+                animate={{
+                  scale: [1, 2],
+                  opacity: [0.6, 0],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Number.POSITIVE_INFINITY,
+                  delay: i * 1,
+                  ease: "easeOut",
+                }}
+              />
+            ))}
+          </AnimatePresence>
 
-        <div className="relative w-full h-full flex items-center justify-center">
-          {/* Current user in center */}
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className="absolute w-16 h-16 rounded-full flex items-center justify-center font-bold text-black text-sm border-2 z-10"
-            style={{
-              backgroundColor: "#00FFB3",
-              borderColor: "#00FFB3",
-              boxShadow: "0 0 30px rgba(0, 255, 179, 0.8), 0 0 60px rgba(0, 255, 179, 0.4)",
-            }}
-          >
-            {user?.firstName?.[0]}{user?.lastName?.[0]}
-          </motion.div>
+          {/* Extra scan animation when sending signal */}
+          {isAnimatingSignal && (
+            <motion.div
+              className="absolute inset-0 border-4 border-[#1DE3F2] rounded-full"
+              style={{
+                left: "20%",
+                top: "20%",
+                width: "60%",
+                height: "60%",
+              }}
+              animate={{
+                scale: [1, 1.5],
+                opacity: [0.8, 0],
+              }}
+              transition={{
+                duration: 1.5,
+                ease: "easeOut",
+              }}
+            />
+          )}
 
-          {/* Nearby users */}
-          {isVisible && nearbyUsers && nearbyUsers.map(renderUserMarker)}
+          {/* Concentric circles - perfectly circular */}
+          {[25, 50, 75].map((size, i) => (
+            <div
+              key={`circle-${i}`}
+              className="absolute border border-[#00FFB3] rounded-full opacity-20"
+              style={{
+                left: `${(100 - size) / 2}%`,
+                top: `${(100 - size) / 2}%`,
+                width: `${size}%`,
+                height: `${size}%`,
+              }}
+            />
+          ))}
 
-          {/* Nearby events */}
-          {isVisible && nearbyEvents && nearbyEvents.map(renderEventMarker)}
+          {/* Radar content */}
+          <div className="relative w-full h-full">
+            <CentralUserMarker
+              initial={user?.displayName?.[0]?.toUpperCase() || user?.firstName?.[0]?.toUpperCase() || "U"}
+            />
 
-          {/* Nearby signals */}
-          {nearbySignals && nearbySignals.map(renderSignalMarker)}
+            {isVisible &&
+              nearbyUsers &&
+              nearbyUsers.map((nearbyUser, index) => {
+                const hasSignal = nearbySignals.some((s) => s.senderId === nearbyUser.userId)
+                const position = getMarkerPosition(index, nearbyUsers.length, nearbyUser.distance, "user")
+                return (
+                  <UserMarker
+                    key={nearbyUser.userId}
+                    user={nearbyUser}
+                    position={position}
+                    hasSignal={hasSignal}
+                    onClick={() => handleUserClick(nearbyUser)}
+                    index={index}
+                  />
+                )
+              })}
+
+            {isVisible &&
+              nearbyEvents &&
+              nearbyEvents.map((event, index) => {
+                const position = getMarkerPosition(index, nearbyEvents.length, event.distance || 5000, "event")
+                return (
+                  <EventMarker
+                    key={event.eventId}
+                    event={event}
+                    position={position}
+                    onClick={() => handleEventClick(event)}
+                    index={index}
+                  />
+                )
+              })}
+          </div>
         </div>
 
         <motion.button
           onClick={() => setIsSendSignalModalOpen(true)}
-          className="absolute bottom-20 w-20 h-20 bg-gradient-to-br from-[#00FFB3] to-[#1DE3F2] rounded-full flex items-center justify-center shadow-2xl border border-[#00FFB3]/50 cursor-pointer z-20"
+          className="absolute bottom-20 w-16 h-16 rounded-full flex items-center justify-center shadow-2xl cursor-pointer z-20 overflow-hidden"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           animate={{
@@ -265,27 +292,18 @@ export default function RadarPage() {
               "0 0 20px rgba(0, 255, 179, 0.5), 0 0 40px rgba(29, 227, 242, 0.3)",
             ],
           }}
-          transition={{ duration: 2, repeat: Infinity }}
+          transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
         >
-          <Radio className="w-8 h-8 text-black" />
+          <div className="absolute inset-0 bg-gradient-to-br from-[#00FFB3] to-[#1DE3F2]" />
+          <Radio className="w-7 h-7 text-black relative z-10" />
         </motion.button>
-
-        <AnimatePresence>{showInvisibleBadge && <InvisibleBadge />}</AnimatePresence>
       </div>
 
-      <nav className="relative z-20 border-t border-[#00FFB3]/20 px-6 py-4 flex justify-around items-center bg-black/90 backdrop-blur-sm">
-        <NavButton label="Radar" icon="📍" active onClick={() => router.push("/radar")} />
-        <NavButton label="Chats" icon="💬" onClick={() => router.push("/chats")} />
-        <NavButton label="Eventos" icon="📅" onClick={() => router.push("/events")} />
-        <NavButton label="Perfil" icon="👤" onClick={() => router.push("/profile")} />
-      </nav>
+      <BottomNav activeTab="radar" onTabChange={(tab) => router.push(`/${tab === "radar" ? "radar" : tab}`)} />
 
       {/* Modals */}
       {isSendSignalModalOpen && (
-        <SendSignalModal
-          onClose={() => setIsSendSignalModalOpen(false)}
-          onSend={handleSendSignal}
-        />
+        <SendSignalModal onClose={() => setIsSendSignalModalOpen(false)} onSend={handleSendSignal} />
       )}
 
       {selectedSignal && (
@@ -293,36 +311,19 @@ export default function RadarPage() {
           signal={selectedSignal}
           onClose={() => setSelectedSignal(null)}
           onRespond={() => handleRespond(selectedSignal)}
+          onViewProfile={() => handleViewProfile(selectedSignal.senderId)}
         />
       )}
 
-      {selectedEvent && (
-        <EventDetailModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />
+      {selectedUser && (
+        <UserProfileModal
+          user={selectedUser}
+          onClose={() => setSelectedUser(null)}
+          onMessage={() => router.push(`/chats/${selectedUser.userId}`)}
+        />
       )}
-    </div>
-  )
-}
 
-function NavButton({
-  label,
-  icon,
-  active,
-  onClick,
-}: {
-  label: string
-  icon: string
-  active?: boolean
-  onClick?: () => void
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex flex-col items-center gap-1 transition-colors ${
-        active ? "text-[#00FFB3]" : "text-gray-500 hover:text-gray-300"
-      }`}
-    >
-      <div className="text-xl">{icon}</div>
-      <div className="text-xs font-medium">{label}</div>
-    </button>
+      {selectedEvent && <EventDetailModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />}
+    </div>
   )
 }
