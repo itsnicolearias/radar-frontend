@@ -1,166 +1,184 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button, Input, Label, Textarea } from "@radar/ui"
-import { useAuthStore } from "@radar/features"
-import { ArrowLeft, Camera } from 'lucide-react'
-import Link from "next/link"
+import { useState } from "react";
+import { ArrowLeft, Settings, LogOut } from "lucide-react";
+import { useAuthStore } from "@radar/features";
+import PlanCard from "@radar/ui/components/plan-card";
+import ProfileField from "@radar/ui/components/profile-field";
+import InterestsSelector from "@radar/ui/components/interest-selector";
+import AvatarBlock from "@radar/ui/components/avatar-block";
+import { profileService } from "@radar/api";
 
 export default function ProfilePage() {
-  const { user, profile } = useAuthStore()
-  const [isEditing, setIsEditing] = useState(false)
+  const { user, profile } = useAuthStore();
+
+  const [displayName, setDisplayName] = useState(user?.displayName || "");
+  const [firstName, setFirstName] = useState(user?.firstName || "");
+  const [lastName, setLastName] = useState(user?.lastName || "");
+  const [bio, setBio] = useState(profile?.bio || "");
+  const [age, setAge] = useState(profile?.age || "");
+  const [country, setCountry] = useState(profile?.country || "");
+  const [province, setProvince] = useState(profile?.province || "");
+  const [interests, setInterests] = useState<string[]>(profile?.interests || []);
+
+  const [showAge, setShowAge] = useState(profile?.showAge ?? true);
+  const [showLocation, setShowLocation] = useState(profile?.showLocation ?? true);
+
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+
+    await profileService.updateMyProfile({
+      displayName,
+      firstName,
+      lastName,
+      bio,
+      age,
+      country,
+      province,
+      interests,
+      showAge,
+      showLocation,
+    });
+
+    setIsSaving(false);
+  };
 
   return (
-    <div className="relative min-h-screen bg-black overflow-hidden">
-      {/* Radial gradient background */}
-      <div className="absolute inset-0 bg-gradient-radial from-[#1DE3F2]/5 via-transparent to-transparent pointer-events-none" />
+    <div className="min-h-screen bg-black flex flex-col relative overflow-hidden">
 
-      <div className="relative z-10 min-h-screen px-6 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <Link
+      {/* Radial background */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(circle at 50% 0%, rgba(0,255,179,0.06) 0%, transparent 60%)",
+        }}
+      />
+
+      {/* Header */}
+      <div className="bg-[#1A1A1A]/40 backdrop-blur-xl p-6 pb-8 border-b border-[#00FFB3]/20 relative z-10">
+        <div className="flex items-center justify-between">
+          <a
             href="/radar"
-            className="inline-flex items-center gap-2 text-[#C5C5C5] hover:text-[#00FFB3] transition-all duration-300"
+            className="w-10 h-10 rounded-full border border-[#00FFB3]/30 flex items-center justify-center bg-[#101010] hover:scale-110 transition"
           >
-            <ArrowLeft className="w-5 h-5" />
-            <span>Volver</span>
-          </Link>
+            <ArrowLeft className="w-5 h-5 text-white" />
+          </a>
 
-          <Button
-            variant="ghost"
-            onClick={() => setIsEditing(!isEditing)}
-            className="text-[#00FFB3] hover:text-[#1DE3F2] transition-colors"
-          >
-            {isEditing ? "Cancelar" : "Editar"}
-          </Button>
-        </div>
+          <h2 className="text-white text-center flex-1 -ml-10">Mi Perfil</h2>
 
-        <div className="max-w-2xl mx-auto space-y-8">
-          {/* Profile photo */}
-          <div className="flex flex-col items-center gap-4">
-            <div className="relative">
-              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#00FFB3] via-[#1DE3F2] to-[#197387] flex items-center justify-center shadow-lg shadow-[#00FFB3]/50 border-2 border-[#00FFB3]/30">
-                {profile?.photoUrl ? (
-                  <img
-                    src={profile.photoUrl || "/placeholder.svg"}
-                    alt="Profile"
-                    className="w-full h-full rounded-full object-cover"
-                  />
-                ) : (
-                  <span className="text-4xl font-bold text-white">
-                    {user?.firstName?.[0]}
-                    {user?.lastName?.[0]}
-                  </span>
-                )}
-              </div>
-              {isEditing && (
-                <Button 
-                  size="icon" 
-                  className="absolute bottom-0 right-0 rounded-full bg-[#00FFB3] hover:bg-[#1DE3F2] transition-all shadow-lg shadow-[#00FFB3]/30 text-black"
-                >
-                  <Camera className="w-4 h-4" />
-                </Button>
-              )}
-            </div>
-
-            <div className="text-center">
-              <h1 className="text-2xl font-bold text-white">
-                {user?.firstName} {user?.lastName}
-              </h1>
-              <p className="text-[#C5C5C5]">{user?.email}</p>
-            </div>
-          </div>
-
-          {/* Profile form */}
-          <div className="space-y-6 bg-[#0a0e27] backdrop-blur-lg rounded-2xl p-6 border border-[#1DE3F2]/20">
-            <div className="space-y-2">
-              <Label htmlFor="displayName" className="text-white">Nombre visible</Label>
-              <Textarea
-                id="displayName"
-                placeholder="Nombre visible para todos los usuarios en el radar"
-                value={user.displayName|| ""}
-                disabled={!isEditing}
-                className="min-h-24 bg-[#1A1A1A] border border-[#1DE3F2]/30 rounded-2xl text-white placeholder-[#C5C5C5]/40 focus:border-[#00FFB3] focus:outline-none transition-all disabled:opacity-60"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="firstName" className="text-white">Nombre</Label>
-              <Textarea
-                id="firstName"
-                placeholder="Tu nombre"
-                value={user.firstName || ""}
-                disabled={!isEditing}
-                className="min-h-24 bg-[#1A1A1A] border border-[#1DE3F2]/30 rounded-2xl text-white placeholder-[#C5C5C5]/40 focus:border-[#00FFB3] focus:outline-none transition-all disabled:opacity-60"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="lastName" className="text-white">Apellido</Label>
-              <Textarea
-                id="bio"
-                placeholder="Tu apellido"
-                value={user.lastName || ""}
-                disabled={!isEditing}
-                className="min-h-24 bg-[#1A1A1A] border border-[#1DE3F2]/30 rounded-2xl text-white placeholder-[#C5C5C5]/40 focus:border-[#00FFB3] focus:outline-none transition-all disabled:opacity-60"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="bio" className="text-white">Biografía</Label>
-              <Textarea
-                id="bio"
-                placeholder="Contanos sobre vos..."
-                value={profile?.bio || ""}
-                disabled={!isEditing}
-                className="min-h-24 bg-[#1A1A1A] border border-[#1DE3F2]/30 rounded-2xl text-white placeholder-[#C5C5C5]/40 focus:border-[#00FFB3] focus:outline-none transition-all disabled:opacity-60"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="age" className="text-white">Edad</Label>
-                <Input 
-                  id="age" 
-                  type="number" 
-                  placeholder="25" 
-                  value={profile?.age || ""} 
-                  disabled={!isEditing}
-                  className="bg-[#1A1A1A] border border-[#1DE3F2]/30 rounded-2xl text-white placeholder-[#C5C5C5]/40 focus:border-[#00FFB3] focus:outline-none transition-all disabled:opacity-60"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="country" className="text-white">País</Label>
-                <Input 
-                  id="country" 
-                  placeholder="Argentina" 
-                  value={profile?.country || ""} 
-                  disabled={!isEditing}
-                  className="bg-[#1A1A1A] border border-[#1DE3F2]/30 rounded-2xl text-white placeholder-[#C5C5C5]/40 focus:border-[#00FFB3] focus:outline-none transition-all disabled:opacity-60"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="province" className="text-white">Provincia</Label>
-              <Input 
-                id="province" 
-                placeholder="Buenos Aires" 
-                value={profile?.province || ""} 
-                disabled={!isEditing}
-                className="bg-[#1A1A1A] border border-[#1DE3F2]/30 rounded-2xl text-white placeholder-[#C5C5C5]/40 focus:border-[#00FFB3] focus:outline-none transition-all disabled:opacity-60"
-              />
-            </div>
-
-            {isEditing && (
-              <Button 
-                className="w-full h-12 bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-semibold rounded-2xl hover:opacity-90 transition-all shadow-lg shadow-[#00FFB3]/50 active:scale-95"
-              >
-                Guardar cambios
-              </Button>
-            )}
+          <div className="w-10 h-10 rounded-full border border-[#00FFB3]/30 flex items-center justify-center bg-[#101010]">
+            <Settings className="w-5 h-5 text-white" />
           </div>
         </div>
       </div>
+
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto p-6 space-y-6 relative z-10 scrollbar-hide">
+
+        {/* Avatar Block */}
+        <AvatarBlock
+          src={profile?.photoUrl}
+          initials={`${user?.firstName?.[0] || ""}${user?.lastName?.[0] || ""}`}
+        />
+
+        {/* Plan Card */}
+        <PlanCard />
+
+        {/* FORM FIELDS */}
+        <div className="space-y-6 animate-slide-up">
+
+          <ProfileField
+            label="Nombre visible"
+            value={displayName}
+            onChange={setDisplayName}
+          />
+
+          <ProfileField
+            label="Nombre"
+            value={firstName}
+            onChange={setFirstName}
+          />
+
+          <ProfileField
+            label="Apellido"
+            value={lastName}
+            onChange={setLastName}
+          />
+
+          {/* Edad con privacy */}
+          <ProfileField
+            label="Edad"
+            value={String(age)}
+            onChange={setAge}
+            privacy={{
+              visible: showAge,
+              onToggle: () => setShowAge(!showAge),
+            }}
+            type="number"
+          />
+
+          <ProfileField
+            label="País"
+            value={country}
+            onChange={setCountry}
+          />
+
+          {/* Provincia con privacy */}
+          <ProfileField
+            label="Provincia"
+            value={province}
+            onChange={setProvince}
+            privacy={{
+              visible: showLocation,
+              onToggle: () => setShowLocation(!showLocation),
+            }}
+            type="text"
+          />
+
+          {/* BIO */}
+          <ProfileField
+            label="Biografía"
+            value={bio}
+            onChange={setBio}
+            multiline
+          />
+
+        </div>
+
+        {/* Intereses */}
+        <InterestsSelector
+          selected={interests}
+          onToggle={(name) => {
+            setInterests((prev) =>
+              prev.includes(name)
+                ? prev.filter((i) => i !== name)
+                : [...prev, name]
+            );
+          }}
+        />
+
+        {/* Logout */}
+        <div className="pt-4 border-t border-[#197387]/20">
+          <button className="w-full h-12 rounded-full bg-[#0A0E12]/50 border border-[#197387]/30 hover:bg-[#0A0E12]/80 text-[#C5C5C5] hover:text-white transition-all duration-300 flex items-center justify-center gap-2">
+            <LogOut className="w-5 h-5" />
+            Cerrar sesión
+          </button>
+        </div>
+      </div>
+
+      {/* Save Button */}
+      <div className="p-6 bg-[#0F2B33]/80 backdrop-blur-xl border-t border-[#197387]/20">
+        <button
+          disabled={isSaving}
+          onClick={handleSave}
+          className="w-full h-14 rounded-full bg-gradient-to-r from-[#197387] to-[#15657a] text-white hover:shadow-lg transition-all"
+        >
+          {isSaving ? "Guardando..." : "Guardar cambios"}
+        </button>
+      </div>
     </div>
-  )
+  );
 }

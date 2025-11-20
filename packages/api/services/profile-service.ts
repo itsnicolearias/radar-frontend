@@ -1,5 +1,5 @@
 import { axiosClient } from "../axios-client"
-import type { IProfile, IProfileResponse, IDeleteProfileResponse } from "@radar/types"
+import type { IProfile, IProfileResponse, IDeleteProfileResponse, IUser } from "@radar/types"
 
 export const profileService = {
   async getMyProfile(): Promise<IProfileResponse> {
@@ -12,7 +12,7 @@ export const profileService = {
     return response.data
   },
 
-  async updateMyProfile(data: IProfile): Promise<IProfileResponse> {
+  async updateMyProfile(data: any): Promise<IProfileResponse> {
     const response = await axiosClient.patch<IProfileResponse>("/profile", data)
     return response.data
   },

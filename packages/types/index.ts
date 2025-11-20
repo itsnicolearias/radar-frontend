@@ -141,6 +141,8 @@ export interface IProfile {
   age?: number | null
   province?: string
   country?: string
+  showAge?: boolean
+  showLocation?: boolean
 }
 
 export interface IProfileResponse extends IProfile {
