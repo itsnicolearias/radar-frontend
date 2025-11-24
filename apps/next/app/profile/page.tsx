@@ -33,16 +33,20 @@ export default function ProfilePage() {
     setIsSaving(true);
 
     await profileService.updateMyProfile({
-      displayName,
-      firstName,
-      lastName,
-      bio,
-      age,
-      country,
-      province,
-      interests,
-      showAge,
-      showLocation,
+      Profile: {
+        bio,
+        age: Number(age),
+        country,
+        province,
+        interests,
+        showAge,
+        showLocation,
+      },
+      User: {
+        displayName,
+        firstName,
+        lastName,
+      }
     });
 
     setIsSaving(false);

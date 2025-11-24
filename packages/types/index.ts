@@ -120,6 +120,15 @@ export interface IDeleteNotificationResponse {
   message: string
 }
 
+export interface UpdateProfileApi {
+  User: Partial<IUser>
+  Profile?: Partial<IProfile>
+}
+
+export interface UpdateProfileResponse {
+  success: boolean
+  data: Partial<UpdateProfileApi>
+}
 export interface IProfile {
   profileId?: string
   userId?: string
@@ -299,26 +308,6 @@ export interface IDeleteNotificationResponse {
   message: string
 }
 
-export interface IProfile {
-  profileId?: string
-  userId?: string
-  photoUrl: string | null
-  bio: string | null
-  location?: string | null
-  website?: string | null
-  birthDate?: Date | null
-  gender?: string | null
-  pronouns?: string | null
-  height?: number | null
-  zodiac?: string | null
-  education?: string | null
-  work?: string | null
-  interests: string[] | null
-  createdAt?: Date
-  updatedAt?: Date
-  User?: IUser
-  age?: number | null
-}
 
 export interface IProfileResponse extends IProfile {
   profileId: string

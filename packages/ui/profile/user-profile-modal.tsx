@@ -4,14 +4,18 @@ import type React from "react"
 import { motion } from "framer-motion"
 import { X, MapPin, MessageCircle, Heart } from "lucide-react"
 import type { IRadarUser } from "@radar/types"
+import { cn } from "../lib/utils"
 
 interface UserProfileModalProps {
   user: IRadarUser
   onClose: () => void
   onMessage: () => void
+  isUserConnected: () => boolean
 }
 
-export const UserProfileModal: React.FC<UserProfileModalProps> = ({ user, onClose, onMessage }) => {
+export const UserProfileModal: React.FC<UserProfileModalProps> = ({ user, onClose, onMessage, isUserConnected }) => {
+  const connectionMade = isUserConnected()
+
   return (
     <motion.div
       className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center"
@@ -52,7 +56,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ user, onClos
           {/* Name and location */}
           <div>
             <h2 className="text-white font-bold text-2xl">
-              {user.Profile.showAge ? `${user.displayName}, ${user.Profile.age}` : user.displayName}
+              {user.Profile.showAge && user.Profile.age ? `${user.displayName}, ${user.Profile.age}` : user.displayName}
             </h2>
             { user.Profile.showLocation && (
                 <p className="text-[#1DE3F2] flex items-center gap-1 mt-1">
@@ -95,7 +99,13 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ user, onClos
               Enviar mensaje
             </button>
 
-            <button className="w-14 h-14 rounded-full bg-[#1A1A1A] border border-[#FF005C]/30 flex items-center justify-center hover:bg-[#FF005C]/10 transition-colors">
+            <button className={cn(
+              "w-14 h-14 rounded-full border border-[#FF005C]/30 flex items-center justify-center hover:bg-[#FF005C]/10 transition-colors",
+              connectionMade
+              ? "bg-[#FF005C]"
+              : "bg-[#1A1A1A]"
+            )}
+            >
               <Heart className="w-6 h-6 text-[#FF005C]" />
             </button>
           </div>

@@ -8,9 +8,10 @@ interface UserProfileModalNativeProps {
   user: IRadarUser
   onClose: () => void
   onMessage: () => void
+  isUserConnected: () => boolean
 }
 
-export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({ user, onClose, onMessage }) => {
+export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({ user, onClose, onMessage, isUserConnected }) => {
   return (
     <Modal visible transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.overlay}>

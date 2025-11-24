@@ -23,7 +23,7 @@ export default function LoginScreen() {
     try {
       const response = await authService.login({ email, password })
 
-      setAuth(response.data.user, null, response.data.token)
+      setAuth(response.data.user, response.data.user.Profile!, response.data.token)
       router.replace("/radar")
     } catch (error) {
       Alert.alert("Error", "Credenciales inválidas")

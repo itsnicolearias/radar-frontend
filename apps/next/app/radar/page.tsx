@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useRadarStore, useAuthStore, useSocket, useSocketEvent } from "@radar/features"
-import { radarService, signalService } from "@radar/api"
-import type { IEventResponse, IRadarUser, IRadarSignal } from "@radar/types"
+import { connectionService, radarService, signalService } from "@radar/api"
+import type { IEventResponse, IRadarUser, IRadarSignal, IConnectionResponse } from "@radar/types"
 import { BottomNav, GhostButton, InvisibleBadge } from "@radar/ui"
 import { SendSignalModal } from "../../../../packages/ui/modals/send-signal-modal"
 import { SignalDetailModal } from "../../../../packages/ui/signals/signal-detail-modal"
@@ -32,10 +32,12 @@ export default function RadarPage() {
     updateUserLocation,
   } = useRadarStore()
 
+
   const [radius, setRadius] = useState(10000) // default 10km
   const [selectedUser, setSelectedUser] = useState<IRadarUser | null>(null)
   const [selectedEvent, setSelectedEvent] = useState<IEventResponse | null>(null)
   const [selectedSignal, setSelectedSignal] = useState<IRadarSignal | null>(null)
+  const [ connections, setConnections] = useState<IConnectionResponse[]>(null)
   const [isSendSignalModalOpen, setIsSendSignalModalOpen] = useState(false)
   const [isAnimatingSignal, setIsAnimatingSignal] = useState(false)
   const socket = useSocket()
@@ -52,6 +54,9 @@ export default function RadarPage() {
         setNearbyUsers(users)
         setNearbyEvents(events)
         setNearbySignals(signals)
+
+        const friends = await connectionService.getAcceptedConnections()
+        setConnections(friends)
       } catch (error) {
         console.error("[v0] Error fetching nearby data:", error)
       }
@@ -75,6 +80,11 @@ export default function RadarPage() {
       console.error("[v0] Error sending signal:", error)
       setIsAnimatingSignal(false)
     }
+  }
+
+  const isUserConnected = (userId: string): boolean => {
+    const isConnected = connections.some((c) => c.receiverId === userId || c.senderId === userId)
+    return isConnected;
   }
 
   useSocketEvent<{ userId: string; latitude: number; longitude: number }>(
@@ -322,6 +332,7 @@ export default function RadarPage() {
           user={selectedUser}
           onClose={() => setSelectedUser(null)}
           onMessage={() => router.push(`/chats/${selectedUser.userId}`)}
+          isUserConnected={() => isUserConnected(selectedUser.userId)}
         />
       )}
 

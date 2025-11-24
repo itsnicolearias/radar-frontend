@@ -109,7 +109,7 @@ function ChatConversationPage() {
 
         <View style={styles.headerInfo}>
           <View style={styles.headerAvatar}>
-            <Text style={styles.headerAvatarText}>{name[0]}</Text>
+            <Text style={styles.headerAvatarText}>{name![0]}</Text>
           </View>
           <View>
             <Text style={styles.headerTitle}>{name}</Text>

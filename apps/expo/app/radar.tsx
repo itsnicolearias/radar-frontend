@@ -7,8 +7,8 @@ import { useRouter } from "expo-router"
 import { MotiView } from "moti"
 import { Radio } from "lucide-react-native"
 import { useRadarStore, useAuthStore, useSocketEvent, useChatStore } from "@radar/features"
-import { radarService, signalService } from "@radar/api"
-import type { IRadarUser, IRadarSignal, IEventResponse } from "@radar/types"
+import { connectionService, radarService, signalService } from "@radar/api"
+import type { IRadarUser, IRadarSignal, IEventResponse, IConnectionResponse } from "@radar/types"
 import { BottomNavNative } from "../../../packages/ui/navigation/bottom-nav.native"
 import { SendSignalModalNative } from "../../../packages/ui/signals/send-signal-modal.native"
 import { SignalDetailModalNative } from "../../../packages/ui/signals/signal-detail-modal.native"
@@ -45,6 +45,7 @@ export default function RadarScreen() {
   const [selectedUser, setSelectedUser] = useState<IRadarUser | null>(null)
   const [selectedEvent, setSelectedEvent] = useState<IEventResponse | null>(null)
   const [isScanning, setIsScanning] = useState(false)
+  const [ connections, setConnections] = useState<IConnectionResponse[]>([])
 
   useEffect(() => {
     const fetchNearbyData = async () => {
@@ -59,6 +60,9 @@ export default function RadarScreen() {
         setNearbyUsers(users)
         setNearbySignals(signals)
         setNearbyEvents(events)
+
+        const friends = await connectionService.getAcceptedConnections()
+        setConnections(friends)
       } catch (error) {
         console.error("[v0] Error fetching nearby data:", error)
       }
@@ -142,6 +146,12 @@ export default function RadarScreen() {
     setSelectedUser(null)
     router.push(`/chats/${userId}`)
   }
+
+  const isUserConnected = (userId: string): boolean => {
+  const isConnected = connections.some((c) => c.receiverId === userId || c.senderId === userId)
+  return isConnected;
+  }
+
 
   return (
     <View style={styles.container}>
@@ -288,6 +298,7 @@ export default function RadarScreen() {
           user={selectedUser}
           onClose={() => setSelectedUser(null)}
           onMessage={() => handleMessageUser(selectedUser.userId)}
+          isUserConnected={() => isUserConnected(selectedUser.userId)}         
         />
       )}
 
