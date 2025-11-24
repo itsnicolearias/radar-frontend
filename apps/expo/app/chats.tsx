@@ -8,6 +8,7 @@ import { MotiView } from "moti"
 import { useChatStore, useConnectionStore, useSocketEvent, useProfileViewsStore, useAuthStore } from "@radar/features"
 import { messageService, connectionService, profileViewService } from "@radar/api"
 import type { IMessageResponse, IConnectionResponse } from "@radar/types"
+import { BottomNavNative } from "@radar/ui/navigation/bottom-nav.native"
 
 export default function ChatsScreen() {
   const router = useRouter()
@@ -260,11 +261,11 @@ export default function ChatsScreen() {
                     >
                       <View style={styles.profileViewAvatarContainer}>
                         <View style={styles.profileViewAvatar}>
-                          <Text style={styles.profileViewAvatarText}>{view.Viewer.displayName[0]}</Text>
+                          <Text style={styles.profileViewAvatarText}>{view.Viewer.displayName![0]}</Text>
                         </View>
                         <View style={styles.onlineIndicator} />
                       </View>
-                      <Text style={styles.profileViewName}>{view.Viewer.displayName.split(" ")[0]}</Text>
+                      <Text style={styles.profileViewName}>{view.Viewer.displayName![0]}</Text>
                       <Text style={styles.profileViewTime}>Hace 15 min</Text>
                     </TouchableOpacity>
                   </MotiView>
@@ -329,24 +330,14 @@ export default function ChatsScreen() {
         )}
       </ScrollView>
 
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push("/radar")}>
-          <Text style={styles.navIcon}>📡</Text>
-          <Text style={styles.navLabel}>Radar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={styles.navIcon}>💬</Text>
-          <Text style={[styles.navLabel, styles.navLabelActive]}>Chats</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push("/events")}>
-          <Text style={styles.navIcon}>📅</Text>
-          <Text style={styles.navLabel}>Eventos</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push("/profile")}>
-          <Text style={styles.navIcon}>👤</Text>
-          <Text style={styles.navLabel}>Perfil</Text>
-        </TouchableOpacity>
-      </View>
+     <BottomNavNative
+             activeTab="chats"
+             onTabChange={(tab) => {
+               if (tab === "events") router.push("/events")
+               else if (tab === "radar") router.push("/radar")
+               else if (tab === "profile") router.push("/profile")
+             }}
+           />
     </View>
   )
 }

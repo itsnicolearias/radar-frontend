@@ -8,9 +8,12 @@ import ProfileField from "@radar/ui/components/profile-field";
 import InterestsSelector from "@radar/ui/components/interest-selector";
 import AvatarBlock from "@radar/ui/components/avatar-block";
 import { profileService } from "@radar/api";
+import { BottomNav } from "@radar/ui";
+import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
   const { user, profile } = useAuthStore();
+  const router = useRouter()
 
   const [displayName, setDisplayName] = useState(user?.displayName || "");
   const [firstName, setFirstName] = useState(user?.firstName || "");
@@ -174,11 +177,12 @@ export default function ProfilePage() {
         <button
           disabled={isSaving}
           onClick={handleSave}
-          className="w-full h-14 rounded-full bg-gradient-to-r from-[#197387] to-[#15657a] text-white hover:shadow-lg transition-all"
+          className="w-full h-14 rounded-full bg-linear-to-r from-[#197387] to-[#15657a] text-white hover:shadow-lg transition-all"
         >
           {isSaving ? "Guardando..." : "Guardar cambios"}
         </button>
       </div>
+      <BottomNav activeTab="profile" onTabChange={(tab) => router.push(`/${tab === "profile" ? "profile" : tab}`)} />
     </div>
   );
 }

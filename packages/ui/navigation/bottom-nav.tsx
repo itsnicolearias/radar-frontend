@@ -26,7 +26,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange, cl
         className,
       )}
     >
-      <div className="flex items-center justify-around max-w-md mx-auto">
+      <div className="flex items-center justify-around ">
         {tabs.map((tab) => {
           const Icon = tab.icon
           const isActive = activeTab === tab.id

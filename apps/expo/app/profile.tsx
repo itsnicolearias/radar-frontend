@@ -3,9 +3,12 @@ import { View, Text, ScrollView, TextInput, TouchableOpacity, StyleSheet, Image 
 import { ArrowLeft, Settings, Eye, EyeOff, LogOut, Crown, Zap, Check, MapPin, Radio } from "lucide-react-native";
 import { useAuthStore } from "@radar/features";
 import { profileService } from "@radar/api";
+import { BottomNavNative } from "@radar/ui/navigation/bottom-nav.native";
+import { useRouter } from "expo-router";
 
 export default function ProfileScreen() {
   const { user, profile } = useAuthStore();
+  const router = useRouter()
 
   const [displayName, setDisplayName] = useState(user?.displayName || "");
   const [firstName, setFirstName] = useState(user?.firstName || "");
@@ -196,6 +199,14 @@ export default function ProfileScreen() {
           </Text>
         </TouchableOpacity>
       </View>
+      <BottomNavNative
+        activeTab="profile"
+        onTabChange={(tab) => {
+          if (tab === "events") router.push("/events")
+          else if (tab === "radar") router.push("/radar")
+          else if (tab === "chats") router.push("/chats")
+        }}
+      />
     </View>
   );
 }
@@ -222,6 +233,7 @@ function ProfileField({
   };
 }) {
   return (
+    
     <View style={{ marginBottom: 20 }}>
       <View style={styles.fieldHeader}>
         <Text style={styles.fieldLabel}>{label}</Text>
@@ -249,6 +261,8 @@ function ProfileField({
         style={[styles.input, multiline && styles.inputMultiline]}
         placeholderTextColor="#7f7f7f"
       />
+
+      
     </View>
   );
 }

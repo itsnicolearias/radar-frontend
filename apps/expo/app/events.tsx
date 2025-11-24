@@ -5,6 +5,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from
 import { useRouter } from "expo-router"
 import { useEventsStore, useAuthStore } from "@radar/features"
 import { eventService } from "@radar/api"
+import { BottomNavNative } from "@radar/ui/navigation/bottom-nav.native"
 
 const { width } = Dimensions.get("window")
 const CATEGORIES = ["Todos", "Música", "Gastronomía", "Arte", "Deportes", "Social"]
@@ -143,24 +144,14 @@ export default function EventsScreen() {
       </ScrollView>
 
       {/* Bottom Nav */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push("/radar")}>
-          <View style={styles.navIcon} />
-          <Text style={styles.navLabel}>Radar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push("/chats")}>
-          <View style={styles.navIcon} />
-          <Text style={styles.navLabel}>Chats</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <View style={[styles.navIcon, styles.navIconActive]} />
-          <Text style={[styles.navLabel, styles.navLabelActive]}>Eventos</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push("/profile")}>
-          <View style={styles.navIcon} />
-          <Text style={styles.navLabel}>Perfil</Text>
-        </TouchableOpacity>
-      </View>
+      <BottomNavNative
+              activeTab="events"
+              onTabChange={(tab) => {
+                if (tab === "chats") router.push("/chats")
+                else if (tab === "events") router.push("/events")
+                else if (tab === "profile") router.push("/profile")
+              }}
+            />
     </View>
   )
 }

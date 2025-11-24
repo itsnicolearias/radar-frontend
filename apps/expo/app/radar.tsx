@@ -357,8 +357,8 @@ const styles = StyleSheet.create({
   },
   radiusButton: {
     flex: 1,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingVertical: 3,
+    borderRadius: 10,
     backgroundColor: "#1A1A1A",
     borderWidth: 1,
     borderColor: "rgba(0, 255, 179, 0.2)",

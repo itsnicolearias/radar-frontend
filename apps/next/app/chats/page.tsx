@@ -7,6 +7,7 @@ import { motion } from "framer-motion"
 import { useChatStore, useConnectionStore, useSocketEvent, useProfileViewsStore, useAuthStore } from "@radar/features"
 import { messageService, connectionService, profileViewService } from "@radar/api"
 import type { IConnectionResponse, IMessageResponse } from "@radar/types"
+import { BottomNav } from "@radar/ui"
 
 export default function ChatsPage() {
   const router = useRouter()
@@ -117,7 +118,7 @@ export default function ChatsPage() {
           onClick={() => setActiveTab("chats")}
           className={`flex-1 py-3 rounded-full transition-all duration-300 flex items-center justify-center gap-2 relative ${
             activeTab === "chats"
-              ? "bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black shadow-lg"
+              ? "bg-linear-to-r from-[#00FFB3] to-[#1DE3F2] text-black shadow-lg"
               : "text-white/70"
           }`}
         >
@@ -129,7 +130,7 @@ export default function ChatsPage() {
           onClick={() => setActiveTab("solicitudes")}
           className={`flex-1 py-3 rounded-full transition-all duration-300 flex items-center justify-center gap-2 relative ${
             activeTab === "solicitudes"
-              ? "bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black shadow-lg"
+              ? "bg-linear-to-r from-[#00FFB3] to-[#1DE3F2] text-black shadow-lg"
               : "text-white/70"
           }`}
         >
@@ -146,7 +147,7 @@ export default function ChatsPage() {
           onClick={() => setActiveTab("conectados")}
           className={`flex-1 py-3 rounded-full transition-all duration-300 flex items-center justify-center gap-2 ${
             activeTab === "conectados"
-              ? "bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black shadow-lg"
+              ? "bg-linear-to-r from-[#00FFB3] to-[#1DE3F2] text-black shadow-lg"
               : "text-white/70"
           }`}
         >
@@ -176,7 +177,7 @@ export default function ChatsPage() {
                 >
                   <div className="flex items-center gap-3">
                     {/* Avatar */}
-                    <div className="relative flex-shrink-0">
+                    <div className="relative shrink-0">
                       <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center border-2 border-[#00FFB3]/50">
                         <span className="text-[#1A1A1A] font-semibold text-base">
                           {chat.user.displayName?.[0] || "U"}
@@ -228,7 +229,7 @@ export default function ChatsPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="rounded-2xl p-5 bg-gradient-to-br from-[#00FFB3]/10 to-[#1DE3F2]/5 border border-[#00FFB3]/30"
+                  className="rounded-2xl p-5 bg-linear-to-br from-[#00FFB3]/10 to-[#1DE3F2]/5 border border-[#00FFB3]/30"
                 >
                   <div className="flex items-start gap-4">
                     {/* Avatar */}
@@ -253,7 +254,7 @@ export default function ChatsPage() {
                       <div className="flex gap-2 mt-4">
                         <button
                           onClick={() => handleAcceptConnection(request.connectionId)}
-                          className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-medium shadow-lg shadow-[#00FFB3]/30 hover:scale-105 transition-transform"
+                          className="flex-1 h-10 rounded-xl bg-linear-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-medium shadow-lg shadow-[#00FFB3]/30 hover:scale-105 transition-transform"
                         >
                           Aceptar
                         </button>
@@ -291,7 +292,7 @@ export default function ChatsPage() {
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: index * 0.1 }}
-                    className="flex-shrink-0 text-center cursor-pointer"
+                    className="shrink-0 text-center cursor-pointer"
                     onClick={() => router.push(`/profile/${view.viewerId}`)}
                   >
                     <div className="relative">
@@ -310,7 +311,7 @@ export default function ChatsPage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] cursor-pointer hover:scale-[1.02] transition-transform"
+              className="mb-6 p-4 rounded-2xl bg-linear-to-r from-[#00FFB3] to-[#1DE3F2] cursor-pointer hover:scale-[1.02] transition-transform"
             >
               <div className="flex items-center gap-2">
                 <Crown className="w-5 h-5 text-black" />
@@ -353,7 +354,7 @@ export default function ChatsPage() {
                             connection.senderId === user?.userId ? connection.receiverId : connection.senderId,
                           )
                         }
-                        className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-medium shadow-lg shadow-[#00FFB3]/30 hover:scale-105 transition-transform flex items-center gap-2"
+                        className="px-4 py-2 rounded-xl bg-linear-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-medium shadow-lg shadow-[#00FFB3]/30 hover:scale-105 transition-transform flex items-center gap-2"
                       >
                         <MessageCircle className="w-4 h-4" />
                         <span>Chat</span>
@@ -367,27 +368,7 @@ export default function ChatsPage() {
         )}
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 bg-[#1A1A1A]/90 backdrop-blur-lg rounded-t-3xl px-6 py-4 shadow-lg border-t border-[#00FFB3]/20 z-20">
-        <div className="flex items-center justify-around max-w-md mx-auto">
-          {[
-            { id: "radar", label: "Radar", icon: "📡" },
-            { id: "chats", label: "Chats", icon: "💬" },
-            { id: "events", label: "Eventos", icon: "📅" },
-            { id: "profile", label: "Perfil", icon: "👤" },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => handleTabChange(tab.id as any)}
-              className="flex flex-col items-center gap-1 p-2 transition-colors"
-            >
-              <span className="text-2xl">{tab.icon}</span>
-              <span className={`text-xs font-medium ${tab.id === "chats" ? "text-[#00FFB3]" : "text-[#C5C5C5]"}`}>
-                {tab.label}
-              </span>
-            </button>
-          ))}
-        </div>
-      </div>
+      <BottomNav activeTab="chats" onTabChange={(tab) => router.push(`/${tab === "chats" ? "chats" : tab}`)} />
     </div>
   )
 }
