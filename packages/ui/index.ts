@@ -14,6 +14,8 @@ export * from "./chat/tabs"
 
 export * from "./profile/profile-card"
 export * from "./profile/interest-pill"
+export * from "./profile/user-profile-modal"
+//export * from "./profile/user-profile-modal.native"
 
 export * from "./events/event-card"
 export * from "./events/event-category-filter"

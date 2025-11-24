@@ -52,20 +52,23 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ user, onClos
           {/* Name and location */}
           <div>
             <h2 className="text-white font-bold text-2xl">
-              {user.displayName || `${user.firstName} ${user.lastName}`}, {user.age || 26}
+              {user.Profile.showAge ? `${user.displayName}, ${user.Profile.age}` : user.displayName}
             </h2>
-            <p className="text-[#1DE3F2] flex items-center gap-1 mt-1">
-              <MapPin className="w-4 h-4" />
-              {user.city || "Buenos Aires"}, {user.neighborhood || "Palermo"}
-            </p>
+            { user.Profile.showLocation && (
+                <p className="text-[#1DE3F2] flex items-center gap-1 mt-1">
+                <MapPin className="w-4 h-4" />
+                {user.Profile.province || "Buenos Aires"}
+                </p>
+            )}
+            
           </div>
 
           {/* Interests */}
-          {user.interests && user.interests.length > 0 && (
+          {user.Profile.interests && user.Profile.interests.length > 0 && (
             <div>
               <h3 className="text-white font-semibold mb-3">Intereses</h3>
               <div className="flex flex-wrap gap-2">
-                {user.interests.map((interest) => (
+                {user.Profile.interests.map((interest) => (
                   <span key={interest} className="px-4 py-2 bg-white rounded-full text-black text-sm font-medium">
                     {interest}
                   </span>
@@ -75,10 +78,10 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ user, onClos
           )}
 
           {/* Bio */}
-          {user.bio && (
+          {user.Profile.bio && (
             <div>
               <h3 className="text-white font-semibold mb-2">Sobre mí</h3>
-              <p className="text-[#C5C5C5] leading-relaxed">{user.bio}</p>
+              <p className="text-[#C5C5C5] leading-relaxed">{user.Profile.bio}</p>
             </div>
           )}
 

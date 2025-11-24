@@ -38,32 +38,42 @@ export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({ 
               </View>
 
               <Text style={styles.profileName}>
-                {user.displayName}, {user.age || "??"}
+                {user.Profile.showAge ? `${user.displayName}, ${user.Profile.age}` : user.displayName}
               </Text>
 
-              <View style={styles.locationContainer}>
+            { user.Profile.showLocation && (
+            <View style={styles.locationContainer}>
                 <MapPin color="#8B8B8B" size={16} />
-                <Text style={styles.locationText}>Buenos Aires, Palermo</Text>
+                <Text style={styles.locationText}>{user.Profile.province || "Buenos Aires"}</Text>
               </View>
+            )}
+            
             </View>
+              
 
-            <View style={styles.section}>
+            {user.Profile.interests && user.Profile.interests.length > 0 && (
+                <View style={styles.section}>
               <Text style={styles.sectionTitle}>Intereses</Text>
               <View style={styles.interestsGrid}>
-                {["Música", "Café", "Arte", "Running", "Fotografía", "Viajes"].map((interest, index) => (
+                {user.Profile.interests.map((interest, index) => (
                   <View key={index} style={styles.interestChip}>
                     <Text style={styles.interestText}>{interest}</Text>
                   </View>
                 ))}
               </View>
             </View>
+            )}
+            
 
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Sobre mí</Text>
-              <Text style={styles.aboutText}>
-                Me encanta explorar cafés nuevos, descubrir música indie y correr por los parques de la ciudad.
-              </Text>
-            </View>
+            {user.Profile.bio && (
+                <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Sobre mí</Text>
+                <Text style={styles.aboutText}>
+                    {user.Profile.bio}
+                </Text>
+                </View>
+            )}
+            
 
             <TouchableOpacity style={styles.messageButton} onPress={onMessage}>
               <LinearGradient

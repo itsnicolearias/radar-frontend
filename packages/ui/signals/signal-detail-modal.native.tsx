@@ -35,13 +35,13 @@ export const SignalDetailModalNative: React.FC<SignalDetailModalNativeProps> = (
           <View style={styles.userInfo}>
             <View style={styles.avatarContainer}>
               <View style={styles.avatar}>
-                <Text style={styles.avatarText}>{signal.Sender?.firstName?.[0] || "?"}</Text>
+                <Text style={styles.avatarText}>{signal.Sender?.displayName?.[0]}</Text>
               </View>
               <View style={styles.onlineIndicator} />
             </View>
 
             <View style={styles.userDetails}>
-              <Text style={styles.userName}>{signal.Sender?.firstName}</Text>
+              <Text style={styles.userName}>{signal.Sender?.displayName}</Text>
               <Text style={styles.distance}>{Math.round(signal.distance)}m de distancia</Text>
             </View>
 
@@ -52,8 +52,7 @@ export const SignalDetailModalNative: React.FC<SignalDetailModalNativeProps> = (
 
           <View style={styles.statusContainer}>
             <View style={styles.statusBadge}>
-              <Text style={styles.statusIcon}>🎵</Text>
-              <Text style={styles.statusText}>Buscando grupo</Text>
+              <Text style={styles.statusText}>{signal.note}</Text>
             </View>
             <Text style={styles.timeAgo}>{getTimeAgo()}</Text>
           </View>

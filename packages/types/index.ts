@@ -171,26 +171,6 @@ export interface IProfileViewResponse {
   }
 }
 
-export interface IRadarUser {
-  userId: string
-  firstName: string
-  lastName: string
-  email: string
-  displayName: string | null
-  birthDate: Date | null
-  isVerified: boolean
-  lastLatitude: number | null
-  lastLongitude: number | null
-  lastSeenAt: Date | null
-  distance: number
-  Profile: {
-    photoUrl: string | null
-    bio: string | null
-    age: number | null
-    interests: string[] | null
-    province?: string
-  }
-}
 
 export interface IRadarSignal {
   signalId: string
@@ -384,6 +364,8 @@ export interface IRadarUser {
     age: number | null
     interests: string[] | null
     province?: string
+    showAge: boolean
+    showLocation: boolean
   }
 }
 

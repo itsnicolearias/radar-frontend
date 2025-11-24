@@ -150,11 +150,8 @@ export default function RadarPage() {
           <h1 className="text-white font-bold text-xl absolute left-1/2 -translate-x-1/2">RADAR</h1>
           <div className="flex items-center gap-3">
             <GhostButton onClick={toggleVisibility} isActive={!isVisible} />
-            <button className="px-4 py-1.5 bg-[#1A1A1A] border border-[#FF005C]/30 rounded-full text-[#FF005C] text-sm flex items-center gap-1.5">
-              <Radio className="w-3 h-3" />
-              Señales: {nearbySignals.length}
-            </button>
           </div>
+
         </div>
 
         {/* Radius filter */}
@@ -173,6 +170,7 @@ export default function RadarPage() {
             </button>
           ))}
         </div>
+
       </header>
 
       <AnimatePresence>{!isVisible && <InvisibleBadge />}</AnimatePresence>
@@ -250,6 +248,8 @@ export default function RadarPage() {
               nearbyUsers &&
               nearbyUsers.map((nearbyUser, index) => {
                 const hasSignal = nearbySignals.some((s) => s.senderId === nearbyUser.userId)
+                const findSignal = nearbySignals.findLast((s) => s.senderId === nearbyUser.userId)
+
                 const position = getMarkerPosition(index, nearbyUsers.length, nearbyUser.distance, "user")
                 return (
                   <UserMarker
@@ -259,6 +259,7 @@ export default function RadarPage() {
                     hasSignal={hasSignal}
                     onClick={() => handleUserClick(nearbyUser)}
                     index={index}
+                    onSelectSignal={() => setSelectedSignal(findSignal)}
                   />
                 )
               })}

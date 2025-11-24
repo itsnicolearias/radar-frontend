@@ -9,9 +9,10 @@ interface UserMarkerProps {
   hasSignal: boolean
   onPress: () => void
   index: number
+  onSelectSignal: () =>  void
 }
 
-export const UserMarkerNative: React.FC<UserMarkerProps> = ({ user, position, hasSignal, onPress, index }) => {
+export const UserMarkerNative: React.FC<UserMarkerProps> = ({ user, position, hasSignal, onPress, index, onSelectSignal }) => {
   return (
     <MotiView
       from={{ opacity: 0, scale: 0 }}
@@ -30,13 +31,13 @@ export const UserMarkerNative: React.FC<UserMarkerProps> = ({ user, position, ha
           }}
           style={styles.signalIndicator}
         >
-          <Text style={styles.signalEmoji}>🎵</Text>
+          <Text style={styles.signalEmoji} onPress={onSelectSignal}>📝</Text>
         </MotiView>
       )}
 
       <TouchableOpacity style={styles.userCircle} onPress={onPress}>
         <Text style={styles.userInitials}>
-          {user.displayName?.[0]?.toUpperCase() || user.firstName?.[0]?.toUpperCase()}
+          {user.displayName?.[0]?.toUpperCase()}
         </Text>
       </TouchableOpacity>
     </MotiView>

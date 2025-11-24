@@ -32,11 +32,11 @@ export default function RadarScreen() {
     nearbySignals,
     currentLocation,
     setNearbyUsers,
-    setNearbyEvents,
     setNearbySignals,
     setCurrentLocation,
     addNearbySignal,
     updateUserLocation,
+    setNearbyEvents,
   } = useRadarStore()
 
   const [radiusKm, setRadiusKm] = useState(10)
@@ -48,7 +48,7 @@ export default function RadarScreen() {
 
   useEffect(() => {
     const fetchNearbyData = async () => {
-      if (!currentLocation || !isVisible) return
+      if (!currentLocation) return
 
       try {
         const { users, events, signals } = await radarService.getNearby(
@@ -57,8 +57,8 @@ export default function RadarScreen() {
           radiusKm * 1000,
         )
         setNearbyUsers(users)
-        setNearbyEvents(events)
         setNearbySignals(signals)
+        setNearbyEvents(events)
       } catch (error) {
         console.error("[v0] Error fetching nearby data:", error)
       }
@@ -76,7 +76,7 @@ export default function RadarScreen() {
   const handleSendSignal = async (note?: string, quickReply?: string, availableToChat?: boolean, inPark?: boolean) => {
     try {
       setIsScanning(true)
-      const newSignal = await signalService.sendSignal(note, quickReply, availableToChat, inPark)
+      const newSignal = await signalService.sendSignal(note)
       addNearbySignal(newSignal)
       setTimeout(() => setIsScanning(false), 2000)
     } catch (error) {
@@ -118,8 +118,10 @@ export default function RadarScreen() {
     return { x, y }
   }
 
-  const handleSignalClick = (signal: IRadarSignal) => {
-    setSelectedSignal(signal)
+  const handleSignalClick = (signal: IRadarSignal | undefined) => {
+    if (signal){
+      setSelectedSignal(signal)
+    } 
   }
 
   const handleRespond = (signal: IRadarSignal) => {
@@ -150,10 +152,6 @@ export default function RadarScreen() {
         <Text style={styles.title}>RADAR</Text>
         <View style={styles.headerRight}>
           <GhostButton onPress={toggleVisibility} isActive={!isVisible} />
-          <View style={styles.signalsBadge}>
-            <Radio color="#FF005C" size={12} />
-            <Text style={styles.signalsBadgeText}>{nearbySignals.length}</Text>
-          </View>
         </View>
       </View>
 
@@ -216,6 +214,7 @@ export default function RadarScreen() {
         {isVisible &&
           nearbyUsers.map((nearbyUser, index) => {
             const hasSignal = nearbySignals.some((s) => s.senderId === nearbyUser.userId)
+            const findSignal = nearbySignals.findLast((s) => s.senderId === nearbyUser.userId)
             const position = getMarkerPosition(index, nearbyUsers.length, nearbyUser.distance, "user")
             return (
               <UserMarkerNative
@@ -225,6 +224,7 @@ export default function RadarScreen() {
                 hasSignal={hasSignal}
                 onPress={() => setSelectedUser(nearbyUser)}
                 index={index}
+                onSelectSignal={() => setSelectedSignal(findSignal!)}
               />
             )
           })}
@@ -439,3 +439,4 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 })
+

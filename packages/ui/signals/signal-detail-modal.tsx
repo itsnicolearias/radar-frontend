@@ -47,7 +47,7 @@ export const SignalDetailModal: React.FC<SignalDetailModalProps> = ({ signal, on
         {/* Signal message */}
         <div className="bg-[#1A1A1A] rounded-2xl p-4 mb-2 border border-[#FF005C]/30">
           <p className="text-[#FF005C] font-semibold text-center flex items-center justify-center gap-2">
-            🔥 {signal.note || "Buscando grupo"} 🔥
+            {signal.note} 
           </p>
         </div>
         <p className="text-[#C5C5C5] text-xs text-center mb-6">Hace {timeAgo} min</p>

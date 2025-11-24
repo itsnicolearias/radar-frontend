@@ -11,9 +11,10 @@ interface UserMarkerProps {
   hasSignal: boolean
   onClick: () => void
   index: number
+  onSelectSignal: () => void
 }
 
-export const UserMarker: React.FC<UserMarkerProps> = ({ user, position, hasSignal, onClick, index }) => {
+export const UserMarker: React.FC<UserMarkerProps> = ({ user, position, hasSignal, onClick, index, onSelectSignal }) => {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0 }}
@@ -35,8 +36,9 @@ export const UserMarker: React.FC<UserMarkerProps> = ({ user, position, hasSigna
             y: [0, -4, 0],
           }}
           transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
+          onClick={onSelectSignal}
         >
-          🎵
+          📝
         </motion.div>
       )}
 
@@ -50,7 +52,7 @@ export const UserMarker: React.FC<UserMarkerProps> = ({ user, position, hasSigna
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
       >
-        {user.displayName?.[0]?.toUpperCase() || user.firstName?.[0]?.toUpperCase()}
+        {user.displayName?.[0]?.toUpperCase()}
       </motion.button>
     </motion.div>
   )
