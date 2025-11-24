@@ -56,7 +56,7 @@ export const SignalDetailModal: React.FC<SignalDetailModalProps> = ({ signal, on
         <div className="space-y-3">
           <button
             onClick={() => onRespond(signal)}
-            className="w-full h-12 rounded-full bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-semibold hover:shadow-lg transition-all duration-300 shadow-[#00FFB3]/30 flex items-center justify-center gap-2"
+            className="w-full h-12 rounded-full bg-linear-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-semibold hover:shadow-lg transition-all duration-300 shadow-[#00FFB3]/30 flex items-center justify-center gap-2"
           >
             <MessageCircle className="w-5 h-5" />
             Responder señal

@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingHorizontal: 12,
     paddingVertical: 6,
-    backgroundColor: "rgba(255, 0, 92, 0.2)",
+    backgroundColor: "#1A1A1A",
     borderRadius: 16,
     borderWidth: 1,
     borderColor: "rgba(255, 0, 92, 0.4)",
@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   statusText: {
-    color: "#FF005C",
+    color: "#f8f5f5",
     fontSize: 12,
     fontWeight: "600",
   },

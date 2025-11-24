@@ -83,7 +83,7 @@ export const EventCard: React.FC<EventCardProps> = ({
 
       {/* Image */}
       <div className="p-4">
-        <div className="w-full aspect-video bg-gradient-to-br from-[#00FFB3]/20 to-[#1DE3F2]/20 rounded-xl flex items-center justify-center overflow-hidden border border-[#1DE3F2]/20">
+        <div className="w-full aspect-video bg-linear-to-br from-[#00FFB3]/20 to-[#1DE3F2]/20 rounded-xl flex items-center justify-center overflow-hidden border border-[#1DE3F2]/20">
           {photoUrl ? (
             <img src={photoUrl || "/placeholder.svg"} alt={title} className="w-full h-full object-cover" />
           ) : (

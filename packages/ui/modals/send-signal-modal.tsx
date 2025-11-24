@@ -70,7 +70,7 @@ export const SendSignalModal: React.FC<SendSignalModalProps> = ({ onClose, onSen
           <button
             onClick={handleSend}
             disabled={!note.trim()}
-            className="w-full h-14 rounded-full bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-semibold hover:shadow-lg transition-all duration-300 shadow-[#00FFB3]/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full h-14 rounded-full bg-linear-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-semibold hover:shadow-lg transition-all duration-300 shadow-[#00FFB3]/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             <Radio className="w-5 h-5" />
             Enviar señal (1/día)

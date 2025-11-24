@@ -99,8 +99,9 @@ export default function RadarPage() {
     setSelectedEvent(event)
   }
 
-  const handleSignalClick = (signal: IRadarSignal) => {
-    setSelectedSignal(signal)
+  const handleSignalClick = (senderId: string) => {
+    const findUser = nearbyUsers.find((u) => u.userId === senderId )
+    setSelectedUser(findUser)
   }
 
   const handleRespond = (signal: IRadarSignal) => {
@@ -162,7 +163,7 @@ export default function RadarPage() {
               onClick={() => setRadius(r)}
               className={`flex-1 py-2 rounded-full text-sm font-medium transition-all ${
                 radius === r
-                  ? "bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black"
+                  ? "bg-linear-to-r from-[#00FFB3] to-[#1DE3F2] text-black"
                   : "bg-[#1A1A1A] text-[#C5C5C5] border border-[#00FFB3]/20"
               }`}
             >
@@ -295,7 +296,7 @@ export default function RadarPage() {
           }}
           transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-[#00FFB3] to-[#1DE3F2]" />
+          <div className="absolute inset-0 bg-linear-to-br from-[#00FFB3] to-[#1DE3F2]" />
           <Radio className="w-7 h-7 text-black relative z-10" />
         </motion.button>
       </div>
@@ -312,7 +313,7 @@ export default function RadarPage() {
           signal={selectedSignal}
           onClose={() => setSelectedSignal(null)}
           onRespond={() => handleRespond(selectedSignal)}
-          onViewProfile={() => handleViewProfile(selectedSignal.senderId)}
+          onViewProfile={() => handleSignalClick(selectedSignal.senderId)}
         />
       )}
 

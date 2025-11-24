@@ -28,7 +28,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ user, onClos
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header with gradient background */}
-        <div className="relative bg-gradient-to-b from-[#197387] to-[#0F2B33] p-8 pb-16">
+        <div className="relative bg-linear-to-b from-[#197387] to-[#0F2B33] p-8 pb-16">
           <button
             onClick={onClose}
             className="absolute top-4 left-4 w-10 h-10 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center"
@@ -89,7 +89,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ user, onClos
           <div className="flex gap-3 pt-4">
             <button
               onClick={onMessage}
-              className="flex-1 h-14 rounded-full bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-semibold hover:shadow-lg transition-all duration-300 shadow-[#00FFB3]/30 flex items-center justify-center gap-2"
+              className="flex-1 h-14 rounded-full bg-linear-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-semibold hover:shadow-lg transition-all duration-300 shadow-[#00FFB3]/30 flex items-center justify-center gap-2"
             >
               <MessageCircle className="w-5 h-5" />
               Enviar mensaje

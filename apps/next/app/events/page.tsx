@@ -60,7 +60,7 @@ export default function EventsPage() {
       <div className="absolute inset-0 bg-gradient-radial from-[#00FFB3]/5 via-transparent to-transparent pointer-events-none" />
 
       {/* Header */}
-      <header className="relative z-10 bg-black px-6 py-4 pt-12 sticky top-0 z-10 border-b border-[#00FFB3]/10">
+      <header className="relative z-10 bg-black px-6 py-4 pt-12 top-0 border-b border-[#00FFB3]/10">
         <div className="flex items-center justify-between mb-4">
           {/* Updated header styling */}
           <h1 className="text-2xl font-bold text-white">Eventos Cercanos</h1>
