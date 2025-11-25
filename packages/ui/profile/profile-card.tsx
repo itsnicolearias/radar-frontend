@@ -31,13 +31,19 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
   onMessage,
   className,
 }) => {
+  const formatDistance = (distance?: number) => {
+    if (!distance) return "Cerca"
+    if (distance < 1000) return `${Math.round(distance)}m`
+    return `${(distance / 1000).toFixed(1)}km`
+  }
+
   return (
     <div className={cn("bg-[#1A3A52] rounded-3xl p-6 text-white shadow-xl", className)}>
       {/* Distance badge */}
       {distance !== undefined && (
         <div className="flex items-center gap-2 mb-4">
           <MapPin className="w-4 h-4 text-[#00FFB3]" />
-          <span className="text-sm text-[#00FFB3]">{distance}m de distancia</span>
+          <span className="text-sm text-[#00FFB3]">{formatDistance(distance)} de distancia</span>
         </div>
       )}
 

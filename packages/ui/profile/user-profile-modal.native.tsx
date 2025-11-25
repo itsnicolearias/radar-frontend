@@ -12,6 +12,13 @@ interface UserProfileModalNativeProps {
 }
 
 export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({ user, onClose, onMessage, isUserConnected }) => {
+  
+  const formatDistance = (distance?: number) => {
+    if (!distance) return "Cerca"
+    if (distance < 1000) return `${Math.round(distance)}m`
+    return `${(distance / 1000).toFixed(1)}km`
+  }
+
   return (
     <Modal visible transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.overlay}>
@@ -35,7 +42,7 @@ export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({ 
 
               <View style={styles.distanceBadge}>
                 <MapPin color="#00FFB3" size={16} />
-                <Text style={styles.distanceText}>{Math.round(user.distance)}m de distancia</Text>
+                <Text style={styles.distanceText}>{formatDistance(user.distance)} de distancia</Text>
               </View>
 
               <Text style={styles.profileName}>
@@ -75,7 +82,7 @@ export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({ 
                 </View>
             )}
             
-
+          {isUserConnected() && (
             <TouchableOpacity style={styles.messageButton} onPress={onMessage}>
               <LinearGradient
                 colors={["#00FFB3", "#1DE3F2"]}
@@ -87,10 +94,15 @@ export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({ 
                 <Text style={styles.messageButtonText}>Enviar mensaje</Text>
               </LinearGradient>
             </TouchableOpacity>
+          )}
 
+          { !isUserConnected() && (
             <TouchableOpacity style={styles.likeButton}>
               <Heart color="#FF005C" size={20} />
             </TouchableOpacity>
+          )}  
+
+            
           </ScrollView>
         </View>
       </View>

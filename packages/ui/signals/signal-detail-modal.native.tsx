@@ -28,6 +28,12 @@ export const SignalDetailModalNative: React.FC<SignalDetailModalNativeProps> = (
     return `Hace ${diffHours}h`
   }
 
+    const formatDistance = (distance?: number) => {
+    if (!distance) return "Cerca"
+    if (distance < 1000) return `${Math.round(distance)}m`
+    return `${(distance / 1000).toFixed(1)}km`
+  }
+
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.overlay}>
@@ -42,7 +48,7 @@ export const SignalDetailModalNative: React.FC<SignalDetailModalNativeProps> = (
 
             <View style={styles.userDetails}>
               <Text style={styles.userName}>{signal.Sender?.displayName}</Text>
-              <Text style={styles.distance}>{Math.round(signal.distance)}m de distancia</Text>
+              <Text style={styles.distance}>{formatDistance(signal.distance)}</Text>
             </View>
 
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>

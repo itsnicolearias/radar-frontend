@@ -7,7 +7,7 @@ import { useRouter } from "expo-router"
 import { MotiView } from "moti"
 import { Radio } from "lucide-react-native"
 import { useRadarStore, useAuthStore, useSocketEvent, useChatStore } from "@radar/features"
-import { connectionService, radarService, signalService } from "@radar/api"
+import { connectionService, profileViewService, radarService, signalService } from "@radar/api"
 import type { IRadarUser, IRadarSignal, IEventResponse, IConnectionResponse } from "@radar/types"
 import { BottomNavNative } from "../../../packages/ui/navigation/bottom-nav.native"
 import { SendSignalModalNative } from "../../../packages/ui/signals/send-signal-modal.native"
@@ -122,23 +122,31 @@ export default function RadarScreen() {
     return { x, y }
   }
 
-  const handleSignalClick = (signal: IRadarSignal | undefined) => {
-    if (signal){
-      setSelectedSignal(signal)
-    } 
-  }
-
   const handleRespond = (signal: IRadarSignal) => {
     setReplyingToSignal(signal)
     router.push(`/chats/${signal.senderId}`)
     setSelectedSignal(null)
   }
 
-  const handleViewProfile = (userId: string) => {
+  const handleViewProfile = async (userId: string) => {
     setSelectedSignal(null)
     const foundUser = nearbyUsers.find((u) => u.userId === userId)
     if (foundUser) {
       setSelectedUser(foundUser)
+    }
+    try {
+      await profileViewService.registerProfileView(userId)
+    } catch (error) {
+      console.error("Error registering profile view:", error)
+    }
+  }
+
+  const handleSelectUser = async (user: IRadarUser) => {
+      setSelectedUser(user)
+    try {
+      await profileViewService.registerProfileView(user.userId)
+    } catch (error) {
+      console.error("Error registering profile view:", error)
     }
   }
 
@@ -232,7 +240,7 @@ export default function RadarScreen() {
                 user={nearbyUser}
                 position={position}
                 hasSignal={hasSignal}
-                onPress={() => setSelectedUser(nearbyUser)}
+                onPress={() => handleSelectUser(nearbyUser)}
                 index={index}
                 onSelectSignal={() => setSelectedSignal(findSignal!)}
               />

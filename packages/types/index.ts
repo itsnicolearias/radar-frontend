@@ -34,41 +34,16 @@ export interface IVerifyEmailResponse {
   user: IUser
 }
 
-export interface IConnectionUser {
-  userId: string
-  email: string
-  displayName: string
-}
-
-export interface IConnectionResponse {
-  connectionId: string
-  senderId: string
-  receiverId: string
-  status: "pending" | "accepted" | "rejected"
-  createdAt: Date
-  updatedAt: Date
-  Sender: IConnectionUser
-  Receiver: IConnectionUser
-}
-
 export interface IDeleteConnectionResponse {
   message: string
 }
 
-export interface IConversationUser {
-  userId: string
-  displayName: string | null
-  isVerified: boolean
-  Profile: {
-    photoUrl: string | null
-  }
-}
 
 
 
 export interface IConversation {
   conversationId: string
-  user: IConversationUser
+  user: Partial<IRadarUser>
   lastMessage: ILastMessage
   unreadCount: number
 }
@@ -86,8 +61,8 @@ export interface IMessageResponse {
   isRead: boolean
   createdAt: Date
   updatedAt: Date
-  Sender: IConversationUser
-  Receiver: IConversationUser
+  Sender: Partial<IRadarUser>
+  Receiver: Partial<IRadarUser>
 }
 
 export interface IMarkAsReadResponse {
@@ -233,12 +208,7 @@ export interface IVerifyEmailResponse {
   user: IUser
 }
 
-export interface IConnectionUser {
-  userId: string
-  firstName: string
-  lastName: string
-  email: string
-}
+
 
 export interface IConnectionResponse {
   connectionId: string
@@ -247,22 +217,14 @@ export interface IConnectionResponse {
   status: "pending" | "accepted" | "rejected"
   createdAt: Date
   updatedAt: Date
-  Sender: IConnectionUser
-  Receiver: IConnectionUser
+  Sender: Partial<IRadarUser>
+  Receiver: Partial<IRadarUser>
 }
 
 export interface IDeleteConnectionResponse {
   message: string
 }
 
-export interface IConversationUser {
-  userId: string
-  displayName: string | null
-  isVerified: boolean
-  Profile: {
-    photoUrl: string | null
-  }
-}
 
 export interface ILastMessage {
   content: string

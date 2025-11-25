@@ -99,10 +99,14 @@ function ChatConversationPage() {
         content: message,
         signalId: replyingTo ? replyingTo.signalId : undefined,
       }
-      await messageService.sendMessage(messageData)
+      const msg = await messageService.sendMessage(messageData)
       emitSocketEvent("send-message", messageData)
       setReplyingTo(null)
       setMessage("")
+
+      addMessage(userId, msg)
+      await messageService.markAsRead([msg.messageId])
+
     } catch (error) {
       console.error("[v0] Error sending message:", error)
     }
@@ -121,6 +125,17 @@ function ChatConversationPage() {
       ? firstMsg.Sender.displayName
       : firstMsg.Receiver.displayName
     : "Chat"
+
+  const formatDistance = (distance?: number) => {
+    if (!distance) return "Cerca"
+    if (distance < 1000) return `${Math.round(distance)}m`
+    return `${(distance / 1000).toFixed(1)}km`
+  }
+
+  const distance = firstMsg ?? firstMsg?.senderId === userId
+      ? firstMsg?.Sender?.distance
+      : firstMsg?.Receiver?.distance
+
 
   return (
     <div className="h-screen bg-black flex flex-col relative overflow-hidden">
@@ -147,7 +162,7 @@ function ChatConversationPage() {
             <h2 className="font-semibold text-white">{name}</h2>
             <div className="flex items-center gap-1">
               <div className="w-2 h-2 bg-[#1DE3F2] rounded-full" />
-              <span className="text-xs text-[#1DE3F2]">120m</span>
+              <span className="text-xs text-[#1DE3F2]">{formatDistance(distance)}</span>
             </div>
           </div>
         </div>
@@ -167,7 +182,7 @@ function ChatConversationPage() {
               <div
                 className={`px-4 py-3 rounded-2xl ${
                   isSent
-                    ? "bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black shadow-lg shadow-[#00FFB3]/20"
+                    ? "bg-linear-to-r from-[#00FFB3] to-[#1DE3F2] text-black shadow-lg shadow-[#00FFB3]/20"
                     : "bg-[#1A1A1A] text-white border border-[#00FFB3]/30"
                 }`}
               >
@@ -199,14 +214,14 @@ function ChatConversationPage() {
             type="text"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+            onKeyUp={(e) => e.key === "Enter" && handleSendMessage()}
             placeholder="Escribí un mensaje..."
             className="flex-1 h-14 px-4 bg-[#1A1A1A] backdrop-blur-sm border border-[#00FFB3]/30 rounded-full focus:ring-2 focus:ring-[#00FFB3]/50 text-white placeholder-white/50 outline-none transition-all"
           />
           <button
             onClick={handleSendMessage}
             disabled={!message.trim()}
-            className="w-14 h-14 bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] rounded-full flex items-center justify-center shadow-lg shadow-[#00FFB3]/30 hover:scale-110 transition-transform disabled:opacity-50 disabled:hover:scale-100"
+            className="w-14 h-14 bg-linear-to-r from-[#00FFB3] to-[#1DE3F2] rounded-full flex items-center justify-center shadow-lg shadow-[#00FFB3]/30 hover:scale-110 transition-transform disabled:opacity-50 disabled:hover:scale-100"
           >
             <Send className="w-5 h-5 text-black" />
           </button>

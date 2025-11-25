@@ -100,6 +100,20 @@ export default function ChatsPage() {
     }
   }
 
+  const formatRelativeTime = (date: string | Date) => {
+    const now = new Date()
+    const diffMs = now.getTime() - new Date(date).getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMins / 60)
+    const diffDays = Math.floor(diffHours / 24)
+
+    if (diffMins < 1) return "Ahora"
+    if (diffMins < 60) return `Hace ${diffMins}m`
+    if (diffHours < 24) return `Hace ${diffHours}h`
+    if (diffDays === 1) return "Ayer"
+    return `Hace ${diffDays} días`
+  }
+
   return (
     <div className="h-screen bg-black flex flex-col relative overflow-hidden">
       <div
@@ -205,7 +219,7 @@ export default function ChatsPage() {
                       )}
                       <div className="flex items-center gap-1 mt-1">
                         <div className="w-2 h-2 bg-[#1DE3F2] rounded-full" />
-                        <span className="text-xs text-[#1DE3F2]">120m</span>
+                        <span className="text-xs text-[#1DE3F2]">{formatDistance(chat.user.distance)}</span>
                       </div>
                     </div>
                   </div>
@@ -234,18 +248,18 @@ export default function ChatsPage() {
                   <div className="flex items-start gap-4">
                     {/* Avatar */}
                     <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center border-2 border-[#00FFB3]">
-                      <span className="text-[#1A1A1A] font-bold text-lg">S</span>
+                      <span className="text-[#1A1A1A] font-bold text-lg">{request.Sender.displayName[0]}</span>
                     </div>
 
                     {/* Content */}
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
                         <div>
-                          <h3 className="font-semibold text-white text-base">Sofia, 24</h3>
+                          <h3 className="font-semibold text-white text-base">{request.Sender.Profile.showAge ? `${request.Sender.displayName}, ${request.Sender.Profile.age}` : request.Sender.displayName}</h3>
                           <div className="flex items-center gap-1 mt-1">
                             <div className="w-2 h-2 bg-[#1DE3F2] rounded-full" />
-                            <span className="text-xs text-[#1DE3F2]">35m</span>
-                            <span className="text-xs text-[#1DBF73]"> • 3 intereses en común</span>
+                            <span className="text-xs text-[#1DE3F2]">{formatDistance(request.Sender?.distance)}</span>
+                            {/**<span className="text-xs text-[#1DBF73]"> • 3 intereses en común</span> */}
                           </div>
                         </div>
                       </div>
@@ -286,7 +300,7 @@ export default function ChatsPage() {
               </div>
 
               <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-                {profileViews.slice(0, 5).map((view, index) => (
+                {profileViews.map((view, index) => (
                   <motion.div
                     key={view.profileViewId}
                     initial={{ opacity: 0, scale: 0.8 }}
@@ -302,7 +316,7 @@ export default function ChatsPage() {
                       <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-[#1DE3F2] border-2 border-black rounded-full" />
                     </div>
                     <p className="text-white text-xs font-medium mt-2">{view.Viewer.displayName.split(" ")[0]}</p>
-                    <p className="text-[#1DE3F2] text-xs">Hace 15 min</p>
+                    <p className="text-[#1DE3F2] text-xs">{formatRelativeTime(view.createdAt)}</p>
                   </motion.div>
                 ))}
               </div>
@@ -343,17 +357,13 @@ export default function ChatsPage() {
                           <h3 className="font-semibold text-white">{connectedUser.displayName}</h3>
                           <div className="flex items-center gap-1 mt-1">
                             <div className="w-2 h-2 bg-[#1DE3F2] rounded-full" />
-                            <span className="text-xs text-[#1DE3F2]">120m</span>
+                            <span className="text-xs text-[#1DE3F2]">{formatDistance(connectedUser.distance)}</span>
                           </div>
                         </div>
                       </div>
 
                       <button
-                        onClick={() =>
-                          handleChatClick(
-                            connection.senderId === user?.userId ? connection.receiverId : connection.senderId,
-                          )
-                        }
+                        onClick={() => handleChatClick(connectedUser.userId)}
                         className="px-4 py-2 rounded-xl bg-linear-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-medium shadow-lg shadow-[#00FFB3]/30 hover:scale-105 transition-transform flex items-center gap-2"
                       >
                         <MessageCircle className="w-4 h-4" />

@@ -63,6 +63,13 @@ export default function UserProfileScreen() {
     )
   }
 
+  const formatDistance = (distance?: number) => {
+    if (!distance) return "Cerca"
+    if (distance < 1000) return `${Math.round(distance)}m`
+    return `${(distance / 1000).toFixed(1)}km`
+  }
+
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -74,7 +81,7 @@ export default function UserProfileScreen() {
 
       <View style={styles.card}>
         <View style={styles.distanceBadge}>
-          <Text style={styles.distanceText}>{profileData.distance}m de distancia</Text>
+          <Text style={styles.distanceText}>{formatDistance(profileData.distance)} de distancia</Text>
         </View>
 
         <Text style={styles.name}>

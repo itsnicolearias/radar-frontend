@@ -34,8 +34,8 @@ export const messageService = {
   },
 
   async sendMessage(data: SendMessageInput): Promise<IMessageResponse> {
-    const response = await axiosClient.post<IMessageResponse>("/messages", data)
-    return response.data
+    const response = await axiosClient.post("/messages", data)
+    return response.data.data
   },
 
   async markAsRead(messageIds: string[]): Promise<IMarkAsReadResponse> {

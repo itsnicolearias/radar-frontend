@@ -87,6 +87,26 @@ export default function ChatsScreen() {
     }
   }
 
+    const formatDistance = (distance?: number) => {
+    if (!distance) return "Cerca"
+    if (distance < 1000) return `${Math.round(distance)}m`
+    return `${(distance / 1000).toFixed(1)}km`
+  }
+
+    const formatRelativeTime = (date: string | Date) => {
+    const now = new Date()
+    const diffMs = now.getTime() - new Date(date).getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMins / 60)
+    const diffDays = Math.floor(diffHours / 24)
+
+    if (diffMins < 1) return "Ahora"
+    if (diffMins < 60) return `Hace ${diffMins}m`
+    if (diffHours < 24) return `Hace ${diffHours}h`
+    if (diffDays === 1) return "Ayer"
+    return `Hace ${diffDays} días`
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.gradientBg} />
@@ -172,7 +192,7 @@ export default function ChatsScreen() {
                         )}
                         <View style={styles.distanceContainer}>
                           <View style={styles.distanceDot} />
-                          <Text style={styles.distanceText}>120m</Text>
+                          <Text style={styles.distanceText}>{formatDistance(chat.user.distance)}</Text>
                         </View>
                       </View>
                     </View>
@@ -201,15 +221,15 @@ export default function ChatsScreen() {
                   <View style={styles.requestCard}>
                     <View style={styles.requestContent}>
                       <View style={styles.requestAvatar}>
-                        <Text style={styles.requestAvatarText}>S</Text>
+                        <Text style={styles.requestAvatarText}>{request.Sender.displayName![0]}</Text>
                       </View>
 
                       <View style={styles.requestInfo}>
-                        <Text style={styles.requestName}>Sofia, 24</Text>
+                        <Text style={styles.requestName}>{request.Sender.Profile?.showAge ? `${request.Sender.displayName}, ${request.Sender.Profile.age}` : request.Sender.displayName}</Text>
                         <View style={styles.requestMeta}>
                           <View style={styles.distanceDot} />
-                          <Text style={styles.distanceText}>35m</Text>
-                          <Text style={styles.interestText}> • 3 intereses en común</Text>
+                          <Text style={styles.distanceText}>{formatDistance(request.Sender?.distance)}</Text>
+                          {/**<Text style={styles.interestText}> • 3 intereses en común</Text> */}
                         </View>
 
                         <View style={styles.requestActions}>
@@ -248,7 +268,9 @@ export default function ChatsScreen() {
               </View>
 
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.profileViewsScroll}>
-                {profileViews.slice(0, 5).map((view, index) => (
+                {profileViews.map((view, index) => (
+                  
+                  <>                  
                   <MotiView
                     key={view.profileViewId}
                     from={{ opacity: 0, scale: 0.8 }}
@@ -266,9 +288,11 @@ export default function ChatsScreen() {
                         <View style={styles.onlineIndicator} />
                       </View>
                       <Text style={styles.profileViewName}>{view.Viewer.displayName![0]}</Text>
-                      <Text style={styles.profileViewTime}>Hace 15 min</Text>
+                      <Text style={styles.profileViewTime}>{formatRelativeTime(view.createdAt)}</Text>
                     </TouchableOpacity>
                   </MotiView>
+                  </>
+                  
                 ))}
               </ScrollView>
             </View>
@@ -304,7 +328,7 @@ export default function ChatsScreen() {
                             <Text style={styles.connectedName}>{connectedUser.displayName}</Text>
                             <View style={styles.distanceContainer}>
                               <View style={styles.distanceDot} />
-                              <Text style={styles.distanceText}>120m</Text>
+                              <Text style={styles.distanceText}>{formatDistance(connectedUser.distance)}</Text>
                             </View>
                           </View>
                         </View>

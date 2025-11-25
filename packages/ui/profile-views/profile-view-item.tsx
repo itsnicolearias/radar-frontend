@@ -42,7 +42,7 @@ export const ProfileViewItem: React.FC<ProfileViewItemProps> = ({
     >
       {/* Avatar */}
       <div className="relative shrink-0">
-        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#00FFB3] to-[#14B8A6] flex items-center justify-center">
+        <div className="w-12 h-12 rounded-full bg-linear-to-br from-[#00FFB3] to-[#14B8A6] flex items-center justify-center">
           {photoUrl ? (
             <img src={photoUrl || "/placeholder.svg"} alt={displayName} className="w-full h-full rounded-full object-cover" />
           ) : (

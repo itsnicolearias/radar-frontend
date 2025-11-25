@@ -13,7 +13,28 @@ interface SignalDetailModalProps {
 }
 
 export const SignalDetailModal: React.FC<SignalDetailModalProps> = ({ signal, onClose, onRespond, onViewProfile }) => {
-  const timeAgo = Math.floor((Date.now() - new Date(signal.createdAt).getTime()) / 60000)
+
+  const formatRelativeTime = (date: string | Date) => {
+    const now = new Date()
+    const diffMs = now.getTime() - new Date(date).getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMins / 60)
+    const diffDays = Math.floor(diffHours / 24)
+
+    if (diffMins < 1) return "Ahora"
+    if (diffMins < 60) return `Hace ${diffMins}m`
+    if (diffHours < 24) return `Hace ${diffHours}h`
+    if (diffDays === 1) return "Ayer"
+    return `Hace ${diffDays} días`
+  }
+
+
+  const formatDistance = (distance?: number) => {
+    if (!distance) return "Cerca"
+    if (distance < 1000) return `${Math.round(distance)}m`
+    return `${(distance / 1000).toFixed(1)}km`
+  }
+
 
   return (
     <motion.div
@@ -40,17 +61,18 @@ export const SignalDetailModal: React.FC<SignalDetailModalProps> = ({ signal, on
           </div>
           <h3 className="text-white font-bold text-lg">{signal.Sender.displayName}</h3>
           <p className="text-[#1DE3F2] text-sm flex items-center gap-1">
-            <span>{Math.round(signal.distance)}m de distancia</span>
+            <span>{formatDistance(signal.distance)} de distancia</span>
           </p>
         </div>
 
         {/* Signal message */}
         <div className="bg-[#1A1A1A] rounded-2xl p-4 mb-2 border border-[#FF005C]/30">
-          <p className="text-[#FF005C] font-semibold text-center flex items-center justify-center gap-2">
+          <p className="text-white font-semibold text-center flex items-center justify-center gap-2">
             {signal.note} 
           </p>
+          <p className="text-[#C5C5C5] text-xs text-center mb-6">{formatRelativeTime(signal.createdAt)}</p>
         </div>
-        <p className="text-[#C5C5C5] text-xs text-center mb-6">Hace {timeAgo} min</p>
+        
 
         {/* Action buttons */}
         <div className="space-y-3">

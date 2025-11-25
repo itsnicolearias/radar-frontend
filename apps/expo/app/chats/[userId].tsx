@@ -38,7 +38,7 @@ function ChatConversationPage() {
         setMessages(userId, data)
         resetUnreadCount(userId)
 
-        console.log(userMessages)
+
       } catch (error) {
         console.error("[v0] Error fetching messages:", error)
       }
@@ -69,10 +69,13 @@ function ChatConversationPage() {
         content: message,
         signalId: replyingToSignal ? replyingToSignal.signalId : undefined,
       }
-      await messageService.sendMessage(messageData)
+      const msg = await messageService.sendMessage(messageData)
       emitSocketEvent("send-message", messageData)
       setReplyingToSignal(null)
       setMessage("")
+
+      addMessage(userId, msg)
+      await messageService.markAsRead([msg.messageId])
     } catch (error) {
       console.error("[v0] Error sending message:", error)
     }
@@ -91,6 +94,17 @@ function ChatConversationPage() {
       ? firstMsg.Sender.displayName
       : firstMsg.Receiver.displayName
     : "Chat"
+
+  const distance = firstMsg ? firstMsg.Sender?.userId === userId
+      ? firstMsg.Sender?.distance
+      : firstMsg.Receiver?.distance
+    : 0;
+
+    const formatDistance = (distance?: number) => {
+    if (!distance) return "Cerca"
+    if (distance < 1000) return `${Math.round(distance)}m`
+    return `${(distance / 1000).toFixed(1)}km`
+  }
 
   return (
     <KeyboardAvoidingView
@@ -115,7 +129,7 @@ function ChatConversationPage() {
             <Text style={styles.headerTitle}>{name}</Text>
             <View style={styles.headerMeta}>
               <View style={styles.distanceDot} />
-              <Text style={styles.distanceText}>120m</Text>
+              <Text style={styles.distanceText}>{formatDistance(distance)}</Text>
             </View>
           </View>
         </View>

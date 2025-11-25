@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useRadarStore, useAuthStore, useSocket, useSocketEvent } from "@radar/features"
-import { connectionService, radarService, signalService } from "@radar/api"
+import { connectionService, profileViewService, radarService, signalService } from "@radar/api"
 import type { IEventResponse, IRadarUser, IRadarSignal, IConnectionResponse } from "@radar/types"
 import { BottomNav, GhostButton, InvisibleBadge } from "@radar/ui"
 import { SendSignalModal } from "../../../../packages/ui/modals/send-signal-modal"
@@ -101,17 +101,29 @@ export default function RadarPage() {
     }
   }, [currentLocation, setCurrentLocation, user])
 
-  const handleUserClick = (nearbyUser: IRadarUser) => {
+  const handleUserClick = async (nearbyUser: IRadarUser) => {
     setSelectedUser(nearbyUser)
+
+    try {
+      await profileViewService.registerProfileView(user.userId)
+    } catch (error) {
+      console.error("Error registering profile view:", error)
+    }
   }
 
   const handleEventClick = (event: IEventResponse) => {
     setSelectedEvent(event)
   }
 
-  const handleSignalClick = (senderId: string) => {
+  const handleSignalClick = async (senderId: string) => {
     const findUser = nearbyUsers.find((u) => u.userId === senderId )
     setSelectedUser(findUser)
+
+    try {
+      await profileViewService.registerProfileView(user.userId)
+    } catch (error) {
+      console.error("Error registering profile view:", error)
+    }
   }
 
   const handleRespond = (signal: IRadarSignal) => {

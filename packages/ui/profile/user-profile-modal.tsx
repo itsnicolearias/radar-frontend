@@ -4,7 +4,6 @@ import type React from "react"
 import { motion } from "framer-motion"
 import { X, MapPin, MessageCircle, Heart } from "lucide-react"
 import type { IRadarUser } from "@radar/types"
-import { cn } from "../lib/utils"
 
 interface UserProfileModalProps {
   user: IRadarUser
@@ -15,6 +14,12 @@ interface UserProfileModalProps {
 
 export const UserProfileModal: React.FC<UserProfileModalProps> = ({ user, onClose, onMessage, isUserConnected }) => {
   const connectionMade = isUserConnected()
+
+  const formatDistance = (distance?: number) => {
+    if (!distance) return "Cerca"
+    if (distance < 1000) return `${Math.round(distance)}m`
+    return `${(distance / 1000).toFixed(1)}km`
+  }
 
   return (
     <motion.div
@@ -46,7 +51,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ user, onClos
             </div>
             <div className="flex items-center gap-2 text-white/90">
               <MapPin className="w-4 h-4 text-[#1DE3F2]" />
-              <span>{Math.round(user.distance)}m de distancia</span>
+              <span>{formatDistance(user.distance)} de distancia</span>
             </div>
           </div>
         </div>
@@ -91,23 +96,22 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ user, onClos
 
           {/* Action buttons */}
           <div className="flex gap-3 pt-4">
-            <button
+            { connectionMade && (
+              <button
               onClick={onMessage}
               className="flex-1 h-14 rounded-full bg-linear-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-semibold hover:shadow-lg transition-all duration-300 shadow-[#00FFB3]/30 flex items-center justify-center gap-2"
             >
               <MessageCircle className="w-5 h-5" />
               Enviar mensaje
             </button>
-
-            <button className={cn(
-              "w-14 h-14 rounded-full border border-[#FF005C]/30 flex items-center justify-center hover:bg-[#FF005C]/10 transition-colors",
-              connectionMade
-              ? "bg-[#FF005C]"
-              : "bg-[#1A1A1A]"
             )}
-            >
+            
+            { !connectionMade && (
+              <button className="w-14 h-14 rounded-full border border-[#FF005C]/30 flex items-center justify-center hover:bg-[#FF005C]/10 transition-colors bg-[#FF005C]">
               <Heart className="w-6 h-6 text-[#FF005C]" />
             </button>
+            )}
+            
           </div>
         </div>
       </motion.div>

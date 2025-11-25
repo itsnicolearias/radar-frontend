@@ -64,7 +64,9 @@ export const useChatStore = create<ChatState>()(
         if (!state.messages[conversationId]) {
           state.messages[conversationId] = []
         }
-        state.messages[conversationId].push(message)
+
+          state.messages[conversationId].push(message)
+
       }),
 
     updateChatLastMessage: (conversationId, message) =>
