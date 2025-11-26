@@ -101,8 +101,11 @@ export default function EventsScreen() {
             <Text style={styles.emptySubtext}>Crea el primer evento de tu zona</Text>
           </View>
         ) : (
-          filteredEvents.map((event) => (
-            <TouchableOpacity
+          filteredEvents.map((event) => {
+            const isInterested = event?.InterestedUsers?.some((u) => u.userId === user?.userId)
+
+            return (
+              <TouchableOpacity
               key={event.eventId}
               style={styles.eventCard}
               onPress={() => router.push(`/events/${event.eventId}`)}
@@ -122,24 +125,25 @@ export default function EventsScreen() {
                 </Text>
                 <View style={styles.eventMeta}>
                   <Text style={styles.eventDate}>🕐 {formatDate(event.startDate)}</Text>
-                  <Text style={styles.eventAttendees}>👥 {event.attendeesCount || 0}</Text>
+                  <Text style={styles.eventAttendees}>👥 {event.InterestedUsers?.length || 0}</Text>
                 </View>
                 <View style={styles.eventFooter}>
                   <View style={styles.categoryBadge}>
                     <Text style={styles.categoryBadgeText}>{event.category}</Text>
                   </View>
                   <TouchableOpacity
-                    style={[styles.interestButton, event.isInterested && styles.interestButtonActive]}
-                    onPress={() => handleInterestClick(event.eventId, event.isInterested || false)}
+                    style={[styles.interestButton, isInterested && styles.interestButtonActive]}
+                    onPress={() => handleInterestClick(event.eventId, isInterested || false)}
                   >
-                    <Text style={[styles.interestButtonText, event.isInterested && styles.interestButtonTextActive]}>
-                      {event.isInterested ? "Me interesa ❤️" : "Me interesa"}
+                    <Text style={[styles.interestButtonText, isInterested && styles.interestButtonTextActive]}>
+                      {isInterested ? "Me interesa ❤️" : "No me interesa"}
                     </Text>
                   </TouchableOpacity>
                 </View>
               </View>
             </TouchableOpacity>
-          ))
+            )            
+          })
         )}
       </ScrollView>
 

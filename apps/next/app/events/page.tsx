@@ -104,23 +104,35 @@ export default function EventsPage() {
             <p className="text-[#8B8B8B] text-sm mt-2">Crea el primer evento de tu zona</p>
           </div>
         ) : (
-          filteredEvents.map((event) => (
-            <EventCard
+          filteredEvents.map((event) => {
+
+            const isInterested = event?.InterestedUsers.some((u) => u.userId === user.userId)
+            return (
+              <EventCard
               key={event.eventId}
               title={event.title}
               description={event.description}
               location={event.location}
               startDate={event.startDate}
-              attendeesCount={event.attendeesCount}
+              attendeesCount={event.InterestedUsers.length}
               price={event.price}
               distance={event.distance}
               category={event.category}
-              isInterested={event.isInterested}
+              isInterested={isInterested}
               isBoosted={false}
-              onInterestClick={() => handleInterestClick(event.eventId, event.isInterested || false)}
+              onInterestClick={() => handleInterestClick(event.eventId, isInterested || false)}
               onClick={() => router.push(`/events/${event.eventId}`)}
             />
-          ))
+            )
+              
+
+            
+
+            
+            
+
+            
+})
         )}
       </div>
 

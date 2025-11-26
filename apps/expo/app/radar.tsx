@@ -160,6 +160,22 @@ export default function RadarScreen() {
   return isConnected;
   }
 
+  const handleConnect = async (receiverId: string) => {
+    try {
+      await connectionService.createConnection(receiverId!)
+    } catch (error) {
+      console.error("[v0] Error:", error)
+    }
+  }
+
+  const handleDeleteConnection = async (receiverId: string) => {
+    try {
+      await connectionService.deleteConnection(receiverId!)
+    } catch (error) {
+      console.error("[v0] Error:", error)
+    }
+  }
+
 
   return (
     <View style={styles.container}>
@@ -306,7 +322,9 @@ export default function RadarScreen() {
           user={selectedUser}
           onClose={() => setSelectedUser(null)}
           onMessage={() => handleMessageUser(selectedUser.userId)}
-          isUserConnected={() => isUserConnected(selectedUser.userId)}         
+          isUserConnected={() => isUserConnected(selectedUser.userId)}
+          sendConnection={() => handleConnect(selectedUser.userId)}
+          deleteConnection={() => handleDeleteConnection(selectedUser.userId)}         
         />
       )}
 

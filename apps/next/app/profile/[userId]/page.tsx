@@ -51,10 +51,19 @@ export default function UserProfilePage() {
     setIsLoading(true)
     try {
       await connectionService.createConnection(userId)
-      alert("Solicitud de conexión enviada")
     } catch (error) {
       console.error("[v0] Error sending connection request:", error)
-      alert("Error al enviar solicitud")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleDeleteConnection = async () => {
+    setIsLoading(true)
+    try {
+      await connectionService.deleteConnection(userId)
+    } catch (error) {
+      console.error("[v0] Error sending connection request:", error)
     } finally {
       setIsLoading(false)
     }
@@ -95,6 +104,7 @@ export default function UserProfilePage() {
           isConnected={isConnected}
           onConnect={handleConnect}
           onMessage={handleMessage}
+          onDeleteConnection={handleDeleteConnection}
         />
       </div>
     </div>

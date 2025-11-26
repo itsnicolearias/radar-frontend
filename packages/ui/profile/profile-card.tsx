@@ -1,11 +1,12 @@
 "use client"
 
 import type React from "react"
-import { MapPin, Heart, MessageCircle } from "lucide-react"
+import { MapPin, Heart, MessageCircle, HeartOff } from "lucide-react"
 import { cn } from "../lib/utils"
 
 interface ProfileCardProps {
   name: string
+  onDeleteConnection: () => void
   age?: number
   location?: string
   distance?: number
@@ -30,6 +31,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
   onConnect,
   onMessage,
   className,
+  onDeleteConnection,
 }) => {
   const formatDistance = (distance?: number) => {
     if (!distance) return "Cerca"
@@ -95,6 +97,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
           </button>
         )}
         {isConnected && onMessage && (
+          <>
           <button
             onClick={onMessage}
             className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-[#00FFB3] text-[#1A3A52] rounded-full font-semibold hover:bg-[#00E5A0] transition-colors"
@@ -102,6 +105,16 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
             <MessageCircle className="w-5 h-5" />
             Enviar mensaje
           </button>
+
+          <button
+            onClick={onDeleteConnection}
+            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-transparent border-2 border-[#00FFB3] text-[#00FFB3] rounded-full font-semibold hover:bg-[#00FFB3] hover:text-[#1A3A52] transition-colors"
+          >
+            <HeartOff className="w-5 h-5" />
+            Eliminar
+          </button>
+          </>
+          
         )}
       </div>
     </div>

@@ -373,8 +373,8 @@ export interface IEventResponse {
   updatedAt: string
   distance?: number
   attendeesCount?: number
-  isInterested?: boolean
   category?: string
+  InterestedUsers?: IUser[]
 }
 
 export interface IEventCreatePayload {

@@ -1,6 +1,6 @@
 import type React from "react"
 import { View, Text, TouchableOpacity, Modal, StyleSheet, ScrollView } from "react-native"
-import { X, MessageCircle, MapPin, Heart } from "lucide-react-native"
+import { X, MessageCircle, MapPin, Heart, HeartOff } from "lucide-react-native"
 import { LinearGradient } from "expo-linear-gradient"
 import type { IRadarUser } from "@radar/types"
 
@@ -9,9 +9,11 @@ interface UserProfileModalNativeProps {
   onClose: () => void
   onMessage: () => void
   isUserConnected: () => boolean
+  sendConnection: () => void
+  deleteConnection: () => void
 }
 
-export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({ user, onClose, onMessage, isUserConnected }) => {
+export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({ user, onClose, onMessage, isUserConnected, sendConnection, deleteConnection }) => {
   
   const formatDistance = (distance?: number) => {
     if (!distance) return "Cerca"
@@ -83,6 +85,7 @@ export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({ 
             )}
             
           {isUserConnected() && (
+            <>
             <TouchableOpacity style={styles.messageButton} onPress={onMessage}>
               <LinearGradient
                 colors={["#00FFB3", "#1DE3F2"]}
@@ -94,10 +97,16 @@ export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({ 
                 <Text style={styles.messageButtonText}>Enviar mensaje</Text>
               </LinearGradient>
             </TouchableOpacity>
+
+            <TouchableOpacity style={styles.likeButton} onPress={deleteConnection}>
+              <HeartOff color="#FF005C" size={20} />
+            </TouchableOpacity>
+            </>
+            
           )}
 
           { !isUserConnected() && (
-            <TouchableOpacity style={styles.likeButton}>
+            <TouchableOpacity style={styles.likeButton} onPress={sendConnection}>
               <Heart color="#FF005C" size={20} />
             </TouchableOpacity>
           )}  

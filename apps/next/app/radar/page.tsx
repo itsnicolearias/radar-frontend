@@ -153,6 +153,22 @@ export default function RadarPage() {
     return { x, y }
   }
 
+  const handleConnect = async (receiverId: string) => {
+    try {
+      await connectionService.createConnection(receiverId!)
+    } catch (error) {
+      console.error("[v0] Error:", error)
+    }
+  }
+
+  const handleDeleteConnection = async (receiverId: string) => {
+    try {
+      await connectionService.deleteConnection(receiverId!)
+    } catch (error) {
+      console.error("[v0] Error:", error)
+    }
+  }
+
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden flex flex-col">
       {/* Radial gradient background */}
@@ -345,6 +361,8 @@ export default function RadarPage() {
           onClose={() => setSelectedUser(null)}
           onMessage={() => router.push(`/chats/${selectedUser.userId}`)}
           isUserConnected={() => isUserConnected(selectedUser.userId)}
+          sendConnection={() => handleConnect(selectedUser.userId)}
+          deleteConnection={() => handleDeleteConnection(selectedUser.userId)}   
         />
       )}
 

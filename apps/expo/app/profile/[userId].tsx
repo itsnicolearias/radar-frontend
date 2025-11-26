@@ -6,6 +6,7 @@ import { useRouter, useLocalSearchParams } from "expo-router"
 import { useAuthStore, useConnectionStore, useRadarStore } from "@radar/features"
 import { connectionService, profileViewService } from "@radar/api"
 import { IRadarUser } from "@radar/types"
+import { Heart, HeartOff } from "lucide-react-native"
 
 export default function UserProfileScreen() {
   const router = useRouter()
@@ -49,7 +50,14 @@ export default function UserProfileScreen() {
   const handleConnect = async () => {
     try {
       await connectionService.createConnection(userId!)
-      alert("Solicitud enviada")
+    } catch (error) {
+      console.error("[v0] Error:", error)
+    }
+  }
+
+  const handleDeleteConnection = async () => {
+    try {
+      await connectionService.deleteConnection(userId!)
     } catch (error) {
       console.error("[v0] Error:", error)
     }
@@ -108,13 +116,20 @@ export default function UserProfileScreen() {
         <View style={styles.actions}>
           {!isConnected && (
             <TouchableOpacity style={styles.connectButton} onPress={handleConnect}>
-              <Text style={styles.connectText}>♥ Conectar</Text>
+               <Heart color="#FF005C" size={20} />
             </TouchableOpacity>
           )}
           {isConnected && (
+            <>
             <TouchableOpacity style={styles.messageButton} onPress={() => router.push(`/chats/${userId}`)}>
               <Text style={styles.messageText}>💬 Enviar mensaje</Text>
             </TouchableOpacity>
+
+            <TouchableOpacity style={styles.connectButton} onPress={handleDeleteConnection}>
+               <HeartOff color="#FF005C" size={20} />
+            </TouchableOpacity>
+            </>
+            
           )}
         </View>
       </View>
