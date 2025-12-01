@@ -23,7 +23,7 @@ export default function LoginScreen() {
     try {
       const response = await authService.login({ email, password })
 
-      setAuth(response.data.user, null, response.data.token)
+      setAuth(response.data.user, response.data.user.Profile!, response.data.token)
       router.replace("/radar")
     } catch (error) {
       Alert.alert("Error", "Credenciales inválidas")
@@ -36,7 +36,7 @@ export default function LoginScreen() {
     <View style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.title}>Iniciar sesión</Text>
-        <Text style={styles.subtitle}>Bienvenido de vuelta</Text>
+        <Text style={styles.subtitle}>Ingresá a tu cuenta de Radar</Text>
 
         <View style={styles.form}>
           <TextInput
@@ -70,7 +70,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0A1628",
+    backgroundColor: "#000000",
     paddingHorizontal: 24,
   },
   content: {
@@ -81,34 +81,41 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#F8FAFC",
+    color: "#FFFFFF",
   },
   subtitle: {
     fontSize: 16,
-    color: "#94A3B8",
+    color: "#C5C5C5",
   },
   form: {
     gap: 16,
   },
   input: {
     height: 56,
-    backgroundColor: "#1E293B",
+    backgroundColor: "#1A1A1A",
     borderRadius: 12,
     paddingHorizontal: 16,
-    color: "#F8FAFC",
+    color: "#FFFFFF",
     fontSize: 16,
+    borderWidth: 1,
+    borderColor: "#1DE3F2",
   },
   button: {
     height: 56,
-    backgroundColor: "#14B8A6",
+    backgroundColor: "#00FFB3",
     borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
     marginTop: 16,
+    shadowColor: "#00FFB3",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
   buttonText: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#fff",
+    color: "#000000",
   },
 })

@@ -29,12 +29,14 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
       <div
         className={cn(
           "px-4 py-2 rounded-2xl",
-          isSent ? "bg-[#2C5F8D] text-white rounded-br-sm" : "bg-[#00FFB3] text-[#0E2A3E] rounded-bl-sm",
+          isSent 
+            ? "bg-[#1DE3F2] text-black rounded-br-sm shadow-lg shadow-[#1DE3F2]/30" 
+            : "bg-[#1A1A1A] text-white border border-[#00FFB3]/30 rounded-bl-sm",
         )}
       >
         <p className="text-sm leading-relaxed">{content}</p>
       </div>
-      <span className="text-xs text-gray-500 mt-1 px-1">{timestamp}</span>
+      <span className="text-xs text-[#8B8B8B] mt-1 px-1">{timestamp}</span>
     </div>
   )
 }

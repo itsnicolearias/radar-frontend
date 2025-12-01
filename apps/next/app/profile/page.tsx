@@ -1,107 +1,192 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button, GradientBackground, Input, Label, Textarea } from "@radar/ui"
-import { useAuthStore } from "@radar/features"
-import { ArrowLeft, Camera } from "lucide-react"
-import Link from "next/link"
+import { useState } from "react";
+import { ArrowLeft, Settings, LogOut } from "lucide-react";
+import { useAuthStore } from "@radar/features";
+import PlanCard from "@radar/ui/components/plan-card";
+import ProfileField from "@radar/ui/components/profile-field";
+import InterestsSelector from "@radar/ui/components/interest-selector";
+import AvatarBlock from "@radar/ui/components/avatar-block";
+import { profileService } from "@radar/api";
+import { BottomNav } from "@radar/ui";
+import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
-  const { user, profile } = useAuthStore()
-  const [isEditing, setIsEditing] = useState(false)
+  const { user, profile } = useAuthStore();
+  const router = useRouter()
+
+  const [displayName, setDisplayName] = useState(user?.displayName || "");
+  const [firstName, setFirstName] = useState(user?.firstName || "");
+  const [lastName, setLastName] = useState(user?.lastName || "");
+  const [bio, setBio] = useState(profile?.bio || "");
+  const [age, setAge] = useState(profile?.age || "");
+  const [country, setCountry] = useState(profile?.country || "");
+  const [province, setProvince] = useState(profile?.province || "");
+  const [interests, setInterests] = useState<string[]>(profile?.interests || []);
+
+  const [showAge, setShowAge] = useState(profile?.showAge ?? true);
+  const [showLocation, setShowLocation] = useState(profile?.showLocation ?? true);
+
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+
+    await profileService.updateMyProfile({
+      Profile: {
+        bio,
+        age: Number(age),
+        country,
+        province,
+        interests,
+        showAge,
+        showLocation,
+      },
+      User: {
+        displayName,
+        firstName,
+        lastName,
+      }
+    });
+
+    setIsSaving(false);
+  };
 
   return (
-    <GradientBackground>
-      <div className="relative z-10 min-h-screen px-6 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <Link
+    <div className="min-h-screen bg-black flex flex-col relative overflow-hidden">
+
+      {/* Radial background */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(circle at 50% 0%, rgba(0,255,179,0.06) 0%, transparent 60%)",
+        }}
+      />
+
+      {/* Header */}
+      <div className="bg-[#1A1A1A]/40 backdrop-blur-xl p-6 pb-8 border-b border-[#00FFB3]/20 relative z-10">
+        <div className="flex items-center justify-between">
+          <a
             href="/radar"
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+            className="w-10 h-10 rounded-full border border-[#00FFB3]/30 flex items-center justify-center bg-[#101010] hover:scale-110 transition"
           >
-            <ArrowLeft className="w-5 h-5" />
-            <span>Volver</span>
-          </Link>
+            <ArrowLeft className="w-5 h-5 text-white" />
+          </a>
 
-          <Button
-            variant="ghost"
-            onClick={() => setIsEditing(!isEditing)}
-            className="text-primary hover:text-primary/80"
-          >
-            {isEditing ? "Cancelar" : "Editar"}
-          </Button>
-        </div>
+          <h2 className="text-white text-center flex-1 -ml-10">Mi Perfil</h2>
 
-        <div className="max-w-2xl mx-auto space-y-8">
-          {/* Profile photo */}
-          <div className="flex flex-col items-center gap-4">
-            <div className="relative">
-              <div className="w-32 h-32 rounded-full bg-linear-to-br from-primary to-accent flex items-center justify-center">
-                {profile?.photoUrl ? (
-                  <img
-                    src={profile.photoUrl || "/placeholder.svg"}
-                    alt="Profile"
-                    className="w-full h-full rounded-full object-cover"
-                  />
-                ) : (
-                  <span className="text-4xl font-bold text-white">
-                    {user?.firstName?.[0]}
-                    {user?.lastName?.[0]}
-                  </span>
-                )}
-              </div>
-              {isEditing && (
-                <Button size="icon" className="absolute bottom-0 right-0 rounded-full bg-primary hover:bg-primary/90">
-                  <Camera className="w-4 h-4" />
-                </Button>
-              )}
-            </div>
-
-            <div className="text-center">
-              <h1 className="text-2xl font-bold">
-                {user?.firstName} {user?.lastName}
-              </h1>
-              <p className="text-muted-foreground">{user?.email}</p>
-            </div>
-          </div>
-
-          {/* Profile form */}
-          <div className="space-y-6 bg-card/50 backdrop-blur-lg rounded-lg p-6 border border-border">
-            <div className="space-y-2">
-              <Label htmlFor="bio">Biografía</Label>
-              <Textarea
-                id="bio"
-                placeholder="Contanos sobre vos..."
-                value={profile?.bio || ""}
-                disabled={!isEditing}
-                className="min-h-24"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="age">Edad</Label>
-                <Input id="age" type="number" placeholder="25" value={profile?.age || ""} disabled={!isEditing} />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="country">País</Label>
-                <Input id="country" placeholder="Argentina" value={profile?.country || ""} disabled={!isEditing} />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="province">Provincia</Label>
-              <Input id="province" placeholder="Buenos Aires" value={profile?.province || ""} disabled={!isEditing} />
-            </div>
-
-            {isEditing && (
-              <Button className="w-full h-12 bg-linear-to-r from-primary to-accent hover:opacity-90">
-                Guardar cambios
-              </Button>
-            )}
+          <div className="w-10 h-10 rounded-full border border-[#00FFB3]/30 flex items-center justify-center bg-[#101010]">
+            <Settings className="w-5 h-5 text-white" />
           </div>
         </div>
       </div>
-    </GradientBackground>
-  )
+
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto p-6 space-y-6 relative z-10 scrollbar-hide">
+
+        {/* Avatar Block */}
+        <AvatarBlock
+          src={profile?.photoUrl}
+          initials={`${user?.firstName?.[0] || ""}${user?.lastName?.[0] || ""}`}
+        />
+
+        {/* Plan Card */}
+        <PlanCard />
+
+        {/* FORM FIELDS */}
+        <div className="space-y-6 animate-slide-up">
+
+          <ProfileField
+            label="Nombre visible"
+            value={displayName}
+            onChange={setDisplayName}
+          />
+
+          <ProfileField
+            label="Nombre"
+            value={firstName}
+            onChange={setFirstName}
+          />
+
+          <ProfileField
+            label="Apellido"
+            value={lastName}
+            onChange={setLastName}
+          />
+
+          {/* Edad con privacy */}
+          <ProfileField
+            label="Edad"
+            value={String(age)}
+            onChange={setAge}
+            privacy={{
+              visible: showAge,
+              onToggle: () => setShowAge(!showAge),
+            }}
+            type="number"
+          />
+
+          <ProfileField
+            label="País"
+            value={country}
+            onChange={setCountry}
+          />
+
+          {/* Provincia con privacy */}
+          <ProfileField
+            label="Provincia"
+            value={province}
+            onChange={setProvince}
+            privacy={{
+              visible: showLocation,
+              onToggle: () => setShowLocation(!showLocation),
+            }}
+            type="text"
+          />
+
+          {/* BIO */}
+          <ProfileField
+            label="Biografía"
+            value={bio}
+            onChange={setBio}
+            multiline
+          />
+
+        </div>
+
+        {/* Intereses */}
+        <InterestsSelector
+          selected={interests}
+          onToggle={(name) => {
+            setInterests((prev) =>
+              prev.includes(name)
+                ? prev.filter((i) => i !== name)
+                : [...prev, name]
+            );
+          }}
+        />
+
+        {/* Logout */}
+        <div className="pt-4 border-t border-[#197387]/20">
+          <button className="w-full h-12 rounded-full bg-[#0A0E12]/50 border border-[#197387]/30 hover:bg-[#0A0E12]/80 text-[#C5C5C5] hover:text-white transition-all duration-300 flex items-center justify-center gap-2">
+            <LogOut className="w-5 h-5" />
+            Cerrar sesión
+          </button>
+        </div>
+      </div>
+
+      {/* Save Button */}
+      <div className="p-6 bg-[#0F2B33]/80 backdrop-blur-xl border-t border-[#197387]/20">
+        <button
+          disabled={isSaving}
+          onClick={handleSave}
+          className="w-full h-14 rounded-full bg-linear-to-r from-[#197387] to-[#15657a] text-white hover:shadow-lg transition-all"
+        >
+          {isSaving ? "Guardando..." : "Guardar cambios"}
+        </button>
+      </div>
+      <BottomNav activeTab="profile" onTabChange={(tab) => router.push(`/${tab === "profile" ? "profile" : tab}`)} />
+    </div>
+  );
 }

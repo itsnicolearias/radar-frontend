@@ -1,42 +1,102 @@
-import React from "react"
+"use client"
+
+import type React from "react"
 import { motion } from "framer-motion"
-import { X } from "lucide-react"
+import { MessageCircle, User } from "lucide-react"
 import type { IRadarSignal } from "@radar/types"
 
 interface SignalDetailModalProps {
   signal: IRadarSignal
   onClose: () => void
   onRespond: (signal: IRadarSignal) => void
+  onViewProfile: () => void
 }
 
-export const SignalDetailModal: React.FC<SignalDetailModalProps> = ({ signal, onClose, onRespond }) => {
+export const SignalDetailModal: React.FC<SignalDetailModalProps> = ({ signal, onClose, onRespond, onViewProfile }) => {
+
+  const formatRelativeTime = (date: string | Date) => {
+    const now = new Date()
+    const diffMs = now.getTime() - new Date(date).getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMins / 60)
+    const diffDays = Math.floor(diffHours / 24)
+
+    if (diffMins < 1) return "Ahora"
+    if (diffMins < 60) return `Hace ${diffMins}m`
+    if (diffHours < 24) return `Hace ${diffHours}h`
+    if (diffDays === 1) return "Ayer"
+    return `Hace ${diffDays} días`
+  }
+
+
+  const formatDistance = (distance?: number) => {
+    if (!distance) return "Cerca"
+    if (distance < 1000) return `${Math.round(distance)}m`
+    return `${(distance / 1000).toFixed(1)}km`
+  }
+
+
   return (
     <motion.div
       className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-8"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      onClick={onClose}
     >
-      <div className="bg-[#1A1A1A] rounded-3xl p-6 w-full max-w-sm border border-[#FF005C]/30 shadow-2xl">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-white">Señal de {signal.Sender.displayName}</h2>
-          <button
-            onClick={onClose}
-            className="w-10 h-10 bg-[#0D0D0D] rounded-full flex items-center justify-center transition-transform hover:scale-110 border border-transparent hover:border-[#FF005C]/30"
-          >
-            <X className="w-5 h-5 text-[#C5C5C5]" />
-          </button>
+      <motion.div
+        className="bg-[#0F2B33] rounded-3xl p-6 w-full max-w-sm border border-[#00FFB3]/30 shadow-2xl"
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* User info */}
+        <div className="flex flex-col items-center mb-6">
+          <div className="relative mb-3">
+            <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center text-black font-bold text-2xl border-2 border-[#FF005C]">
+              {signal.Sender.displayName?.[0]?.toUpperCase()}
+            </div>
+            {/* Online indicator */}
+            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-[#1DE3F2] border-2 border-[#0F2B33] rounded-full shadow-lg shadow-[#1DE3F2]/50" />
+          </div>
+          <h3 className="text-white font-bold text-lg">{signal.Sender.displayName}</h3>
+          <p className="text-[#1DE3F2] text-sm flex items-center gap-1">
+            <span>{formatDistance(signal.distance)} de distancia</span>
+          </p>
         </div>
-        <p className="text-[#C5C5C5] text-base leading-relaxed">{signal.note}</p>
-        <div className="mt-6">
+
+        {/* Signal message */}
+        <div className="bg-[#1A1A1A] rounded-2xl p-4 mb-2 border border-[#FF005C]/30">
+          <p className="text-white font-semibold text-center flex items-center justify-center gap-2">
+            {signal.note} 
+          </p>
+          <p className="text-[#C5C5C5] text-xs text-center mb-6">{formatRelativeTime(signal.createdAt)}</p>
+        </div>
+        
+
+        {/* Action buttons */}
+        <div className="space-y-3">
           <button
             onClick={() => onRespond(signal)}
-            className="w-full h-14 rounded-full bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-bold hover:shadow-lg transition-all duration-300 shadow-[#00FFB3]/30"
+            className="w-full h-12 rounded-full bg-linear-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-semibold hover:shadow-lg transition-all duration-300 shadow-[#00FFB3]/30 flex items-center justify-center gap-2"
           >
-            Responder
+            <MessageCircle className="w-5 h-5" />
+            Responder señal
+          </button>
+
+          <button
+            onClick={onViewProfile}
+            className="w-full h-12 rounded-full bg-[#1A1A1A] border border-[#00FFB3]/30 text-white font-medium hover:bg-[#1A1A1A]/80 transition-all flex items-center justify-center gap-2"
+          >
+            <User className="w-5 h-5" />
+            Ver perfil
           </button>
         </div>
-      </div>
+
+        <button onClick={onClose} className="w-full mt-4 text-[#C5C5C5] text-sm hover:text-white transition-colors">
+          Cerrar
+        </button>
+      </motion.div>
     </motion.div>
   )
 }

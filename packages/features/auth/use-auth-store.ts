@@ -10,6 +10,7 @@ interface AuthState {
   isVisible: boolean
   setAuth: (user: Partial<IUser>, profile: IProfile | null, token: string) => void
   setProfile: (profile: IProfile) => void
+  setUser: (user: IUser) => void
   toggleVisibility: () => Promise<void>
   logout: () => void
 }
@@ -27,6 +28,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ user, profile, token, isAuthenticated: true, isVisible: user.isVisible ?? true })
   },
   setProfile: (profile) => set({ profile }),
+  setUser: (user) => set({ user }),
   toggleVisibility: async () => {
     const currentVisibility = get().isVisible
     const newVisibility = !currentVisibility

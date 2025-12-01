@@ -34,42 +34,16 @@ export interface IVerifyEmailResponse {
   user: IUser
 }
 
-export interface IConnectionUser {
-  userId: string
-  firstName: string
-  lastName: string
-  email: string
-}
-
-export interface IConnectionResponse {
-  connectionId: string
-  senderId: string
-  receiverId: string
-  status: "pending" | "accepted" | "rejected"
-  createdAt: Date
-  updatedAt: Date
-  Sender: IConnectionUser
-  Receiver: IConnectionUser
-}
-
 export interface IDeleteConnectionResponse {
   message: string
 }
 
-export interface IConversationUser {
-  userId: string
-  displayName: string | null
-  isVerified: boolean
-  Profile: {
-    photoUrl: string | null
-  }
-}
 
 
 
 export interface IConversation {
   conversationId: string
-  user: IConversationUser
+  user: Partial<IRadarUser>
   lastMessage: ILastMessage
   unreadCount: number
 }
@@ -87,8 +61,8 @@ export interface IMessageResponse {
   isRead: boolean
   createdAt: Date
   updatedAt: Date
-  Sender: IConversationUser
-  Receiver: IConversationUser
+  Sender: Partial<IRadarUser>
+  Receiver: Partial<IRadarUser>
 }
 
 export interface IMarkAsReadResponse {
@@ -121,6 +95,15 @@ export interface IDeleteNotificationResponse {
   message: string
 }
 
+export interface UpdateProfileApi {
+  User: Partial<IUser>
+  Profile?: Partial<IProfile>
+}
+
+export interface UpdateProfileResponse {
+  success: boolean
+  data?: UpdateProfileApi
+}
 export interface IProfile {
   profileId?: string
   userId?: string
@@ -140,6 +123,10 @@ export interface IProfile {
   updatedAt?: Date
   User?: IUser
   age?: number | null
+  province?: string
+  country?: string
+  showAge?: boolean
+  showLocation?: boolean
 }
 
 export interface IProfileResponse extends IProfile {
@@ -168,26 +155,6 @@ export interface IProfileViewResponse {
   }
 }
 
-export interface IRadarUser {
-  userId: string
-  firstName: string
-  lastName: string
-  email: string
-  displayName: string | null
-  birthDate: Date | null
-  isVerified: boolean
-  lastLatitude: number | null
-  lastLongitude: number | null
-  lastSeenAt: Date | null
-  distance: number
-  Profile: {
-    photoUrl: string | null
-    bio: string | null
-    age: number | null
-    interests: string[] | null
-    province?: string
-  }
-}
 
 export interface IRadarSignal {
   signalId: string
@@ -241,12 +208,7 @@ export interface IVerifyEmailResponse {
   user: IUser
 }
 
-export interface IConnectionUser {
-  userId: string
-  firstName: string
-  lastName: string
-  email: string
-}
+
 
 export interface IConnectionResponse {
   connectionId: string
@@ -255,22 +217,14 @@ export interface IConnectionResponse {
   status: "pending" | "accepted" | "rejected"
   createdAt: Date
   updatedAt: Date
-  Sender: IConnectionUser
-  Receiver: IConnectionUser
+  Sender: Partial<IRadarUser>
+  Receiver: Partial<IRadarUser>
 }
 
 export interface IDeleteConnectionResponse {
   message: string
 }
 
-export interface IConversationUser {
-  userId: string
-  displayName: string | null
-  isVerified: boolean
-  Profile: {
-    photoUrl: string | null
-  }
-}
 
 export interface ILastMessage {
   content: string
@@ -316,26 +270,6 @@ export interface IDeleteNotificationResponse {
   message: string
 }
 
-export interface IProfile {
-  profileId?: string
-  userId?: string
-  photoUrl: string | null
-  bio: string | null
-  location?: string | null
-  website?: string | null
-  birthDate?: Date | null
-  gender?: string | null
-  pronouns?: string | null
-  height?: number | null
-  zodiac?: string | null
-  education?: string | null
-  work?: string | null
-  interests: string[] | null
-  createdAt?: Date
-  updatedAt?: Date
-  User?: IUser
-  age?: number | null
-}
 
 export interface IProfileResponse extends IProfile {
   profileId: string
@@ -381,6 +315,8 @@ export interface IRadarUser {
     age: number | null
     interests: string[] | null
     province?: string
+    showAge: boolean
+    showLocation: boolean
   }
 }
 
@@ -437,8 +373,8 @@ export interface IEventResponse {
   updatedAt: string
   distance?: number
   attendeesCount?: number
-  isInterested?: boolean
   category?: string
+  InterestedUsers?: IUser[]
 }
 
 export interface IEventCreatePayload {

@@ -21,7 +21,7 @@ export const EventCategoryFilter: React.FC<EventCategoryFilterProps> = ({
       <button
         onClick={() => onCategoryChange(null)}
         className={cn(
-          "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all flex-shrink-0",
+          "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all shrink-0",
           selectedCategory === null
             ? "bg-[#00FFB3] text-[#0E2A3E]"
             : "bg-[#1A3A4F] text-gray-400 hover:text-white border border-[#00FFB3]/20",
@@ -34,7 +34,7 @@ export const EventCategoryFilter: React.FC<EventCategoryFilterProps> = ({
           key={category}
           onClick={() => onCategoryChange(category)}
           className={cn(
-            "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all flex-shrink-0",
+            "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all shrink-0",
             selectedCategory === category
               ? "bg-[#00FFB3] text-[#0E2A3E]"
               : "bg-[#1A3A4F] text-gray-400 hover:text-white border border-[#00FFB3]/20",

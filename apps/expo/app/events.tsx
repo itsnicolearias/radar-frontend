@@ -5,6 +5,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from
 import { useRouter } from "expo-router"
 import { useEventsStore, useAuthStore } from "@radar/features"
 import { eventService } from "@radar/api"
+import { BottomNavNative } from "@radar/ui/navigation/bottom-nav.native"
 
 const { width } = Dimensions.get("window")
 const CATEGORIES = ["Todos", "Música", "Gastronomía", "Arte", "Deportes", "Social"]
@@ -72,7 +73,7 @@ export default function EventsScreen() {
             <TouchableOpacity
               key={category}
               style={[styles.categoryChip, selectedCategory === category && styles.categoryChipActive]}
-              onPress={() => setSelectedCategory("Todos")}
+              onPress={() => setSelectedCategory(selectedCategory === category ? "Todos" : category)}
             >
               <Text style={[styles.categoryText, selectedCategory === category && styles.categoryTextActive]}>
                 {category}
@@ -100,8 +101,11 @@ export default function EventsScreen() {
             <Text style={styles.emptySubtext}>Crea el primer evento de tu zona</Text>
           </View>
         ) : (
-          filteredEvents.map((event) => (
-            <TouchableOpacity
+          filteredEvents.map((event) => {
+            const isInterested = event?.InterestedUsers?.some((u) => u.userId === user?.userId)
+
+            return (
+              <TouchableOpacity
               key={event.eventId}
               style={styles.eventCard}
               onPress={() => router.push(`/events/${event.eventId}`)}
@@ -121,46 +125,37 @@ export default function EventsScreen() {
                 </Text>
                 <View style={styles.eventMeta}>
                   <Text style={styles.eventDate}>🕐 {formatDate(event.startDate)}</Text>
-                  <Text style={styles.eventAttendees}>👥 {event.attendeesCount || 0}</Text>
+                  <Text style={styles.eventAttendees}>👥 {event.InterestedUsers?.length || 0}</Text>
                 </View>
                 <View style={styles.eventFooter}>
                   <View style={styles.categoryBadge}>
                     <Text style={styles.categoryBadgeText}>{event.category}</Text>
                   </View>
                   <TouchableOpacity
-                    style={[styles.interestButton, event.isInterested && styles.interestButtonActive]}
-                    onPress={() => handleInterestClick(event.eventId, event.isInterested || false)}
+                    style={[styles.interestButton, isInterested && styles.interestButtonActive]}
+                    onPress={() => handleInterestClick(event.eventId, isInterested || false)}
                   >
-                    <Text style={[styles.interestButtonText, event.isInterested && styles.interestButtonTextActive]}>
-                      {event.isInterested ? "Me interesa ❤️" : "Me interesa"}
+                    <Text style={[styles.interestButtonText, isInterested && styles.interestButtonTextActive]}>
+                      {isInterested ? "Me interesa ❤️" : "No me interesa"}
                     </Text>
                   </TouchableOpacity>
                 </View>
               </View>
             </TouchableOpacity>
-          ))
+            )            
+          })
         )}
       </ScrollView>
 
       {/* Bottom Nav */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push("/radar")}>
-          <View style={styles.navIcon} />
-          <Text style={styles.navLabel}>Mapa</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push("/chats")}>
-          <View style={styles.navIcon} />
-          <Text style={styles.navLabel}>Chats</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <View style={[styles.navIcon, styles.navIconActive]} />
-          <Text style={[styles.navLabel, styles.navLabelActive]}>Eventos</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push("/profile")}>
-          <View style={styles.navIcon} />
-          <Text style={styles.navLabel}>Perfil</Text>
-        </TouchableOpacity>
-      </View>
+      <BottomNavNative
+              activeTab="events"
+              onTabChange={(tab) => {
+                if (tab === "chats") router.push("/chats")
+                else if (tab === "events") router.push("/events")
+                else if (tab === "profile") router.push("/profile")
+              }}
+            />
     </View>
   )
 }
@@ -168,10 +163,10 @@ export default function EventsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0E2A3E",
+    backgroundColor: "#000000",
   },
   header: {
-    backgroundColor: "#0E2A3E",
+    backgroundColor: "#000000",
     paddingHorizontal: 24,
     paddingTop: 60,
     paddingBottom: 16,
@@ -200,7 +195,7 @@ const styles = StyleSheet.create({
   createButtonText: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#0E2A3E",
+    color: "#000000",
   },
   categoriesScroll: {
     marginBottom: 12,
@@ -209,7 +204,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: "#1A3A4F",
+    backgroundColor: "#1A1A1A",
     marginRight: 8,
     borderWidth: 1,
     borderColor: "rgba(0, 255, 179, 0.2)",
@@ -221,28 +216,28 @@ const styles = StyleSheet.create({
   categoryText: {
     fontSize: 14,
     fontWeight: "500",
-    color: "#94A3B8",
+    color: "#8B8B8B",
   },
   categoryTextActive: {
-    color: "#0E2A3E",
+    color: "#000000",
   },
   myEventsButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: "#1A3A4F",
+    backgroundColor: "#1A1A1A",
     alignSelf: "flex-start",
     borderWidth: 1,
     borderColor: "rgba(0, 255, 179, 0.2)",
   },
   myEventsButtonActive: {
-    backgroundColor: "#FF4FD8",
-    borderColor: "#FF4FD8",
+    backgroundColor: "#FF005C",
+    borderColor: "#FF005C",
   },
   myEventsText: {
     fontSize: 14,
     fontWeight: "500",
-    color: "#94A3B8",
+    color: "#8B8B8B",
   },
   myEventsTextActive: {
     color: "#FFFFFF",
@@ -251,6 +246,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 24,
     paddingVertical: 16,
+    backgroundColor: "#000000",
   },
   emptyState: {
     flex: 1,
@@ -260,7 +256,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 18,
-    color: "#94A3B8",
+    color: "#8B8B8B",
     marginBottom: 8,
   },
   emptySubtext: {
@@ -268,7 +264,7 @@ const styles = StyleSheet.create({
     color: "#5A6E7A",
   },
   eventCard: {
-    backgroundColor: "#1A3A4F",
+    backgroundColor: "#0a0e27",
     borderRadius: 16,
     marginBottom: 16,
     borderWidth: 1,
@@ -285,7 +281,7 @@ const styles = StyleSheet.create({
   eventImageText: {
     fontSize: 48,
     fontWeight: "bold",
-    color: "#0E2A3E",
+    color: "#000000",
   },
   eventInfo: {
     padding: 16,
@@ -298,7 +294,7 @@ const styles = StyleSheet.create({
   },
   eventLocation: {
     fontSize: 14,
-    color: "#94A3B8",
+    color: "#8B8B8B",
     marginBottom: 8,
   },
   eventMeta: {
@@ -308,11 +304,11 @@ const styles = StyleSheet.create({
   },
   eventDate: {
     fontSize: 14,
-    color: "#94A3B8",
+    color: "#8B8B8B",
   },
   eventAttendees: {
     fontSize: 14,
-    color: "#94A3B8",
+    color: "#8B8B8B",
   },
   eventFooter: {
     flexDirection: "row",
@@ -337,12 +333,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#00FFB3",
   },
   interestButtonActive: {
-    backgroundColor: "#FF4FD8",
+    backgroundColor: "#FF005C",
   },
   interestButtonText: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#0E2A3E",
+    color: "#000000",
   },
   interestButtonTextActive: {
     color: "#FFFFFF",
@@ -351,16 +347,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    backgroundColor: "#000000",
+    borderTopWidth: 1,
+    borderTopColor: "rgba(0, 255, 179, 0.2)",
     paddingVertical: 16,
     paddingHorizontal: 24,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 10,
   },
   navItem: {
     alignItems: "center",
@@ -370,7 +361,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: "#5A6E7A",
+    backgroundColor: "#1A1A1A",
   },
   navIconActive: {
     backgroundColor: "#00FFB3",
@@ -378,7 +369,7 @@ const styles = StyleSheet.create({
   navLabel: {
     fontSize: 12,
     fontWeight: "500",
-    color: "#5A6E7A",
+    color: "#8B8B8B",
   },
   navLabelActive: {
     color: "#00FFB3",

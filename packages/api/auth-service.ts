@@ -7,10 +7,10 @@ export interface LoginInput {
 }
 
 export interface RegisterInput {
-  firstName: string
-  lastName: string
-  email: string
-  password: string
+  firstName?: string
+  lastName?: string
+  email?: string
+  password?: string
 }
 
 export const authService = {
