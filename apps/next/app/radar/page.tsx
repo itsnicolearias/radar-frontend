@@ -105,7 +105,7 @@ export default function RadarPage() {
     setSelectedUser(nearbyUser)
 
     try {
-      await profileViewService.registerProfileView(user.userId)
+      await profileViewService.registerProfileView(nearbyUser.userId)
     } catch (error) {
       console.error("Error registering profile view:", error)
     }
@@ -120,7 +120,7 @@ export default function RadarPage() {
     setSelectedUser(findUser)
 
     try {
-      await profileViewService.registerProfileView(user.userId)
+      await profileViewService.registerProfileView(senderId)
     } catch (error) {
       console.error("Error registering profile view:", error)
     }

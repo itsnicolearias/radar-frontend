@@ -269,8 +269,7 @@ export default function ChatsScreen() {
 
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.profileViewsScroll}>
                 {profileViews.map((view, index) => (
-                  
-                  <>                  
+                
                   <MotiView
                     key={view.profileViewId}
                     from={{ opacity: 0, scale: 0.8 }}
@@ -283,16 +282,14 @@ export default function ChatsScreen() {
                     >
                       <View style={styles.profileViewAvatarContainer}>
                         <View style={styles.profileViewAvatar}>
-                          <Text style={styles.profileViewAvatarText}>{view.Viewer.displayName![0]}</Text>
+                          <Text style={styles.profileViewAvatarText}>{view.Viewer.displayName?.[0] || "U"}</Text>
                         </View>
                         <View style={styles.onlineIndicator} />
                       </View>
-                      <Text style={styles.profileViewName}>{view.Viewer.displayName![0]}</Text>
+                      <Text style={styles.profileViewName}>{view.Viewer.displayName || "Usuario"}</Text>
                       <Text style={styles.profileViewTime}>{formatRelativeTime(view.createdAt)}</Text>
                     </TouchableOpacity>
-                  </MotiView>
-                  </>
-                  
+                  </MotiView>                 
                 ))}
               </ScrollView>
             </View>

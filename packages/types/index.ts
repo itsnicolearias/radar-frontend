@@ -102,7 +102,7 @@ export interface UpdateProfileApi {
 
 export interface UpdateProfileResponse {
   success: boolean
-  data: Partial<UpdateProfileApi>
+  data?: UpdateProfileApi
 }
 export interface IProfile {
   profileId?: string
