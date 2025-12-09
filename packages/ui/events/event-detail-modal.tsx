@@ -32,7 +32,7 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({ event, onClo
             <strong>Ubicación:</strong> {event.location}
           </p>
           <p className="text-sm text-white">
-            <strong>Fecha:</strong> {new Date(event.date).toLocaleDateString("es-AR")}
+            <strong>Fecha:</strong> {new Date(event.startDate).toLocaleDateString("es-AR")}
           </p>
         </div>
       </div>

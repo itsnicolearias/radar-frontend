@@ -4,7 +4,7 @@ import { useEffect } from "react"
 import { useNotificationStore } from "../notification/use-notification-store"
 import { notificationService } from "@radar/api"
 import { useSocketEvent } from "../socket/use-socket"
-import type { Notification } from "@radar/types"
+import type { INotificationResponse } from "@radar/types"
 
 export const useNotifications = () => {
   const { notifications, unreadCount, setNotifications, setUnreadCount, addNotification } = useNotificationStore()
@@ -18,7 +18,7 @@ export const useNotifications = () => {
           notificationService.getUnreadCount(),
         ])
         setNotifications(notifs)
-        setUnreadCount(count)
+        setUnreadCount(count.count)
       } catch (error) {
         console.error("[v0] Error fetching notifications:", error)
       }
@@ -28,7 +28,7 @@ export const useNotifications = () => {
   }, [setNotifications, setUnreadCount])
 
   // Listen for new notifications via Socket.io
-  useSocketEvent<Notification>(
+  useSocketEvent<INotificationResponse>(
     "new-notification",
     (notification) => {
       addNotification(notification)
