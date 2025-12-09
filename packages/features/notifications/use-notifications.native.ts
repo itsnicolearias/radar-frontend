@@ -5,7 +5,7 @@ import * as Notifications from "expo-notifications"
 import { useNotificationStore } from "../notification/use-notification-store"
 import { notificationService } from "@radar/api"
 import { useSocketEvent } from "../socket/use-socket"
-import type { Notification } from "@radar/types"
+import type { INotificationResponse } from "@radar/types"
 
 // Configure notification handler
 Notifications.setNotificationHandler({
@@ -33,7 +33,7 @@ export const useNotifications = () => {
           notificationService.getUnreadCount(),
         ])
         setNotifications(notifs)
-        setUnreadCount(count)
+        setUnreadCount(count.count)
       } catch (error) {
         console.error("[v0] Error fetching notifications:", error)
       }
@@ -43,7 +43,7 @@ export const useNotifications = () => {
   }, [setNotifications, setUnreadCount])
 
   // Listen for new notifications via Socket.io
-  useSocketEvent<Notification>(
+  useSocketEvent<INotificationResponse>(
     "new-notification",
     async (notification) => {
       addNotification(notification)
