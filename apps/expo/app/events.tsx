@@ -39,7 +39,8 @@ export default function EventsScreen() {
       } else {
         await eventService.markInterest(eventId)
       }
-      toggleInterest(eventId)
+      isInterested = !isInterested
+      toggleInterest(eventId, !isInterested)
     } catch (error) {
       console.error("[v0] Error toggling interest:", error)
     }
@@ -136,7 +137,7 @@ export default function EventsScreen() {
                       onPress={() => handleInterestClick(event.eventId, isInterested || false)}
                     >
                       <Text style={[styles.interestButtonText, isInterested && styles.interestButtonTextActive]}>
-                        {isInterested ? "Me interesa ❤️" : "No me interesa"}
+                        {isInterested ? "No me interesa" : "Me interesa ❤️"}
                       </Text>
                     </TouchableOpacity>
                   </View>

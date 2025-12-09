@@ -3,8 +3,8 @@ import type { IProfile, IProfileResponse, IDeleteProfileResponse, IUser, UpdateP
 
 export const profileService = {
   async getMyProfile(): Promise<IProfileResponse> {
-    const response = await axiosClient.get<IProfileResponse>("/profile")
-    return response.data
+    const response = await axiosClient.get("/profile")
+    return response.data.data
   },
 
   async createMyProfile(data: IProfile): Promise<IProfileResponse> {

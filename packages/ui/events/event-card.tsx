@@ -132,7 +132,7 @@ export const EventCard: React.FC<EventCardProps> = ({
           )}
         >
           <Heart className={cn("w-4 h-4", isInterested && "fill-current")} />
-          {isInterested ? "Me interesa ❤️" : "No me interesa"}
+          {isInterested ? "No me interesa" : "Me interesa ❤️"}
         </button>
 
         {price > 0 && (

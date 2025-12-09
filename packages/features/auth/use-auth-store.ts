@@ -37,7 +37,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       // profileService.getMyProfile returns IProfileResponse which contains User
       // set auth with returned User and profile
-      set({ user: response.User ?? null, profile: response as any, token, isAuthenticated: true })
+      set({ user: response.User ?? null, profile: response, token, isAuthenticated: true })
     } catch (error) {
       try {
         if (globalThis.localStorage) globalThis.localStorage.removeItem("radar_token")

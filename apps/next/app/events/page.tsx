@@ -38,7 +38,8 @@ export default function EventsPage() {
       } else {
         await eventService.markInterest(eventId)
       }
-      toggleInterest(eventId)
+      isInterested = !isInterested
+      toggleInterest(eventId, isInterested)
     } catch (error) {
       console.error("[v0] Error toggling interest:", error)
     }
@@ -106,7 +107,7 @@ export default function EventsPage() {
         ) : (
           filteredEvents.map((event) => {
 
-            const isInterested = event?.InterestedUsers.some((u) => u.userId === user.userId)
+            const isInterested = event?.InterestedUsers.some((u) => u.userId === user?.userId)
             return (
               <EventCard
               key={event.eventId}
