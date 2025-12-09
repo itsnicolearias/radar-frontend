@@ -315,6 +315,7 @@ export interface IRadarUser {
     age: number | null
     interests: string[] | null
     province?: string
+    country?: string
     showAge: boolean
     showLocation: boolean
   }
@@ -378,16 +379,16 @@ export interface IEventResponse {
 }
 
 export interface IEventCreatePayload {
-  title: string
-  description: string
-  location: string
-  latitude: number
-  longitude: number
-  startDate: string
-  endDate: string
-  isPublic: boolean
-  maxAttendees: number
-  price: number
+  title?: string
+  description?: string
+  location?: string
+  latitude?: number
+  longitude?: number
+  startDate?: string
+  endDate?: string
+  isPublic?: boolean
+  maxAttendees?: number
+  price?: number
 }
 
 export interface IEventsListResponse {

@@ -25,7 +25,7 @@ export default function CreateEventScreen() {
       latitude: latitude || 0,
       longitude: longitude || 0,
       isPublic: true,
-      maxAttendees: 50,
+      category: "",
       price: 0,
     },
   })
@@ -156,24 +156,39 @@ export default function CreateEventScreen() {
           </View> 
           */}
 
-          {/* Max Attendees */}
+
+          {/* Category */}
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Asistentes máximos</Text>
+            <Text style={styles.label}>Categoría *</Text>
             <Controller
               control={control}
-              name="maxAttendees"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput
-                  style={styles.input}
-                  placeholder="50"
-                  placeholderTextColor="#5A6E7A"
-                  keyboardType="numeric"
-                  onBlur={onBlur}
-                  onChangeText={(text) => onChange(Number.parseInt(text) || 0)}
-                  value={value?.toString()}
-                />
+              name="category"
+              render={({ field: { onChange, value } }) => (
+                <View style={styles.categoryContainer}>
+                  {[
+                    "social",
+                    "deportes",
+                    "música",
+                    "arte",
+                    "gastronomía",
+                    "educación",
+                    "tecnología",
+                    "otro",
+                  ].map((cat) => (
+                    <TouchableOpacity
+                      key={cat}
+                      style={[styles.categoryOption, value === cat && styles.categoryOptionActive]}
+                      onPress={() => onChange(cat)}
+                    >
+                      <Text style={[styles.categoryOptionText, value === cat && styles.categoryOptionTextActive]}>
+                        {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
               )}
             />
+            {errors.category && <Text style={styles.errorText}>{errors.category.message}</Text>}
           </View>
 
           {/* Price */}
