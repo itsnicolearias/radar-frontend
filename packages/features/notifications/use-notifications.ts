@@ -18,7 +18,7 @@ export const useNotifications = () => {
           notificationService.getUnreadCount(),
         ])
         setNotifications(notifs)
-        setUnreadCount(count.count)
+        setUnreadCount(count.count ?? 0)
       } catch (error) {
         console.error("[v0] Error fetching notifications:", error)
       }

@@ -1,3 +1,5 @@
+"use client"
+
 import { View, Text, StyleSheet, Dimensions } from "react-native"
 import { Link } from "expo-router"
 import { LinearGradient } from "expo-linear-gradient"
