@@ -2,6 +2,61 @@ import { create } from "zustand"
 import type { IUser, IProfile } from "@radar/types"
 import { userService } from "@radar/api"
 
+// helpers de storage (lazy require para no romper web bundle)
+let SecureStore: any = null
+try {
+  SecureStore = require("expo-secure-store")
+} catch (e) {
+  SecureStore = null
+}
+
+const TOKEN_KEY = "radar_token"
+
+async function saveToken(token: string | null) {
+  try {
+    if (typeof window !== "undefined" && window.localStorage) {
+      if (token === null) {
+        window.localStorage.removeItem(TOKEN_KEY)
+      } else {
+        window.localStorage.setItem(TOKEN_KEY, token)
+      }
+      return
+    }
+
+    if (SecureStore && SecureStore.setItemAsync) {
+      if (token === null) {
+        await SecureStore.deleteItemAsync(TOKEN_KEY)
+      } else {
+        await SecureStore.setItemAsync(TOKEN_KEY, token)
+      }
+      return
+    }
+  } catch (e) {
+    // no queremos romper la app por un fallo de storage en dev
+    // pero lo logeamos para debuggueo
+    console.warn("saveToken error", e)
+  }
+}
+
+async function getToken(): Promise<string | null> {
+  try {
+    if (typeof window !== "undefined" && window.localStorage) {
+      return window.localStorage.getItem(TOKEN_KEY)
+    }
+    if (SecureStore && SecureStore.getItemAsync) {
+      const t = await SecureStore.getItemAsync(TOKEN_KEY)
+      return t
+    }
+  } catch (e) {
+    // ignore
+  }
+  return null
+}
+
+async function removeToken() {
+  await saveToken(null)
+}
+
 interface AuthState {
   user: Partial<IUser> | null
   profile: IProfile | null
@@ -24,23 +79,27 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isVisible: true,
   rehydrate: async () => {
     try {
-      if (!globalThis.localStorage) return
-      const token = globalThis.localStorage.getItem("radar_token")
+      const token = await getToken()
       if (!token) {
         set({ user: null, profile: null, token: null, isAuthenticated: false })
         return
       }
 
-      // Try to fetch profile which includes the User
+      // Si usamos userService que depende de axios interceptors,
+      // asegúrate que axios client use la misma clave y getToken en su interceptor
       const { profileService } = await import("@radar/api")
       const response = await profileService.getMyProfile()
 
-      // profileService.getMyProfile returns IProfileResponse which contains User
-      // set auth with returned User and profile
-      set({ user: response.User ?? null, profile: response, token, isAuthenticated: true })
+      set({
+        user: (response?.User as Partial<IUser>) ?? null,
+        profile: (response as unknown as IProfile) ?? null,
+        token,
+        isAuthenticated: true,
+        isVisible: (response?.User?.isVisible ?? true),
+      })
     } catch (error) {
       try {
-        if (globalThis.localStorage) globalThis.localStorage.removeItem("radar_token")
+        await removeToken()
       } catch (e) {
         // ignore
       }
@@ -48,9 +107,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
   setAuth: (user, profile, token) => {
-    if (globalThis.localStorage) {
-      globalThis.localStorage.setItem("radar_token", token)
-    }
+    // guardamos token de forma asíncrona (fire-and-forget) para no romper callers
+    saveToken(token).catch(() => {
+      /* noop */
+    })
     set({ user, profile, token, isAuthenticated: true, isVisible: user.isVisible ?? true })
   },
   setProfile: (profile) => set({ profile }),
@@ -72,21 +132,24 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
   logout: () => {
-    if (globalThis.localStorage) {
-      globalThis.localStorage.removeItem("radar_token")
-    }
+    // limpieza local (fire-and-forget)
+    removeToken().catch(() => {
+      /* noop */
+    })
     set({ user: null, profile: null, token: null, isAuthenticated: false })
   },
 }))
 
-// Listen for global logout events (dispatched by axios interceptors)
+// Listen for global logout events (dispatched por axios interceptors)
 import { onLogout } from "../../common/event-bus"
 
 if (typeof globalThis !== "undefined") {
-  // Register cross-platform logout listener
   onLogout(() => {
     try {
-      if (globalThis.localStorage) globalThis.localStorage.removeItem("radar_token")
+      // quitamos token y limpiamos store
+      removeToken().catch(() => {
+        /* noop */
+      })
     } catch (e) {
       // ignore
     }

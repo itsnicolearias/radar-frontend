@@ -47,8 +47,8 @@ export default function RadarPage() {
       if (!currentLocation || !isVisible) return
       try {
         const { users, events, signals } = await radarService.getNearby(
-          currentLocation.latitude,
-          currentLocation.longitude,
+          currentLocation.latitude || user.lastLatitude,
+          currentLocation.longitude || user.lastLongitude,
           radius,
         )
         setNearbyUsers(users)
