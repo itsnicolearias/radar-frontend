@@ -5,14 +5,14 @@
     "scheme": "radar",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/abrir-perfil-radar.jpg",
+    "icon": "./assets/radar-app-icon-1024x1024.png",
     "userInterfaceStyle": "dark",
     "splash": {
-      "image": "./assets/abrir-perfil-radar.jpg",
+      "image": "./assets/R_A_D_A_R__está_escuchando__version_1.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0A1628"
+      "backgroundColor": "#000000"
     },
-     "experiments": {
+    "experiments": {
       "reactCanary": true
     },
     "assetBundlePatterns": [
@@ -24,23 +24,23 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/abrir-perfil-radar.jpg",
-        "backgroundColor": "#0A1628"
+        "foregroundImage": "./assets/radar-app-icon-1024x1024.png",
+        "backgroundColor": "#000000"
       },
       "package": "com.radar.app"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/radar-app-icon-64x64.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "expo-secure-store"
     ],
     "extra": {
       "router": {},
       "eas": {
         "projectId": "331aed76-dc01-4191-8aa6-f69fb298f553"
       }
-    
     }
   }
 }
