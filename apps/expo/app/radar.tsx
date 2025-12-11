@@ -250,7 +250,7 @@ export default function RadarScreen() {
         {isVisible &&
           nearbyUsers.map((nearbyUser, index) => {
             const hasSignal = nearbySignals.some((s) => s.senderId === nearbyUser.userId)
-            const findSignal = nearbySignals.findLast((s) => s.senderId === nearbyUser.userId)
+            const findSignal = nearbySignals.find((s) => s.senderId === nearbyUser.userId)
             const position = getMarkerPosition(index, nearbyUsers.length, nearbyUser.distance, "user")
             return (
               <UserMarkerNative
