@@ -1,6 +1,6 @@
 "use client"
 
-import { View, Text, StyleSheet, Dimensions } from "react-native"
+import { View, Text, StyleSheet, Dimensions, Pressable } from "react-native"
 import { Link } from "expo-router"
 import { LinearGradient } from "expo-linear-gradient"
 import { MotiView, MotiText } from "moti"
@@ -21,7 +21,7 @@ export default function WelcomeScreen() {
   return (
     <View style={styles.container}>
       {/* Glow central como en Next */}
-      <View style={styles.radialGlow} />
+      <View style={styles.radialGlow} pointerEvents="none" />
 
       {/* Partículas animadas */}
       {PARTICLES.map((p) => (
@@ -39,6 +39,7 @@ export default function WelcomeScreen() {
             repeat: Infinity,
             easing: Easing.inOut(Easing.ease),
           }}
+          pointerEvents="none"
           style={[
             styles.particle,
             { left: `${p.x}%`, top: `${p.y}%` },
@@ -62,6 +63,7 @@ export default function WelcomeScreen() {
                 delay: ring * 300,
                 easing: Easing.inOut(Easing.ease),
               }}
+              pointerEvents="none"
               style={[
                 styles.ring,
                 {
@@ -83,6 +85,7 @@ export default function WelcomeScreen() {
               repeat: Infinity,
               easing: Easing.out(Easing.ease),
             }}
+            pointerEvents="none"
             style={styles.sonarWave}
           />
 
@@ -101,6 +104,7 @@ export default function WelcomeScreen() {
               repeat: Infinity,
               easing: Easing.inOut(Easing.ease),
             }}
+            pointerEvents="none"
             style={styles.centerDot}
           />
 
@@ -113,9 +117,10 @@ export default function WelcomeScreen() {
               repeat: Infinity,
               easing: Easing.linear,
             }}
+            pointerEvents="none"
             style={styles.scanWrapper}
           >
-            <View style={styles.scanLine} />
+            <View style={styles.scanLine} pointerEvents="none" />
           </MotiView>
         </View>
 
@@ -149,7 +154,7 @@ export default function WelcomeScreen() {
           transition={{ duration: 600, delay: 300 }}
         >
           <Link href="/register" asChild>
-            <View style={styles.primaryButton}>
+            <Pressable style={styles.primaryButton}>
               <LinearGradient
                 colors={["#00FFB3", "#1DE3F2"]}
                 start={{ x: 0, y: 0 }}
@@ -158,7 +163,7 @@ export default function WelcomeScreen() {
               >
                 <Text style={styles.primaryButtonText}>Registrarme</Text>
               </LinearGradient>
-            </View>
+            </Pressable>
           </Link>
         </MotiView>
 
@@ -169,9 +174,9 @@ export default function WelcomeScreen() {
           transition={{ duration: 600, delay: 450 }}
         >
           <Link href="/login" asChild>
-            <View style={styles.secondaryButton}>
+            <Pressable style={styles.secondaryButton}>
               <Text style={styles.secondaryButtonText}>Iniciar sesión</Text>
-            </View>
+            </Pressable>
           </Link>
         </MotiView>
       </View>
