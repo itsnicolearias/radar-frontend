@@ -6,26 +6,28 @@ import { useNotificationStore } from "../notification/use-notification-store"
 import { notificationService } from "@radar/api"
 import { useSocketEvent } from "../socket/use-socket"
 import type { INotificationResponse } from "@radar/types"
+import { useAuthStore } from "../auth/use-auth-store"
 
-// Configure notification handler
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
     shouldShowList: true,
-    shouldShowBanner: false
+    shouldShowBanner: false,
   }),
 })
 
 export const useNotifications = () => {
   const { notifications, unreadCount, setNotifications, setUnreadCount, addNotification } = useNotificationStore()
+  const { isAuthenticated } = useAuthStore()
 
   const notificationListener = useRef<Notifications.Subscription>(null)
   const responseListener = useRef<Notifications.Subscription>(null)
 
-  // Fetch notifications on mount
   useEffect(() => {
+    if (!isAuthenticated) return
+
     const fetchNotifications = async () => {
       try {
         const [notifs, count] = await Promise.all([
@@ -40,30 +42,28 @@ export const useNotifications = () => {
     }
 
     fetchNotifications()
-  }, [setNotifications, setUnreadCount])
+  }, [isAuthenticated, setNotifications, setUnreadCount])
 
-  // Listen for new notifications via Socket.io
   useSocketEvent<INotificationResponse>(
     "new-notification",
     async (notification) => {
       addNotification(notification)
 
-      // Show local notification
       await Notifications.scheduleNotificationAsync({
         content: {
           title: "Radar",
           body: notification.message,
           data: { notificationId: notification.notificationId },
         },
-        trigger: null, // Show immediately
+        trigger: null,
       })
     },
     [addNotification],
   )
 
-  // Setup notification listeners
   useEffect(() => {
-    // Request permissions
+    if (!isAuthenticated) return
+
     const requestPermissions = async () => {
       const { status } = await Notifications.requestPermissionsAsync()
       if (status !== "granted") {
@@ -73,15 +73,12 @@ export const useNotifications = () => {
 
     requestPermissions()
 
-    // Listen for notifications received while app is foregrounded
     notificationListener.current = Notifications.addNotificationReceivedListener((notification) => {
       console.log("[v0] Notification received:", notification)
     })
 
-    // Listen for user interactions with notifications
     responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
       console.log("[v0] Notification response:", response)
-      // Handle navigation based on notification data
     })
 
     return () => {
@@ -92,7 +89,7 @@ export const useNotifications = () => {
         responseListener.current.remove()
       }
     }
-  }, [])
+  }, [isAuthenticated])
 
   return {
     notifications,

@@ -13,7 +13,7 @@ interface EventsState {
   addEvent: (event: IEventResponse) => void
   updateEvent: (eventId: string, event: Partial<IEventResponse>) => void
   removeEvent: (eventId: string) => void
-  toggleInterest: (eventId: string, isInterested: boolean) => void
+  toggleInterest: (eventId: string, userId: string) => void
   setSelectedCategory: (category: string | null) => void
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
@@ -66,11 +66,19 @@ export const useEventsStore = create<EventsState>()(
         state.myEvents = state.myEvents.filter((e) => e.eventId !== eventId)
       }),
 
-    toggleInterest: (eventId, isInterested) =>
+    toggleInterest: (eventId, userId) =>
       set((state) => {
         const event = state.events.find((e) => e.eventId === eventId)
         if (event) {
-          isInterested = !isInterested
+          const isCurrentlyInterested = event.InterestedUsers?.some((u) => u.userId === userId)
+          if (isCurrentlyInterested) {
+            event.InterestedUsers = event.InterestedUsers?.filter((u) => u.userId !== userId) || []
+          } else {
+            if (!event.InterestedUsers) {
+              event.InterestedUsers = []
+            }
+            event.InterestedUsers.push({ userId } as any)
+          }
         }
       }),
 

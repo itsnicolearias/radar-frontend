@@ -1,10 +1,11 @@
 "use client"
 
-import { View, Text, TextInput, Pressable, StyleSheet, Alert, ScrollView } from "react-native"
+import { View, Text, TextInput, Pressable, StyleSheet, Alert, ScrollView, TouchableOpacity } from "react-native"
 import { useState } from "react"
 import { useRouter } from "expo-router"
 import { authService } from "@radar/api"
 import { useAuthStore } from "@radar/features"
+import { ArrowLeft } from "lucide-react-native"
 
 export default function RegisterScreen() {
   const router = useRouter()
@@ -46,6 +47,10 @@ export default function RegisterScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <ArrowLeft size={24} color="#00FFB3" />
+      </TouchableOpacity>
+
       <Text style={styles.title}>Crear cuenta</Text>
       <Text style={styles.subtitle}>Unite a Radar y empezá a conectar</Text>
 
@@ -111,6 +116,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 48,
     gap: 32,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(0, 255, 179, 0.3)",
+    backgroundColor: "#101010",
+    alignItems: "center",
+    justifyContent: "center",
   },
   title: {
     fontSize: 32,

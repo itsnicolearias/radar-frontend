@@ -6,6 +6,7 @@ import { useRouter } from "expo-router"
 import { useEventsStore, useAuthStore } from "@radar/features"
 import { eventService } from "@radar/api"
 import { BottomNavNative } from "@radar/ui/navigation/bottom-nav.native"
+import { formatDistance } from "../../../lib/utils/format-distance"
 
 const { width } = Dimensions.get("window")
 const CATEGORIES = ["Todos", "Música", "Gastronomía", "Arte", "Deportes", "Social"]
@@ -39,8 +40,8 @@ export default function EventsScreen() {
       } else {
         await eventService.markInterest(eventId)
       }
-      isInterested = !isInterested
-      toggleInterest(eventId, !isInterested)
+      // Update local state immediately
+      toggleInterest(eventId, user!.userId!)
     } catch (error) {
       console.error("[v0] Error toggling interest:", error)
     }
@@ -59,7 +60,6 @@ export default function EventsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <Text style={styles.title}>Eventos Cercanos</Text>
@@ -68,7 +68,6 @@ export default function EventsScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Category filter */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesScroll}>
           {CATEGORIES.map((category) => (
             <TouchableOpacity
@@ -83,7 +82,6 @@ export default function EventsScreen() {
           ))}
         </ScrollView>
 
-        {/* My events toggle */}
         <TouchableOpacity
           style={[styles.myEventsButton, showMyEvents && styles.myEventsButtonActive]}
           onPress={() => setShowMyEvents(!showMyEvents)}
@@ -94,7 +92,6 @@ export default function EventsScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Events list */}
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {filteredEvents.length === 0 ? (
           <View style={styles.emptyState}>
@@ -111,18 +108,16 @@ export default function EventsScreen() {
                 style={styles.eventCard}
                 onPress={() => router.push(`/events/${event.eventId}`)}
               >
-                {/* Event image placeholder */}
                 <View style={styles.eventImage}>
                   <Text style={styles.eventImageText}>{event.title[0]}</Text>
                 </View>
 
-                {/* Event info */}
                 <View style={styles.eventInfo}>
                   <Text style={styles.eventTitle} numberOfLines={1}>
                     {event.title}
                   </Text>
                   <Text style={styles.eventLocation} numberOfLines={1}>
-                    📍 {event.location} · {event.distance ? `${(event.distance / 1000).toFixed(1)} km` : "Cerca"}
+                    📍 {event.location} · {formatDistance(event.distance)}
                   </Text>
                   <View style={styles.eventMeta}>
                     <Text style={styles.eventDate}>🕐 {formatDate(event.startDate)}</Text>
@@ -148,7 +143,6 @@ export default function EventsScreen() {
         )}
       </ScrollView>
 
-      {/* Bottom Nav */}
       <BottomNavNative
         activeTab="events"
         onTabChange={(tab) => {
@@ -343,36 +337,5 @@ const styles = StyleSheet.create({
   },
   interestButtonTextActive: {
     color: "#FFFFFF",
-  },
-  bottomNav: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    backgroundColor: "#000000",
-    borderTopWidth: 1,
-    borderTopColor: "rgba(0, 255, 179, 0.2)",
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-  },
-  navItem: {
-    alignItems: "center",
-    gap: 4,
-  },
-  navIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: "#1A1A1A",
-  },
-  navIconActive: {
-    backgroundColor: "#00FFB3",
-  },
-  navLabel: {
-    fontSize: 12,
-    fontWeight: "500",
-    color: "#8B8B8B",
-  },
-  navLabelActive: {
-    color: "#00FFB3",
   },
 })

@@ -85,8 +85,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         return
       }
 
-      // Si usamos userService que depende de axios interceptors,
-      // asegúrate que axios client use la misma clave y getToken en su interceptor
       const { profileService } = await import("@radar/api")
       const response = await profileService.getMyProfile()
 

@@ -22,7 +22,7 @@ export const SendSignalModal: React.FC<SendSignalModalProps> = ({ onClose, onSen
 
   return (
     <motion.div
-      className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-8"
+      className="fixed inset-0 bg-black/90 backdrop-blur-sm z-[9999] flex items-center justify-center p-8"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}

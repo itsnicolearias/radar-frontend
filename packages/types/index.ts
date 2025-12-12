@@ -141,20 +141,6 @@ export interface IDeleteProfileResponse {
   message: string
 }
 
-export interface IProfileViewResponse {
-  profileViewId: string
-  viewerId: string
-  viewedId: string
-  createdAt: Date
-  updatedAt: Date
-  Viewer: {
-    userId: string
-    firstName: string
-    lastName: string
-    displayName: string | null
-  }
-}
-
 
 export interface IRadarSignal {
   signalId: string
@@ -294,6 +280,7 @@ export interface IProfileViewResponse {
     firstName: string
     lastName: string
     displayName: string | null
+    Profile: Partial<IProfile>
   }
 }
 
