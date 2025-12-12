@@ -8,6 +8,7 @@ import { useChatStore, useConnectionStore, useSocketEvent, useProfileViewsStore,
 import { messageService, connectionService, profileViewService } from "@radar/api"
 import type { IConnectionResponse, IMessageResponse } from "@radar/types"
 import { BottomNav } from "@radar/ui"
+import { formatDistance } from "../../../../lib/utils/format-distance"
 
 export default function ChatsPage() {
   const router = useRouter()
@@ -76,12 +77,6 @@ export default function ChatsPage() {
     return messageDate.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit" })
   }
 
-  const formatDistance = (distance?: number) => {
-    if (!distance) return "Cerca"
-    if (distance < 1000) return `${Math.round(distance)}m`
-    return `${(distance / 1000).toFixed(1)}km`
-  }
-
   const handleAcceptConnection = async (connectionId: string) => {
     try {
       await connectionService.updateConnection(connectionId, "accepted")
@@ -131,9 +126,7 @@ export default function ChatsPage() {
         <button
           onClick={() => setActiveTab("chats")}
           className={`flex-1 py-3 rounded-full transition-all duration-300 flex items-center justify-center gap-2 relative ${
-            activeTab === "chats"
-              ? "bg-linear-to-r from-[#00FFB3] to-[#1DE3F2] text-black shadow-lg"
-              : "text-white/70"
+            activeTab === "chats" ? "bg-linear-to-r from-[#00FFB3] to-[#1DE3F2] text-black shadow-lg" : "text-white/70"
           }`}
         >
           <MessageCircle className="w-4 h-4" />
@@ -255,11 +248,14 @@ export default function ChatsPage() {
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
                         <div>
-                          <h3 className="font-semibold text-white text-base">{request.Sender.Profile.showAge ? `${request.Sender.displayName}, ${request.Sender.Profile.age}` : request.Sender.displayName}</h3>
+                          <h3 className="font-semibold text-white text-base">
+                            {request.Sender.Profile.showAge
+                              ? `${request.Sender.displayName}, ${request.Sender.Profile.age}`
+                              : request.Sender.displayName}
+                          </h3>
                           <div className="flex items-center gap-1 mt-1">
                             <div className="w-2 h-2 bg-[#1DE3F2] rounded-full" />
                             <span className="text-xs text-[#1DE3F2]">{formatDistance(request.Sender?.distance)}</span>
-                            {/**<span className="text-xs text-[#1DBF73]"> • 3 intereses en común</span> */}
                           </div>
                         </div>
                       </div>
@@ -350,6 +346,7 @@ export default function ChatsPage() {
                       className="bg-[#1A1A1A] border border-[#00FFB3]/20 rounded-2xl p-4 flex items-center justify-between"
                     >
                       <div className="flex items-center gap-3">
+                        {/* Avatar */}
                         <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center border-2 border-[#00FFB3]/50">
                           <span className="text-[#1A1A1A] font-semibold">{connectedUser.displayName?.[0] || "A"}</span>
                         </div>

@@ -1,67 +1,123 @@
-import React, { useState } from "react";
-import { View, Text, ScrollView, TextInput, TouchableOpacity, StyleSheet, Image } from "react-native";
-import { ArrowLeft, Settings, Eye, EyeOff, LogOut, Crown, Zap, Check, MapPin, Radio } from "lucide-react-native";
-import { useAuthStore } from "@radar/features";
-import { profileService } from "@radar/api";
-import { BottomNavNative } from "@radar/ui/navigation/bottom-nav.native";
-import { useRouter } from "expo-router";
+"use client"
+
+import { useState } from "react"
+import { View, Text, ScrollView, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from "react-native"
+import { ArrowLeft, Settings, Eye, EyeOff, LogOut, Crown, Zap, Check, MapPin, Radio } from "lucide-react-native"
+import { useAuthStore } from "@radar/features"
+import { profileService, uploadService } from "@radar/api"
+import { BottomNavNative } from "@radar/ui/navigation/bottom-nav.native"
+import { useRouter } from "expo-router"
+import * as ImagePicker from "expo-image-picker"
 
 export default function ProfileScreen() {
-  const { user, profile } = useAuthStore();
+  const { user, profile, setProfile, setUser } = useAuthStore()
   const router = useRouter()
 
-  const [displayName, setDisplayName] = useState(user?.displayName || "");
-  const [firstName, setFirstName] = useState(user?.firstName || "");
-  const [lastName, setLastName] = useState(user?.lastName || "");
-  const [bio, setBio] = useState(profile?.bio || "");
-  const [age, setAge] = useState(String(profile?.age || ""));
-  const [country, setCountry] = useState(profile?.country || "");
-  const [province, setProvince] = useState(profile?.province || "");
-  const [interests, setInterests] = useState<string[]>(profile?.interests || []);
+  const [displayName, setDisplayName] = useState(user?.displayName || "")
+  const [firstName, setFirstName] = useState(user?.firstName || "")
+  const [lastName, setLastName] = useState(user?.lastName || "")
+  const [bio, setBio] = useState(profile?.bio || "")
+  const [age, setAge] = useState(String(profile?.age || ""))
+  const [country, setCountry] = useState(profile?.country || "")
+  const [province, setProvince] = useState(profile?.province || "")
+  const [interests, setInterests] = useState<string[]>(profile?.interests || [])
 
-  const [showAge, setShowAge] = useState(profile?.showAge ?? true);
-  const [showLocation, setShowLocation] = useState(profile?.showLocation ?? true);
+  const [showAge, setShowAge] = useState(profile?.showAge ?? true)
+  const [showLocation, setShowLocation] = useState(profile?.showLocation ?? true)
 
-  const [isSaving, setIsSaving] = useState(false);
+  const [isSaving, setIsSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
+
+  const handlePhotoUpload = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
+      if (status !== "granted") {
+        Alert.alert("Permiso requerido", "Se necesita permiso para acceder a la galería")
+        return
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      })
+
+      if (!result.canceled && result.assets[0]) {
+        setUploading(true)
+
+        const uri = result.assets[0].uri
+
+        const imageResponse = await fetch(uri)
+        const blob = await imageResponse.blob()
+
+        const response = await uploadService.uploadImage(blob, result.assets[0].fileName!)
+
+        await profileService.updateMyProfile({
+          Profile: { photoUrl: response },
+        })
+
+        if (profile) {
+          setProfile({ ...profile, photoUrl: response })
+        }
+
+        Alert.alert("Éxito", "Foto actualizada correctamente")
+      }
+    } catch (error) {
+      console.error("[v0] Error uploading photo:", error)
+      Alert.alert("Error", "No se pudo subir la foto")
+    } finally {
+      setUploading(false)
+    }
+  }
 
   const handleSave = async () => {
-    setIsSaving(true);
+    setIsSaving(true)
 
-    await profileService.updateMyProfile({
-      Profile: {
-        bio,
-        age: Number(age),
-        country,
-        province,
-        interests,
-        showAge,
-        showLocation,
-      },
-      User: {
-        displayName,
-        firstName,
-        lastName,
+    try {
+      const response = await profileService.updateMyProfile({
+        Profile: {
+          bio,
+          age: Number(age),
+          country,
+          province,
+          interests,
+          showAge,
+          showLocation,
+        },
+        User: {
+          displayName,
+          firstName,
+          lastName,
+        },
+      })
+
+      if (response?.data?.User) {
+        setUser({ ...user, ...response.data.User as any })
       }
-    });
+      if (response?.data) {
+        setProfile({ ...profile, ...response.data.Profile as any })
+      }
 
-    setIsSaving(false);
-  };
+      Alert.alert("Éxito", "Perfil actualizado correctamente")
+    } catch (error) {
+      console.error("[v0] Error saving profile:", error)
+      Alert.alert("Error", "No se pudo guardar el perfil")
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   const toggleInterest = (name: string) => {
-    setInterests((prev) =>
-      prev.includes(name) ? prev.filter((i) => i !== name) : [...prev, name]
-    );
-  };
+    setInterests((prev) => (prev.includes(name) ? prev.filter((i) => i !== name) : [...prev, name]))
+  }
 
-  const initialLetters =
-    `${user?.firstName?.[0] ?? ""}${user?.lastName?.[0] ?? ""}`.toUpperCase();
+  const initialLetters = `${user?.firstName?.[0] ?? ""}${user?.lastName?.[0] ?? ""}`.toUpperCase()
 
   return (
     <View style={styles.container}>
-
-      {/* HEADER */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.headerBtn}>
+        <TouchableOpacity style={styles.headerBtn} onPress={() => router.back()}>
           <ArrowLeft size={22} color="white" />
         </TouchableOpacity>
 
@@ -73,8 +129,6 @@ export default function ProfileScreen() {
       </View>
 
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }}>
-        
-        {/* AVATAR */}
         <View style={styles.avatarWrapper}>
           {profile?.photoUrl ? (
             <Image source={{ uri: profile.photoUrl }} style={styles.avatar} />
@@ -84,12 +138,11 @@ export default function ProfileScreen() {
             </View>
           )}
 
-          <TouchableOpacity>
-            <Text style={styles.changePhoto}>Cambiar foto de perfil</Text>
+          <TouchableOpacity onPress={handlePhotoUpload} disabled={uploading}>
+            <Text style={styles.changePhoto}>{uploading ? "Subiendo..." : "Cambiar foto de perfil"}</Text>
           </TouchableOpacity>
         </View>
 
-        {/* PLAN CARD */}
         <View style={styles.planCard}>
           <View style={styles.planRow}>
             <View style={styles.planLeft}>
@@ -119,7 +172,6 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* PROFILE FIELDS */}
         <ProfileField label="Nombre visible" value={displayName} onChange={setDisplayName} />
         <ProfileField label="Nombre" value={firstName} onChange={setFirstName} />
         <ProfileField label="Apellido" value={lastName} onChange={setLastName} />
@@ -135,11 +187,7 @@ export default function ProfileScreen() {
           }}
         />
 
-        <ProfileField
-          label="País"
-          value={country}
-          onChange={setCountry}
-        />
+        <ProfileField label="País" value={country} onChange={setCountry} />
 
         <ProfileField
           label="Provincia"
@@ -151,56 +199,35 @@ export default function ProfileScreen() {
           }}
         />
 
-        <ProfileField
-          label="Biografía"
-          value={bio}
-          onChange={setBio}
-          multiline
-        />
+        <ProfileField label="Biografía" value={bio} onChange={setBio} multiline />
 
-        {/* INTERESTS */}
         <Text style={styles.sectionTitle}>Intereses</Text>
         <View style={styles.interestsGrid}>
-          {[
-            "Música", "Café", "Arte", "Running",
-            "Fotografía", "Viajes", "Cine", "Gaming",
-            "Deportes", "Lectura"
-          ].map((item) => {
-            const active = interests.includes(item);
-            return (
-              <TouchableOpacity
-                key={item}
-                onPress={() => toggleInterest(item)}
-                style={[
-                  styles.interestBadge,
-                  active && styles.interestBadgeActive,
-                ]}
-              >
-                <Text style={[
-                  styles.interestText,
-                  active && styles.interestTextActive
-                ]}>
-                  {item}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
+          {["Música", "Café", "Arte", "Running", "Fotografía", "Viajes", "Cine", "Gaming", "Deportes", "Lectura"].map(
+            (item) => {
+              const active = interests.includes(item)
+              return (
+                <TouchableOpacity
+                  key={item}
+                  onPress={() => toggleInterest(item)}
+                  style={[styles.interestBadge, active && styles.interestBadgeActive]}
+                >
+                  <Text style={[styles.interestText, active && styles.interestTextActive]}>{item}</Text>
+                </TouchableOpacity>
+              )
+            },
+          )}
         </View>
 
-        {/* LOGOUT */}
         <TouchableOpacity style={styles.logoutBtn}>
           <LogOut size={20} color="#C5C5C5" />
           <Text style={styles.logoutText}>Cerrar sesión</Text>
         </TouchableOpacity>
-
       </ScrollView>
 
-      {/* SAVE BUTTON */}
       <View style={styles.footer}>
-        <TouchableOpacity onPress={handleSave} style={styles.saveBtn}>
-          <Text style={styles.saveBtnText}>
-            {isSaving ? "Guardando..." : "Guardar cambios"}
-          </Text>
+        <TouchableOpacity onPress={handleSave} style={styles.saveBtn} disabled={isSaving}>
+          <Text style={styles.saveBtnText}>{isSaving ? "Guardando..." : "Guardar cambios"}</Text>
         </TouchableOpacity>
       </View>
       <BottomNavNative
@@ -212,12 +239,9 @@ export default function ProfileScreen() {
         }}
       />
     </View>
-  );
+  )
 }
 
-/* -------------------------
-      COMPONENTE FIELD
--------------------------- */
 function ProfileField({
   label,
   value,
@@ -226,32 +250,25 @@ function ProfileField({
   privacy,
   type = "default",
 }: {
-  label: string;
-  value: string;
-  multiline?: boolean;
-  type?: "default" | "numeric";
-  onChange: (v: string) => void;
+  label: string
+  value: string
+  multiline?: boolean
+  type?: "default" | "numeric"
+  onChange: (v: string) => void
   privacy?: {
-    visible: boolean;
-    onToggle: () => void;
-  };
+    visible: boolean
+    onToggle: () => void
+  }
 }) {
   return (
-    
     <View style={{ marginBottom: 20 }}>
       <View style={styles.fieldHeader}>
         <Text style={styles.fieldLabel}>{label}</Text>
 
         {privacy && (
           <TouchableOpacity style={styles.privacyBtn} onPress={privacy.onToggle}>
-            {privacy.visible ? (
-              <Eye size={18} color="#00FFB3" />
-            ) : (
-              <EyeOff size={18} color="#197387" />
-            )}
-            <Text style={styles.privacyText}>
-              {privacy.visible ? "Visible" : "Oculto"}
-            </Text>
+            {privacy.visible ? <Eye size={18} color="#00FFB3" /> : <EyeOff size={18} color="#197387" />}
+            <Text style={styles.privacyText}>{privacy.visible ? "Visible" : "Oculto"}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -265,15 +282,10 @@ function ProfileField({
         style={[styles.input, multiline && styles.inputMultiline]}
         placeholderTextColor="#7f7f7f"
       />
-
-      
     </View>
-  );
+  )
 }
 
-/* -------------------------
-        ESTILOS
--------------------------- */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -346,7 +358,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 
-  /* PLAN CARD */
   planCard: {
     backgroundColor: "rgba(26,26,26,0.6)",
     borderRadius: 20,
@@ -403,8 +414,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
-  /* PROFILE FIELDS */
-
   fieldHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -443,7 +452,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
 
-  /* INTERESTS */
   sectionTitle: {
     color: "white",
     fontSize: 16,
@@ -478,8 +486,6 @@ const styles = StyleSheet.create({
     color: "white",
   },
 
-  /* LOGOUT */
-
   logoutBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -498,7 +504,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 
-  /* FOOTER */
   footer: {
     padding: 20,
     borderTopWidth: 1,
@@ -519,4 +524,4 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: "600",
   },
-});
+})
