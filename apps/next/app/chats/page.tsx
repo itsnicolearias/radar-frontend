@@ -185,10 +185,18 @@ export default function ChatsPage() {
                   <div className="flex items-center gap-3">
                     {/* Avatar */}
                     <div className="relative shrink-0">
-                      <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center border-2 border-[#00FFB3]/50">
-                        <span className="text-[#1A1A1A] font-semibold text-base">
-                          {chat.user.displayName?.[0] || "U"}
-                        </span>
+                      <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center border-2 border-[#00FFB3]/50 overflow-hidden">
+                        {chat.user.Profile?.photoUrl ? (
+                          <img
+                            src={chat.user.Profile.photoUrl || "/placeholder.svg"}
+                            alt={chat.user.displayName}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-[#1A1A1A] font-semibold text-base">
+                            {chat.user.displayName?.[0] || "U"}
+                          </span>
+                        )}
                       </div>
                       {chat.unreadCount > 0 && (
                         <div className="absolute -top-1 -right-1 w-5 h-5 bg-[#FF005C] rounded-full text-white text-xs flex items-center justify-center font-bold">
@@ -240,8 +248,16 @@ export default function ChatsPage() {
                 >
                   <div className="flex items-start gap-4">
                     {/* Avatar */}
-                    <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center border-2 border-[#00FFB3]">
-                      <span className="text-[#1A1A1A] font-bold text-lg">{request.Sender.displayName[0]}</span>
+                    <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center border-2 border-[#00FFB3] overflow-hidden">
+                      {request.Sender?.Profile?.photoUrl ? (
+                        <img
+                          src={request.Sender.Profile.photoUrl || "/placeholder.svg"}
+                          alt={request.Sender.displayName}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-[#1A1A1A] font-bold text-lg">{request.Sender.displayName[0]}</span>
+                      )}
                     </div>
 
                     {/* Content */}
@@ -306,8 +322,16 @@ export default function ChatsPage() {
                     onClick={() => router.push(`/profile/${view.viewerId}`)}
                   >
                     <div className="relative">
-                      <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center border-2 border-[#1DE3F2] shadow-lg shadow-[#1DE3F2]/30">
-                        <span className="text-[#1A1A1A] font-semibold text-lg">{view.Viewer.displayName[0]}</span>
+                      <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center border-2 border-[#1DE3F2] shadow-lg shadow-[#1DE3F2]/30 overflow-hidden">
+                        {view.Viewer?.Profile?.photoUrl ? (
+                          <img
+                            src={view.Viewer.Profile.photoUrl || "/placeholder.svg"}
+                            alt={view.Viewer.displayName}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-[#1A1A1A] font-semibold text-lg">{view.Viewer.displayName[0]}</span>
+                        )}
                       </div>
                       <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-[#1DE3F2] border-2 border-black rounded-full" />
                     </div>
@@ -347,8 +371,18 @@ export default function ChatsPage() {
                     >
                       <div className="flex items-center gap-3">
                         {/* Avatar */}
-                        <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center border-2 border-[#00FFB3]/50">
-                          <span className="text-[#1A1A1A] font-semibold">{connectedUser.displayName?.[0] || "A"}</span>
+                        <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center border-2 border-[#00FFB3]/50 overflow-hidden">
+                          {connectedUser?.Profile?.photoUrl ? (
+                            <img
+                              src={connectedUser.Profile.photoUrl || "/placeholder.svg"}
+                              alt={connectedUser.displayName}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-[#1A1A1A] font-semibold">
+                              {connectedUser.displayName?.[0] || "A"}
+                            </span>
+                          )}
                         </div>
                         <div>
                           <h3 className="font-semibold text-white">{connectedUser.displayName}</h3>

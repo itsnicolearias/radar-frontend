@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native"
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from "react-native"
 import { useRouter } from "expo-router"
 import { MessageCircle, Users, Check, X, Crown } from "lucide-react-native"
 import { MotiView } from "moti"
@@ -87,13 +87,13 @@ export default function ChatsScreen() {
     }
   }
 
-    const formatDistance = (distance?: number) => {
+  const formatDistance = (distance?: number) => {
     if (!distance) return "Cerca"
     if (distance < 1000) return `${Math.round(distance)}m`
     return `${(distance / 1000).toFixed(1)}km`
   }
 
-    const formatRelativeTime = (date: string | Date) => {
+  const formatRelativeTime = (date: string | Date) => {
     const now = new Date()
     const diffMs = now.getTime() - new Date(date).getTime()
     const diffMins = Math.floor(diffMs / 60000)
@@ -159,6 +159,7 @@ export default function ChatsScreen() {
               </View>
             ) : (
               chats.map((chat, index) => (
+
                 <MotiView
                   key={chat.conversationId}
                   from={{ opacity: 0, translateX: -20 }}
@@ -169,7 +170,11 @@ export default function ChatsScreen() {
                     <View style={styles.chatCardContent}>
                       <View style={styles.avatarContainer}>
                         <View style={styles.avatar}>
-                          <Text style={styles.avatarText}>{chat.user.displayName?.[0] || "U"}</Text>
+                          {chat.user.Profile?.photoUrl ? (
+                            <Image source={{ uri: chat.user.Profile.photoUrl }} style={styles.avatarImage} />
+                          ) : (
+                            <Text style={styles.avatarText}>{chat.user.displayName?.[0] || "U"}</Text>
+                          )}
                         </View>
                         {chat.unreadCount > 0 && (
                           <View style={styles.unreadBadge}>
@@ -221,15 +226,23 @@ export default function ChatsScreen() {
                   <View style={styles.requestCard}>
                     <View style={styles.requestContent}>
                       <View style={styles.requestAvatar}>
-                        <Text style={styles.requestAvatarText}>{request.Sender.displayName![0]}</Text>
+                        {request.Sender?.Profile?.photoUrl ? (
+                          <Image source={{ uri: request.Sender.Profile.photoUrl }} style={styles.requestAvatarImage} />
+                        ) : (
+                          <Text style={styles.requestAvatarText}>{request.Sender.displayName![0]}</Text>
+                        )}
                       </View>
 
                       <View style={styles.requestInfo}>
-                        <Text style={styles.requestName}>{request.Sender.Profile?.showAge ? `${request.Sender.displayName}, ${request.Sender.Profile.age}` : request.Sender.displayName}</Text>
+                        <Text style={styles.requestName}>
+                          {request.Sender.Profile?.showAge
+                            ? `${request.Sender.displayName}, ${request.Sender.Profile.age}`
+                            : request.Sender.displayName}
+                        </Text>
                         <View style={styles.requestMeta}>
                           <View style={styles.distanceDot} />
                           <Text style={styles.distanceText}>{formatDistance(request.Sender?.distance)}</Text>
-                          {/**<Text style={styles.interestText}> • 3 intereses en común</Text> */}
+                          {/* <Text style={styles.interestText}> • 3 intereses en común</Text> */}
                         </View>
 
                         <View style={styles.requestActions}>
@@ -269,7 +282,6 @@ export default function ChatsScreen() {
 
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.profileViewsScroll}>
                 {profileViews.map((view, index) => (
-                
                   <MotiView
                     key={view.profileViewId}
                     from={{ opacity: 0, scale: 0.8 }}
@@ -282,14 +294,21 @@ export default function ChatsScreen() {
                     >
                       <View style={styles.profileViewAvatarContainer}>
                         <View style={styles.profileViewAvatar}>
-                          <Text style={styles.profileViewAvatarText}>{view.Viewer.displayName?.[0] || "U"}</Text>
+                          {view.Viewer?.Profile?.photoUrl ? (
+                            <Image
+                              source={{ uri: view.Viewer.Profile.photoUrl }}
+                              style={styles.profileViewAvatarImage}
+                            />
+                          ) : (
+                            <Text style={styles.profileViewAvatarText}>{view.Viewer.displayName?.[0] || "U"}</Text>
+                          )}
                         </View>
                         <View style={styles.onlineIndicator} />
                       </View>
                       <Text style={styles.profileViewName}>{view.Viewer.displayName || "Usuario"}</Text>
                       <Text style={styles.profileViewTime}>{formatRelativeTime(view.createdAt)}</Text>
                     </TouchableOpacity>
-                  </MotiView>                 
+                  </MotiView>
                 ))}
               </ScrollView>
             </View>
@@ -319,7 +338,11 @@ export default function ChatsScreen() {
                       <View style={styles.connectedCard}>
                         <View style={styles.connectedInfo}>
                           <View style={styles.avatar}>
-                            <Text style={styles.avatarText}>{connectedUser.displayName?.[0] || "A"}</Text>
+                            {connectedUser?.Profile?.photoUrl ? (
+                              <Image source={{ uri: connectedUser.Profile.photoUrl }} style={styles.avatarImage} />
+                            ) : (
+                              <Text style={styles.avatarText}>{connectedUser.displayName?.[0] || "A"}</Text>
+                            )}
                           </View>
                           <View>
                             <Text style={styles.connectedName}>{connectedUser.displayName}</Text>
@@ -351,14 +374,14 @@ export default function ChatsScreen() {
         )}
       </ScrollView>
 
-     <BottomNavNative
-             activeTab="chats"
-             onTabChange={(tab) => {
-               if (tab === "events") router.push("/events")
-               else if (tab === "radar") router.push("/radar")
-               else if (tab === "profile") router.push("/profile")
-             }}
-           />
+      <BottomNavNative
+        activeTab="chats"
+        onTabChange={(tab) => {
+          if (tab === "events") router.push("/events")
+          else if (tab === "radar") router.push("/radar")
+          else if (tab === "profile") router.push("/profile")
+        }}
+      />
     </View>
   )
 }
@@ -491,11 +514,17 @@ const styles = StyleSheet.create({
     borderColor: "rgba(0, 255, 179, 0.5)",
     justifyContent: "center",
     alignItems: "center",
+    overflow: "hidden",
   },
   avatarText: {
     color: "#1A1A1A",
     fontSize: 16,
     fontWeight: "600",
+  },
+  avatarImage: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
   },
   unreadBadge: {
     position: "absolute",
@@ -572,11 +601,17 @@ const styles = StyleSheet.create({
     borderColor: "#00FFB3",
     justifyContent: "center",
     alignItems: "center",
+    overflow: "hidden",
   },
   requestAvatarText: {
     color: "#1A1A1A",
     fontSize: 20,
     fontWeight: "bold",
+  },
+  requestAvatarImage: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
   },
   requestInfo: {
     flex: 1,
@@ -674,11 +709,17 @@ const styles = StyleSheet.create({
     borderColor: "#1DE3F2",
     justifyContent: "center",
     alignItems: "center",
+    overflow: "hidden",
   },
   profileViewAvatarText: {
     color: "#1A1A1A",
     fontSize: 20,
     fontWeight: "600",
+  },
+  profileViewAvatarImage: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
   },
   onlineIndicator: {
     position: "absolute",

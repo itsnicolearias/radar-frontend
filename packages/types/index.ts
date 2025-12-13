@@ -48,11 +48,6 @@ export interface IConversation {
   unreadCount: number
 }
 
-export interface IConversationsResponse {
-  conversations: IConversation[]
-  total: number
-}
-
 export interface IMessageResponse {
   messageId: string
   senderId: string

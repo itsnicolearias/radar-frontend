@@ -1,5 +1,5 @@
 import type React from "react"
-import { View, Text, TouchableOpacity, Modal, StyleSheet, ScrollView } from "react-native"
+import { View, Text, TouchableOpacity, Modal, StyleSheet, ScrollView, Image } from "react-native"
 import { X, MessageCircle, MapPin, Heart, HeartOff } from "lucide-react-native"
 import { LinearGradient } from "expo-linear-gradient"
 import type { IRadarUser } from "@radar/types"
@@ -13,12 +13,19 @@ interface UserProfileModalNativeProps {
   deleteConnection: () => void
 }
 
-export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({ user, onClose, onMessage, isUserConnected, sendConnection, deleteConnection }) => {
-  
+export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({
+  user,
+  onClose,
+  onMessage,
+  isUserConnected,
+  sendConnection,
+  deleteConnection,
+}) => {
   const formatDistance = (distance?: number) => {
     if (!distance) return "Cerca"
-    if (distance < 1000) return `${Math.round(distance)}m`
-    return `${(distance / 1000).toFixed(1)}km`
+    if (distance < 50) return "50 m"
+    if (distance < 1000) return `${Math.round(distance)} m`
+    return `${(distance / 1000).toFixed(1)} km`
   }
 
   return (
@@ -39,7 +46,11 @@ export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({ 
           <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
             <View style={styles.profileSection}>
               <View style={styles.avatarLarge}>
-                <Text style={styles.avatarLargeText}>{user.displayName?.[0] || "?"}</Text>
+                {user.Profile?.photoUrl ? (
+                  <Image source={{ uri: user.Profile.photoUrl }} style={styles.avatarImage} />
+                ) : (
+                  <Text style={styles.avatarLargeText}>{user.displayName?.[0]?.toUpperCase() || "?"}</Text>
+                )}
               </View>
 
               <View style={styles.distanceBadge}>
@@ -51,67 +62,59 @@ export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({ 
                 {user.Profile.showAge ? `${user.displayName}, ${user.Profile.age}` : user.displayName}
               </Text>
 
-            { user.Profile.showLocation && (
-            <View style={styles.locationContainer}>
-                <MapPin color="#8B8B8B" size={16} />
-                <Text style={styles.locationText}>{user.Profile.province || "Buenos Aires"}</Text>
-              </View>
-            )}
-            
+              {user.Profile.showLocation && (
+                <View style={styles.locationContainer}>
+                  <MapPin color="#8B8B8B" size={16} />
+                  <Text style={styles.locationText}>{user.Profile.province || "Buenos Aires"}</Text>
+                </View>
+              )}
             </View>
-              
 
             {user.Profile.interests && user.Profile.interests.length > 0 && (
-                <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Intereses</Text>
-              <View style={styles.interestsGrid}>
-                {user.Profile.interests.map((interest, index) => (
-                  <View key={index} style={styles.interestChip}>
-                    <Text style={styles.interestText}>{interest}</Text>
-                  </View>
-                ))}
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Intereses</Text>
+                <View style={styles.interestsGrid}>
+                  {user.Profile.interests.map((interest, index) => (
+                    <View key={index} style={styles.interestChip}>
+                      <Text style={styles.interestText}>{interest}</Text>
+                    </View>
+                  ))}
+                </View>
               </View>
-            </View>
             )}
-            
 
             {user.Profile.bio && (
-                <View style={styles.section}>
+              <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Sobre mí</Text>
-                <Text style={styles.aboutText}>
-                    {user.Profile.bio}
-                </Text>
-                </View>
+                <Text style={styles.aboutText}>{user.Profile.bio}</Text>
+              </View>
             )}
-            
-          {isUserConnected() && (
-            <>
-            <TouchableOpacity style={styles.messageButton} onPress={onMessage}>
-              <LinearGradient
-                colors={["#00FFB3", "#1DE3F2"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.messageButtonGradient}
-              >
-                <MessageCircle color="#000000" size={20} />
-                <Text style={styles.messageButtonText}>Enviar mensaje</Text>
-              </LinearGradient>
-            </TouchableOpacity>
 
-            <TouchableOpacity style={styles.likeButton} onPress={deleteConnection}>
-              <HeartOff color="#FF005C" size={20} />
-            </TouchableOpacity>
-            </>
-            
-          )}
+            {isUserConnected() && (
+              <>
+                <TouchableOpacity style={styles.messageButton} onPress={onMessage}>
+                  <LinearGradient
+                    colors={["#00FFB3", "#1DE3F2"]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.messageButtonGradient}
+                  >
+                    <MessageCircle color="#000000" size={20} />
+                    <Text style={styles.messageButtonText}>Enviar mensaje</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
 
-          { !isUserConnected() && (
-            <TouchableOpacity style={styles.likeButton} onPress={sendConnection}>
-              <Heart color="#FF005C" size={20} />
-            </TouchableOpacity>
-          )}  
+                <TouchableOpacity style={styles.likeButton} onPress={deleteConnection}>
+                  <HeartOff color="#FF005C" size={20} />
+                </TouchableOpacity>
+              </>
+            )}
 
-            
+            {!isUserConnected() && (
+              <TouchableOpacity style={styles.likeButton} onPress={sendConnection}>
+                <Heart color="#FF005C" size={20} />
+              </TouchableOpacity>
+            )}
           </ScrollView>
         </View>
       </View>
@@ -167,6 +170,11 @@ const styles = StyleSheet.create({
     fontSize: 48,
     fontWeight: "bold",
     color: "#000000",
+  },
+  avatarImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
   },
   distanceBadge: {
     flexDirection: "row",

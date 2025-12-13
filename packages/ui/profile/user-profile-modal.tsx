@@ -27,14 +27,14 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
   return (
     <motion.div
-      className="fixed inset-0 bg-black/90 backdrop-blur-sm z-[9999] flex items-end sm:items-center justify-center"
+      className="fixed inset-0 bg-black/90 backdrop-blur-sm z-9999 flex items-center justify-center p-4"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={onClose}
     >
       <motion.div
-        className="bg-[#0A0E12] rounded-t-3xl sm:rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto"
+        className="bg-[#0A0E12] rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto"
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 100, opacity: 0 }}
@@ -50,8 +50,16 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
           </button>
 
           <div className="flex flex-col items-center">
-            <div className="w-24 h-24 rounded-full bg-white flex items-center justify-center text-black font-bold text-4xl mb-4 border-2 border-[#00FFB3]">
-              {user.displayName?.[0]?.toUpperCase()}
+            <div className="w-24 h-24 rounded-full bg-white flex items-center justify-center text-black font-bold text-4xl mb-4 border-2 border-[#00FFB3] overflow-hidden">
+              {user.Profile?.photoUrl ? (
+                <img
+                  src={user.Profile.photoUrl || "/placeholder.svg"}
+                  alt={user.displayName || "U"}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span>{user.displayName?.[0]?.toUpperCase()}</span>
+              )}
             </div>
             <div className="flex items-center gap-2 text-white/90">
               <MapPin className="w-4 h-4 text-[#1DE3F2]" />

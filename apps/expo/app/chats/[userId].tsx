@@ -10,6 +10,7 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from "react-native"
 import { useRouter, useLocalSearchParams } from "expo-router"
 import { ArrowLeft, Send, X } from "lucide-react-native"
@@ -93,6 +94,12 @@ function ChatConversationPage() {
       : firstMsg.Receiver.displayName
     : "Chat"
 
+  const photoUrl = firstMsg
+    ? firstMsg.senderId === userId
+      ? firstMsg.Sender?.Profile?.photoUrl
+      : firstMsg.Receiver?.Profile?.photoUrl
+    : ""
+
   const distance = firstMsg
     ? firstMsg.Sender?.userId === userId
       ? firstMsg.Sender?.distance
@@ -119,7 +126,12 @@ function ChatConversationPage() {
 
           <View style={styles.headerInfo}>
             <View style={styles.headerAvatar}>
+            {photoUrl && photoUrl !== ""  ? (
+               <Image source={{ uri: photoUrl }} style={styles.avatarImage} />
+            ) : (
               <Text style={styles.headerAvatarText}>{name?.[0] || "?"}</Text>
+            )}
+              
             </View>
             <View style={styles.headerTextContainer}>
               <Text style={styles.headerTitle}>{name}</Text>
@@ -327,6 +339,11 @@ const styles = StyleSheet.create({
   },
   timestampReceived: {
     textAlign: "left",
+  },
+  avatarImage: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
   },
   replyingToContainer: {
     backgroundColor: "#1A1A1A",

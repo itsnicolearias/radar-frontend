@@ -126,6 +126,12 @@ function ChatConversationPage() {
       : firstMsg.Receiver.displayName
     : "Chat"
 
+  const photoUrl = firstMsg
+    ? firstMsg.senderId === userId
+      ? firstMsg.Sender.Profile.photoUrl
+      : firstMsg.Receiver.Profile.photoUrl
+    : ""
+
   const formatDistance = (distance?: number) => {
     if (!distance) return "Cerca"
     if (distance < 1000) return `${Math.round(distance)}m`
@@ -156,7 +162,17 @@ function ChatConversationPage() {
 
         <div className="flex items-center gap-3 flex-1">
           <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center border-2 border-[#00FFB3]/50">
-            <span className="text-[#1A1A1A] font-semibold">{name[0]}</span>
+            {photoUrl && photoUrl !== "" ? (
+                          <img
+                            src={photoUrl || "/placeholder.svg"}
+                            alt={name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-[#1A1A1A] font-semibold text-base">
+                            {name[0] || "U"}
+                          </span>
+                        )}
           </div>
           <div>
             <h2 className="font-semibold text-white">{name}</h2>
