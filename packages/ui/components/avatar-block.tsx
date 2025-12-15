@@ -24,8 +24,7 @@ export default function AvatarBlock({
 
     try {
       setUploading(true)
-      const fileName = `profile-${Date.now()}.${file.name.split(".").pop()}`
-      const fileUrl = await uploadService.uploadImage(file, fileName)
+      const fileUrl = await uploadService.uploadImage(file, file.name)
 
       if (fileUrl) {
         onUpload?.(fileUrl)
