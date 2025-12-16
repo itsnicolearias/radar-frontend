@@ -10,7 +10,7 @@ import { useRouter } from "expo-router"
 import * as ImagePicker from "expo-image-picker"
 
 export default function ProfileScreen() {
-  const { user, profile, setProfile, setUser } = useAuthStore()
+  const { user, profile, setProfile, setUser, logout } = useAuthStore()
   const router = useRouter()
 
   const [displayName, setDisplayName] = useState(user?.displayName || "")
@@ -110,6 +110,12 @@ export default function ProfileScreen() {
 
   const toggleInterest = (name: string) => {
     setInterests((prev) => (prev.includes(name) ? prev.filter((i) => i !== name) : [...prev, name]))
+  }
+
+  const handleLogout = () => {
+    logout()
+
+    router.navigate("/")
   }
 
   const initialLetters = `${user?.firstName?.[0] ?? ""}${user?.lastName?.[0] ?? ""}`.toUpperCase()
@@ -219,7 +225,7 @@ export default function ProfileScreen() {
           )}
         </View>
 
-        <TouchableOpacity style={styles.logoutBtn}>
+        <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}>
           <LogOut size={20} color="#C5C5C5" />
           <Text style={styles.logoutText}>Cerrar sesión</Text>
         </TouchableOpacity>

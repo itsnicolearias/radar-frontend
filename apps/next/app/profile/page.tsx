@@ -12,7 +12,7 @@ import { BottomNav } from "@radar/ui"
 import { useRouter } from "next/navigation"
 
 export default function ProfilePage() {
-  const { user, profile, setProfile, setUser } = useAuthStore()
+  const { user, profile, setProfile, setUser, logout } = useAuthStore()
   const router = useRouter()
 
   const [displayName, setDisplayName] = useState(user?.displayName || "")
@@ -40,6 +40,12 @@ export default function ProfilePage() {
     } catch (error) {
       console.error("[v0] Error updating photo:", error)
     }
+  }
+
+  const handleLogout = () => {
+    logout()
+
+    router.push("/")
   }
 
   const handleSave = async () => {
@@ -153,7 +159,9 @@ export default function ProfilePage() {
         />
 
         <div className="pt-4 border-t border-[#197387]/20">
-          <button className="w-full h-12 rounded-full bg-[#0A0E12]/50 border border-[#197387]/30 hover:bg-[#0A0E12]/80 text-[#C5C5C5] hover:text-white transition-all duration-300 flex items-center justify-center gap-2">
+          <button 
+            onClick={handleLogout}
+            className="w-full h-12 rounded-full bg-[#0A0E12]/50 border border-[#197387]/30 hover:bg-[#0A0E12]/80 text-[#C5C5C5] hover:text-white transition-all duration-300 flex items-center justify-center gap-2">
             <LogOut className="w-5 h-5" />
             Cerrar sesión
           </button>
