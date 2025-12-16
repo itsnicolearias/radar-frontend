@@ -38,6 +38,7 @@ export const eventSchema = z
   .object({
     title: z.string().min(3, "El título debe tener al menos 3 caracteres"),
     description: z.string().min(10, "La descripción debe tener al menos 10 caracteres"),
+    category: z.string(),
     location: z.string().min(3, "La ubicación es requerida"),
     latitude: z.number().min(-90).max(90),
     longitude: z.number().min(-180).max(180),

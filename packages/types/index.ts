@@ -48,11 +48,6 @@ export interface IConversation {
   unreadCount: number
 }
 
-export interface IConversationsResponse {
-  conversations: IConversation[]
-  total: number
-}
-
 export interface IMessageResponse {
   messageId: string
   senderId: string
@@ -139,20 +134,6 @@ export interface IProfileResponse extends IProfile {
 
 export interface IDeleteProfileResponse {
   message: string
-}
-
-export interface IProfileViewResponse {
-  profileViewId: string
-  viewerId: string
-  viewedId: string
-  createdAt: Date
-  updatedAt: Date
-  Viewer: {
-    userId: string
-    firstName: string
-    lastName: string
-    displayName: string | null
-  }
 }
 
 
@@ -294,6 +275,7 @@ export interface IProfileViewResponse {
     firstName: string
     lastName: string
     displayName: string | null
+    Profile: Partial<IProfile>
   }
 }
 
@@ -315,6 +297,7 @@ export interface IRadarUser {
     age: number | null
     interests: string[] | null
     province?: string
+    country?: string
     showAge: boolean
     showLocation: boolean
   }
@@ -378,16 +361,16 @@ export interface IEventResponse {
 }
 
 export interface IEventCreatePayload {
-  title: string
-  description: string
-  location: string
-  latitude: number
-  longitude: number
-  startDate: string
-  endDate: string
-  isPublic: boolean
-  maxAttendees: number
-  price: number
+  title?: string
+  description?: string
+  location?: string
+  latitude?: number
+  longitude?: number
+  startDate?: string
+  endDate?: string
+  isPublic?: boolean
+  maxAttendees?: number
+  price?: number
 }
 
 export interface IEventsListResponse {

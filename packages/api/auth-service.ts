@@ -2,8 +2,8 @@ import { axiosClient } from "./axios-client"
 import type { IAuthResponse, IUserResponse } from "@radar/types"
 
 export interface LoginInput {
-  email: string
-  password: string
+  email?: string
+  password?: string
 }
 
 export interface RegisterInput {

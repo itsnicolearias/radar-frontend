@@ -1,5 +1,5 @@
 import type React from "react"
-import { View, Text, TouchableOpacity, Modal, StyleSheet } from "react-native"
+import { View, Text, TouchableOpacity, Modal, StyleSheet, Image } from "react-native"
 import { X, MessageCircle, User } from "lucide-react-native"
 import { LinearGradient } from "expo-linear-gradient"
 import type { IRadarSignal } from "@radar/types"
@@ -40,9 +40,11 @@ export const SignalDetailModalNative: React.FC<SignalDetailModalNativeProps> = (
         <View style={styles.modal}>
           <View style={styles.userInfo}>
             <View style={styles.avatarContainer}>
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>{signal.Sender?.displayName?.[0]}</Text>
-              </View>
+                {signal?.Sender?.Profile?.photoUrl ? (
+                  <Image source={{ uri: signal?.Sender?.Profile?.photoUrl }} style={styles.avatarImage} />
+                ) : (
+                  <Text style={styles.avatarText}>{signal.Sender.displayName?.[0]?.toUpperCase() || "U"}</Text>
+                )}
               <View style={styles.onlineIndicator} />
             </View>
 
@@ -155,6 +157,11 @@ const styles = StyleSheet.create({
   distance: {
     fontSize: 14,
     color: "#8B8B8B",
+  },
+  avatarImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 60,
   },
   closeButton: {
     width: 32,

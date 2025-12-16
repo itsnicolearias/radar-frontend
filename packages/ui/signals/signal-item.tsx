@@ -1,8 +1,8 @@
 import React from "react"
-import type { ISignal } from "@radar/types"
+import type { IRadarSignal } from "@radar/types"
 
 interface SignalItemProps {
-  signal: ISignal
+  signal: IRadarSignal
 }
 
 export const SignalItem: React.FC<SignalItemProps> = ({ signal }) => {

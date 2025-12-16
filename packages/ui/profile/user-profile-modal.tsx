@@ -4,6 +4,7 @@ import type React from "react"
 import { motion } from "framer-motion"
 import { X, MapPin, MessageCircle, Heart, HeartOff } from "lucide-react"
 import type { IRadarUser } from "@radar/types"
+import { formatDistance } from "../../../lib/utils/format-distance"
 
 interface UserProfileModalProps {
   user: IRadarUser
@@ -14,25 +15,26 @@ interface UserProfileModalProps {
   deleteConnection: () => void
 }
 
-export const UserProfileModal: React.FC<UserProfileModalProps> = ({ user, onClose, onMessage, isUserConnected, sendConnection, deleteConnection }) => {
+export const UserProfileModal: React.FC<UserProfileModalProps> = ({
+  user,
+  onClose,
+  onMessage,
+  isUserConnected,
+  sendConnection,
+  deleteConnection,
+}) => {
   const connectionMade = isUserConnected()
-
-  const formatDistance = (distance?: number) => {
-    if (!distance) return "Cerca"
-    if (distance < 1000) return `${Math.round(distance)}m`
-    return `${(distance / 1000).toFixed(1)}km`
-  }
 
   return (
     <motion.div
-      className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center"
+      className="fixed inset-0 bg-black/90 backdrop-blur-sm z-9999 flex items-center justify-center p-4"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={onClose}
     >
       <motion.div
-        className="bg-[#0A0E12] rounded-t-3xl sm:rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto"
+        className="bg-[#0A0E12] rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto"
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 100, opacity: 0 }}
@@ -48,8 +50,16 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ user, onClos
           </button>
 
           <div className="flex flex-col items-center">
-            <div className="w-24 h-24 rounded-full bg-white flex items-center justify-center text-black font-bold text-4xl mb-4 border-2 border-[#00FFB3]">
-              {user.displayName?.[0]?.toUpperCase()}
+            <div className="w-24 h-24 rounded-full bg-white flex items-center justify-center text-black font-bold text-4xl mb-4 border-2 border-[#00FFB3] overflow-hidden">
+              {user.Profile?.photoUrl ? (
+                <img
+                  src={user.Profile.photoUrl || "/placeholder.svg"}
+                  alt={user.displayName || "U"}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span>{user.displayName?.[0]?.toUpperCase()}</span>
+              )}
             </div>
             <div className="flex items-center gap-2 text-white/90">
               <MapPin className="w-4 h-4 text-[#1DE3F2]" />
@@ -65,13 +75,12 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ user, onClos
             <h2 className="text-white font-bold text-2xl">
               {user.Profile.showAge && user.Profile.age ? `${user.displayName}, ${user.Profile.age}` : user.displayName}
             </h2>
-            { user.Profile.showLocation && (
-                <p className="text-[#1DE3F2] flex items-center gap-1 mt-1">
+            {user.Profile.showLocation && (
+              <p className="text-[#1DE3F2] flex items-center gap-1 mt-1">
                 <MapPin className="w-4 h-4" />
                 {user.Profile.province || "Buenos Aires"}
-                </p>
+              </p>
             )}
-            
           </div>
 
           {/* Interests */}
@@ -98,34 +107,32 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ user, onClos
 
           {/* Action buttons */}
           <div className="flex gap-3 pt-4">
-            { connectionMade && (
+            {connectionMade && (
               <>
-              <button
-                onClick={onMessage}
-                className="flex-1 h-14 rounded-full bg-linear-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-semibold hover:shadow-lg transition-all duration-300 shadow-[#00FFB3]/30 flex items-center justify-center gap-2"
-              >
-                <MessageCircle className="w-5 h-5" />
-                Enviar mensaje
-              </button>
-               <button 
-                className="w-14 h-14 rounded-full border border-[#FF005C]/30 flex items-center justify-center hover:bg-[#FF005C]/10 transition-colors bg-[#FF005C]"
-                onClick={deleteConnection}
+                <button
+                  onClick={onMessage}
+                  className="flex-1 h-14 rounded-full bg-linear-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-semibold hover:shadow-lg transition-all duration-300 shadow-[#00FFB3]/30 flex items-center justify-center gap-2"
                 >
-                <HeartOff className="w-6 h-6 text-[#FF005C]" />
-              </button>
+                  <MessageCircle className="w-5 h-5" />
+                  Enviar mensaje
+                </button>
+                <button
+                  className="w-14 h-14 rounded-full border border-[#FF005C]/30 flex items-center justify-center hover:bg-[#FF005C]/10 transition-colors bg-[#FF005C]"
+                  onClick={deleteConnection}
+                >
+                  <HeartOff className="w-6 h-6 text-[#FF005C]" />
+                </button>
               </>
-              
             )}
-            
-            { !connectionMade && (
-              <button 
+
+            {!connectionMade && (
+              <button
                 className="w-14 h-14 rounded-full border border-[#FF005C]/30 flex items-center justify-center hover:bg-[#FF005C]/10 transition-colors bg-[#FF005C]"
                 onClick={sendConnection}
-                >
-              <Heart className="w-6 h-6 text-[#FF005C]" />
-            </button>
+              >
+                <Heart className="w-6 h-6 text-[#FF005C]" />
+              </button>
             )}
-            
           </div>
         </div>
       </motion.div>

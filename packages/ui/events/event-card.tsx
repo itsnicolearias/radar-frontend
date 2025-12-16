@@ -1,8 +1,9 @@
 "use client"
 
 import type React from "react"
-import { MapPin, Calendar, Users, Heart, DollarSign } from 'lucide-react'
+import { MapPin, Calendar, Users, Heart, DollarSign } from "lucide-react"
 import { cn } from "../lib/utils"
+import { formatDistance } from "../../../lib/utils/format-distance"
 
 interface EventCardProps {
   title: string
@@ -103,7 +104,7 @@ export const EventCard: React.FC<EventCardProps> = ({
           <div className="flex items-center gap-1">
             <MapPin className="w-4 h-4 text-[#00FFB3]" />
             <span>{location}</span>
-            {distance !== undefined && <span className="text-[#00FFB3]">• {distance}m</span>}
+            {distance !== undefined && <span className="text-[#00FFB3]">• {formatDistance(distance)}</span>}
           </div>
         </div>
 
@@ -132,7 +133,7 @@ export const EventCard: React.FC<EventCardProps> = ({
           )}
         >
           <Heart className={cn("w-4 h-4", isInterested && "fill-current")} />
-          {isInterested ? "Me interesa ❤️" : "No me interesa"}
+          {isInterested ? "No me interesa" : "Me interesa ❤️"}
         </button>
 
         {price > 0 && (

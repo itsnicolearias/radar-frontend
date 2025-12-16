@@ -1,14 +1,14 @@
 import { create } from "zustand"
 import { immer } from "zustand/middleware/immer"
-import type { Notification } from "@radar/types"
+import type { INotificationResponse } from "@radar/types"
 
 interface NotificationState {
-  notifications: Notification[]
+  notifications: INotificationResponse[]
   unreadCount: number
   isLoading: boolean
-  setNotifications: (notifications: Notification[]) => void
+  setNotifications: (notifications: INotificationResponse[]) => void
   setUnreadCount: (count: number) => void
-  addNotification: (notification: Notification) => void
+  addNotification: (notification: INotificationResponse) => void
   markAsRead: (notificationId: string) => void
   markAllAsRead: () => void
   removeNotification: (notificationId: string) => void

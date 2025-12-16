@@ -53,8 +53,16 @@ export const SignalDetailModal: React.FC<SignalDetailModalProps> = ({ signal, on
         {/* User info */}
         <div className="flex flex-col items-center mb-6">
           <div className="relative mb-3">
-            <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center text-black font-bold text-2xl border-2 border-[#FF005C]">
-              {signal.Sender.displayName?.[0]?.toUpperCase()}
+            <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center text-black font-bold text-2xl border-2 border-[#FF005C] overflow-hidden">
+              {signal.Sender.Profile?.photoUrl ? (
+                <img
+                  src={signal.Sender.Profile.photoUrl || "/placeholder.svg"}
+                  alt={signal.Sender.displayName || "U"}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span>{signal.Sender.displayName?.[0]?.toUpperCase()}</span>
+              )}
             </div>
             {/* Online indicator */}
             <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-[#1DE3F2] border-2 border-[#0F2B33] rounded-full shadow-lg shadow-[#1DE3F2]/50" />

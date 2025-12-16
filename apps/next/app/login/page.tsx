@@ -3,13 +3,13 @@
 import type React from "react"
 
 import { useState } from "react"
-import { useRouter } from 'next/navigation'
+import { useRouter } from "next/navigation"
 import { Button, Input, Label } from "@radar/ui"
 import { authService } from "@radar/api"
 import Link from "next/link"
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Eye, EyeOff } from "lucide-react"
 import { useAuthStore } from "@radar/features"
-import { LoginInput, loginSchema } from "../../../../packages/api/validations"
+import { type LoginInput, loginSchema } from "../../../../packages/api/validations"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -18,6 +18,8 @@ export default function LoginPage() {
     email: "",
     password: "",
   })
+  const [showPassword, setShowPassword] = useState(false)
+  // </CHANGE>
   const [errors, setErrors] = useState<Partial<Record<keyof LoginInput, string>>>({})
   const [isLoading, setIsLoading] = useState(false)
 
@@ -41,7 +43,7 @@ export default function LoginPage() {
     try {
       const response = await authService.login(formData)
 
-      setAuth(response.data.user,  null, response.data.token)
+      setAuth(response.data.user, null, response.data.token)
       router.push("/radar")
     } catch (error: any) {
       setErrors({ email: error.response?.data?.message || "Error al iniciar sesión" })
@@ -53,7 +55,7 @@ export default function LoginPage() {
   return (
     <div className="relative min-h-screen bg-black overflow-hidden">
       <div className="absolute inset-0 bg-gradient-radial from-[#00FFB3]/10 via-transparent to-transparent pointer-events-none" />
-      
+
       <div className="relative z-10 min-h-screen px-6 py-8 flex flex-col">
         <Link
           href="/"
@@ -72,7 +74,9 @@ export default function LoginPage() {
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-white">Email</Label>
+                <Label htmlFor="email" className="text-white">
+                  Email
+                </Label>
                 <Input
                   id="email"
                   type="email"
@@ -85,33 +89,60 @@ export default function LoginPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-white">Contraseña</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="h-12 bg-[#1A1A1A] border border-[#1DE3F2]/30 rounded-2xl text-white placeholder-[#C5C5C5]/40 focus:border-[#00FFB3] focus:outline-none transition-all"
-                />
+                <Label htmlFor="password" className="text-white">
+                  Contraseña
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    className="h-12 bg-[#1A1A1A] border border-[#1DE3F2]/30 rounded-2xl text-white placeholder-[#C5C5C5]/40 focus:border-[#00FFB3] focus:outline-none transition-all pr-12"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#C5C5C5] hover:text-[#00FFB3] transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
                 {errors.password && <p className="text-sm text-[#FF005C]">{errors.password}</p>}
               </div>
+              {/* </CHANGE> */}
 
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full h-12 text-lg font-semibold bg-linear-to-r from-[#00FFB3] to-[#1DE3F2] text-black rounded-2xl hover:opacity-90 transition-all shadow-lg shadow-[#00FFB3]/50 active:scale-95"
+                className="w-full h-12 text-lg font-semibold bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black rounded-2xl hover:opacity-90 transition-all shadow-lg shadow-[#00FFB3]/50 active:scale-95"
               >
                 {isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
               </Button>
             </form>
 
-            <p className="text-center text-sm text-[#C5C5C5]">
-              ¿No tenés cuenta?{" "}
-              <Link href="/register" className="text-[#00FFB3] hover:text-[#1DE3F2] underline font-semibold transition-colors">
-                Registrate
-              </Link>
-            </p>
+            <div className="space-y-3">
+              <p className="text-center text-sm text-[#C5C5C5]">
+                ¿No tenés cuenta?{" "}
+                <Link
+                  href="/register"
+                  className="text-[#00FFB3] hover:text-[#1DE3F2] underline font-semibold transition-colors"
+                >
+                  Registrate
+                </Link>
+              </p>
+              <div className="flex items-center justify-center gap-4 text-xs text-[#C5C5C5]">
+                <Link href="/privacidad" className="hover:text-[#00FFB3] transition-colors">
+                  Privacidad
+                </Link>
+                <span>•</span>
+                <Link href="/terminos" className="hover:text-[#00FFB3] transition-colors">
+                  Términos
+                </Link>
+              </div>
+            </div>
+            {/* </CHANGE> */}
           </div>
         </div>
       </div>
