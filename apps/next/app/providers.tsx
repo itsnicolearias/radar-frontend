@@ -3,7 +3,9 @@
 import type React from "react"
 
 import { useEffect } from "react"
-import { useAuthStore, useGeolocation, useNotifications, useSocket } from "@radar/features"
+import { useAuthStore, useNotifications, useSocket } from "@radar/features"
+import { GeolocationProvider } from "./GeolocationProvider"
+import AuthRehydrator from "./AuthRehydrator"
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore()
@@ -12,9 +14,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
   // Initialize socket connection
   useSocket()
 
-  // Enable geolocation tracking when authenticated
-  useGeolocation(isAuthenticated)
-
   // Request notification permission on mount
   useEffect(() => {
     if (isAuthenticated) {
@@ -22,5 +21,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
     }
   }, [isAuthenticated, requestPermission])
 
-  return <>{children}</>
+  return (
+    <>
+      <AuthRehydrator />
+      <GeolocationProvider />
+      {children}
+    </>
+  )
 }

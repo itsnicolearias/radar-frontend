@@ -1,17 +1,21 @@
 import { create } from "zustand"
 import { immer } from "zustand/middleware/immer"
-import type { NearbyUser, Event } from "@radar/types"
+import type { IEventResponse, IRadarUser, IRadarSignal } from "@radar/types"
 
 interface RadarState {
-  nearbyUsers: NearbyUser[]
-  nearbyEvents: Event[]
+  nearbyUsers: IRadarUser[]
+  nearbyEvents: IEventResponse[]
+  nearbySignals: IRadarSignal[]
   currentLocation: { latitude: number; longitude: number } | null
   isLoading: boolean
   error: string | null
-  setNearbyUsers: (users: NearbyUser[]) => void
-  setNearbyEvents: (events: Event[]) => void
+  setNearbyUsers: (users: IRadarUser[]) => void
+  setNearbyEvents: (events: IEventResponse[]) => void
+  setNearbySignals: (signals: IRadarSignal[]) => void
+  addNearbySignal: (signal: IRadarSignal) => void
+  removeNearbySignal: (signalId: string) => void
   setCurrentLocation: (location: { latitude: number; longitude: number }) => void
-  addNearbyUser: (user: NearbyUser) => void
+  addNearbyUser: (user: IRadarUser) => void
   removeNearbyUser: (userId: string) => void
   updateUserLocation: (userId: string, latitude: number, longitude: number) => void
   setLoading: (loading: boolean) => void
@@ -23,6 +27,7 @@ export const useRadarStore = create<RadarState>()(
   immer((set) => ({
     nearbyUsers: [],
     nearbyEvents: [],
+    nearbySignals: [],
     currentLocation: null,
     isLoading: false,
     error: null,
@@ -34,27 +39,42 @@ export const useRadarStore = create<RadarState>()(
       set((state) => {
         state.nearbyEvents = events
       }),
+    setNearbySignals: (signals) =>
+      set((state) => {
+        state.nearbySignals = signals
+      }),
+    addNearbySignal: (signal) =>
+      set((state) => {
+        const exists = state.nearbySignals.find((s) => s.signalId === signal.signalId)
+        if (!exists) {
+          state.nearbySignals.push(signal)
+        }
+      }),
+    removeNearbySignal: (signalId) =>
+      set((state) => {
+        state.nearbySignals = state.nearbySignals.filter((s) => s.signalId !== signalId)
+      }),
     setCurrentLocation: (location) =>
       set((state) => {
         state.currentLocation = location
       }),
     addNearbyUser: (user) =>
       set((state) => {
-        const exists = state.nearbyUsers.find((u) => u.user.userId === user.user.userId)
+        const exists = state.nearbyUsers.find((u) => u.userId === user.userId)
         if (!exists) {
           state.nearbyUsers.push(user)
         }
       }),
     removeNearbyUser: (userId) =>
       set((state) => {
-        state.nearbyUsers = state.nearbyUsers.filter((u) => u.user.userId !== userId)
+        state.nearbyUsers = state.nearbyUsers.filter((u) => u.userId !== userId)
       }),
     updateUserLocation: (userId, latitude, longitude) =>
       set((state) => {
-        const user = state.nearbyUsers.find((u) => u.user.userId === userId)
+        const user = state.nearbyUsers.find((u) => u.userId === userId)
         if (user) {
-          user.user.lastLatitude = latitude
-          user.user.lastLongitude = longitude
+          user.lastLatitude = latitude
+          user.lastLongitude = longitude
         }
       }),
     setLoading: (loading) =>
@@ -69,6 +89,7 @@ export const useRadarStore = create<RadarState>()(
       set((state) => {
         state.nearbyUsers = []
         state.nearbyEvents = []
+        state.nearbySignals = []
         state.currentLocation = null
         state.isLoading = false
         state.error = null

@@ -59,7 +59,7 @@ npm run clean
 Configura las siguientes variables en el archivo `.env.local` o en la sección **Vars** del sidebar de v0:
 
 \`\`\`
-NEXT_PUBLIC_API_URL=https://api.radarapp.com/api
+NEXT_PUBLIC_API_URL=http://localhost:8000/api
 \`\`\`
 
 ## Desarrollo

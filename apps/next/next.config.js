@@ -3,7 +3,8 @@ const path = require('path');
 
 const nextConfig = {
   transpilePackages: [
-    "react-native",
+    // Do not transpile 'react-native' itself in Next; alias to 'react-native-web' below.
+    // This prevents Next/SWC from parsing RN's internal TS/Flow syntax.
     "react-native-web",
     "expo",
     "solito",
@@ -38,8 +39,19 @@ const nextConfig = {
   webpack: (config) => {
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
+      // Ensure web resolves RN imports to RNW
       "react-native$": "react-native-web",
     };
+
+    // Prioritize web-specific entry points before generic TS/JS
+    config.resolve.extensions = [
+      ".web.tsx",
+      ".web.ts",
+      ".web.jsx",
+      ".web.js",
+      ...config.resolve.extensions,
+    ];
+
     return config;
   },
 };

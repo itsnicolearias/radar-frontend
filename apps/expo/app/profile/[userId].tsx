@@ -3,60 +3,61 @@
 import { useEffect, useState } from "react"
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native"
 import { useRouter, useLocalSearchParams } from "expo-router"
-import { useConnectionStore } from "@radar/features"
-import { connectionService } from "@radar/api"
-import type { NearbyUser } from "@radar/types"
+import { useAuthStore, useConnectionStore, useRadarStore } from "@radar/features"
+import { connectionService, profileViewService } from "@radar/api"
+import { IRadarUser } from "@radar/types"
+import { Heart, HeartOff } from "lucide-react-native"
 
 export default function UserProfileScreen() {
   const router = useRouter()
   const { userId } = useLocalSearchParams<{ userId: string }>()
 
   const { connections } = useConnectionStore()
-  const [profileData, setProfileData] = useState<NearbyUser | null>(null)
-  const [isConnected, setIsConnected] = useState(false)
+  const [ profileData, setProfileData ] = useState<IRadarUser | null>(null)
+  const [ isConnected, setIsConnected ] = useState(false)
+  const { user } = useAuthStore()
+  const { nearbyUsers } = useRadarStore()
 
+  
   useEffect(() => {
     const connected = connections.some((c) => c.receiverId === userId || c.senderId === userId)
     setIsConnected(connected)
   }, [connections, userId])
 
+
   useEffect(() => {
-    // Mock data
-    setProfileData({
-      user: {
-        userId: userId!,
-        firstName: "Ana",
-        lastName: "García",
-        email: "ana@example.com",
-        isVerified: true,
-        invisibleMode: false,
-        lastLatitude: -34.6037,
-        lastLongitude: -58.3816,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-      profile: {
-        profileId: "1",
-        userId: userId!,
-        bio: "Me encanta explorar cafés nuevos, descubrir música indie y correr por los parques de la ciudad.",
-        age: 26,
-        country: "Argentina",
-        province: "Buenos Aires, Palermo",
-        interests: ["Música", "Café", "Arte", "Running", "Fotografía", "Viajes"],
-        showAge: true,
-        showLocation: true,
-        distanceRadius: 1000,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-      distance: 120,
-    })
-  }, [userId])
+    const registerView = async () => {
+      if (user && userId !== user.userId) {
+        try {
+          await profileViewService.registerProfileView(userId)
+        } catch (error) {
+          console.error("[v0] Error registering profile view:", error)
+        }
+      }
+    }
+
+    const findUser = () => {
+      const user = nearbyUsers.find((u) => u.userId === userId)
+      if (user) {
+        setProfileData(user)
+      }
+    }
+
+    registerView()
+    findUser()
+  }, [userId, user, nearbyUsers])
 
   const handleConnect = async () => {
     try {
-      await connectionService.sendConnectionRequest(userId!)
-      alert("Solicitud enviada")
+      await connectionService.createConnection(userId!)
+    } catch (error) {
+      console.error("[v0] Error:", error)
+    }
+  }
+
+  const handleDeleteConnection = async () => {
+    try {
+      await connectionService.deleteConnection(userId!)
     } catch (error) {
       console.error("[v0] Error:", error)
     }
@@ -70,6 +71,13 @@ export default function UserProfileScreen() {
     )
   }
 
+  const formatDistance = (distance?: number) => {
+    if (!distance) return "Cerca"
+    if (distance < 1000) return `${Math.round(distance)}m`
+    return `${(distance / 1000).toFixed(1)}km`
+  }
+
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -81,18 +89,18 @@ export default function UserProfileScreen() {
 
       <View style={styles.card}>
         <View style={styles.distanceBadge}>
-          <Text style={styles.distanceText}>{profileData.distance}m de distancia</Text>
+          <Text style={styles.distanceText}>{formatDistance(profileData.distance)} de distancia</Text>
         </View>
 
         <Text style={styles.name}>
-          {profileData.user.firstName} {profileData.user.lastName}, {profileData.profile.age}
+          {profileData.firstName} {profileData.lastName}, {profileData.Profile.age}
         </Text>
-        <Text style={styles.location}>{profileData.profile.province}</Text>
+        <Text style={styles.location}>{profileData.Profile.province}</Text>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Intereses</Text>
           <View style={styles.interests}>
-            {profileData.profile.interests?.map((interest, index) => (
+            {profileData.Profile.interests?.map((interest, index) => (
               <View key={index} style={styles.interestPill}>
                 <Text style={styles.interestText}>{interest}</Text>
               </View>
@@ -102,19 +110,26 @@ export default function UserProfileScreen() {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Sobre mí</Text>
-          <Text style={styles.bio}>{profileData.profile.bio}</Text>
+          <Text style={styles.bio}>{profileData.Profile.bio}</Text>
         </View>
 
         <View style={styles.actions}>
           {!isConnected && (
             <TouchableOpacity style={styles.connectButton} onPress={handleConnect}>
-              <Text style={styles.connectText}>♥ Conectar</Text>
+               <Heart color="#FF005C" size={20} />
             </TouchableOpacity>
           )}
           {isConnected && (
+            <>
             <TouchableOpacity style={styles.messageButton} onPress={() => router.push(`/chats/${userId}`)}>
               <Text style={styles.messageText}>💬 Enviar mensaje</Text>
             </TouchableOpacity>
+
+            <TouchableOpacity style={styles.connectButton} onPress={handleDeleteConnection}>
+               <HeartOff color="#FF005C" size={20} />
+            </TouchableOpacity>
+            </>
+            
           )}
         </View>
       </View>
@@ -125,7 +140,7 @@ export default function UserProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0E2A3E",
+    backgroundColor: "#000000",
   },
   header: {
     flexDirection: "row",
@@ -134,6 +149,8 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingBottom: 20,
     gap: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(0, 255, 179, 0.2)",
   },
   backButton: {
     width: 40,
@@ -151,15 +168,21 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
   },
   card: {
-    backgroundColor: "#1A3A52",
+    backgroundColor: "#0a0e27",
     borderRadius: 24,
     padding: 24,
     margin: 24,
+    borderWidth: 1,
+    borderColor: "rgba(0, 255, 179, 0.2)",
   },
   distanceBadge: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    backgroundColor: "rgba(0, 255, 179, 0.1)",
   },
   distanceText: {
     color: "#00FFB3",
@@ -173,7 +196,7 @@ const styles = StyleSheet.create({
   },
   location: {
     fontSize: 14,
-    color: "#D1D5DB",
+    color: "#C5C5C5",
     marginBottom: 24,
   },
   section: {
@@ -191,19 +214,21 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   interestPill: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "rgba(0, 255, 179, 0.2)",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "rgba(0, 255, 179, 0.4)",
   },
   interestText: {
-    color: "#1A3A52",
+    color: "#00FFB3",
     fontSize: 14,
     fontWeight: "500",
   },
   bio: {
     fontSize: 14,
-    color: "#D1D5DB",
+    color: "#C5C5C5",
     lineHeight: 20,
   },
   actions: {
@@ -229,7 +254,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   messageText: {
-    color: "#1A3A52",
+    color: "#000000",
     fontSize: 16,
     fontWeight: "600",
   },
