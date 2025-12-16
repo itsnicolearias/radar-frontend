@@ -1,6 +1,6 @@
 "use client"
 
-import { View, Text, StyleSheet, Dimensions, Pressable } from "react-native"
+import { View, Text, StyleSheet, Dimensions, Pressable, Platform } from "react-native"
 import { Link } from "expo-router"
 import { LinearGradient } from "expo-linear-gradient"
 import { MotiView, MotiText } from "moti"
@@ -21,7 +21,7 @@ export default function WelcomeScreen() {
   return (
     <View style={styles.container}>
       {/* Glow central como en Next */}
-      <View style={styles.radialGlow} pointerEvents="none" />
+      <View style={[styles.radialGlow, { pointerEvents: "none" }]} />
 
       {/* Partículas animadas */}
       {PARTICLES.map((p) => (
@@ -39,10 +39,9 @@ export default function WelcomeScreen() {
             repeat: Infinity,
             easing: Easing.inOut(Easing.ease),
           }}
-          pointerEvents="none"
           style={[
             styles.particle,
-            { left: `${p.x}%`, top: `${p.y}%` },
+            { left: `${p.x}%`, top: `${p.y}%`, pointerEvents: "none" },
           ]}
         />
       ))}
@@ -63,7 +62,6 @@ export default function WelcomeScreen() {
                 delay: ring * 300,
                 easing: Easing.inOut(Easing.ease),
               }}
-              pointerEvents="none"
               style={[
                 styles.ring,
                 {
@@ -71,6 +69,7 @@ export default function WelcomeScreen() {
                   height: `${100 - ring * 20}%`,
                   top: `${ring * 10}%`,
                   left: `${ring * 10}%`,
+                  pointerEvents: "none",
                 },
               ]}
             />
@@ -85,8 +84,7 @@ export default function WelcomeScreen() {
               repeat: Infinity,
               easing: Easing.out(Easing.ease),
             }}
-            pointerEvents="none"
-            style={styles.sonarWave}
+            style={[styles.sonarWave, { pointerEvents: "none" }]}
           />
 
           {/* Punto central */}
@@ -104,8 +102,11 @@ export default function WelcomeScreen() {
               repeat: Infinity,
               easing: Easing.inOut(Easing.ease),
             }}
-            pointerEvents="none"
-            style={styles.centerDot}
+            style={[
+              styles.centerDot,
+              Platform.OS === "web" ? { boxShadow: "0 0 20px rgba(255,0,92,0.8)" } : {},
+              { pointerEvents: "none" },
+            ]}
           />
 
           {/* Scan line giratoria */}
@@ -117,10 +118,9 @@ export default function WelcomeScreen() {
               repeat: Infinity,
               easing: Easing.linear,
             }}
-            pointerEvents="none"
-            style={styles.scanWrapper}
+            style={[styles.scanWrapper, { pointerEvents: "none" }]}
           >
-            <View style={styles.scanLine} pointerEvents="none" />
+              <View style={[styles.scanLine, { pointerEvents: "none" }]} />
           </MotiView>
         </View>
 
