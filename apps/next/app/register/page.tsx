@@ -3,13 +3,13 @@
 import type React from "react"
 
 import { useState } from "react"
-import { useRouter } from 'next/navigation'
+import { useRouter } from "next/navigation"
 import { Button, Input, Label } from "@radar/ui"
 import { authService } from "@radar/api"
 import { useAuthStore } from "@radar/features"
 import Link from "next/link"
-import { ArrowLeft } from 'lucide-react'
-import { RegisterInput, registerSchema } from "../../../../packages/api/validations"
+import { ArrowLeft, Eye, EyeOff } from "lucide-react"
+import { type RegisterInput, registerSchema } from "../../../../packages/api/validations"
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -21,12 +21,22 @@ export default function RegisterPage() {
     password: "",
     confirmPassword: "",
   })
-  const [errors, setErrors] = useState<Partial<Record<keyof RegisterInput, string>>>({})
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  // </CHANGE>
+  const [errors, setErrors] = useState<Partial<Record<keyof RegisterInput | "terms", string>>>({})
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setErrors({})
+
+    if (!acceptedTerms) {
+      setErrors({ terms: "Debés aceptar los términos y condiciones para continuar" })
+      return
+    }
+    // </CHANGE>
 
     const validation = registerSchema.safeParse(formData)
     if (!validation.success) {
@@ -55,7 +65,7 @@ export default function RegisterPage() {
   return (
     <div className="relative min-h-screen bg-black overflow-hidden">
       <div className="absolute inset-0 bg-gradient-radial from-[#00FFB3]/10 via-transparent to-transparent pointer-events-none" />
-      
+
       <div className="relative z-10 min-h-screen px-6 py-8 flex flex-col">
         <Link
           href="/"
@@ -75,7 +85,9 @@ export default function RegisterPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName" className="text-white">Nombre</Label>
+                  <Label htmlFor="firstName" className="text-white">
+                    Nombre
+                  </Label>
                   <Input
                     id="firstName"
                     placeholder="Juan"
@@ -87,7 +99,9 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="lastName" className="text-white">Apellido</Label>
+                  <Label htmlFor="lastName" className="text-white">
+                    Apellido
+                  </Label>
                   <Input
                     id="lastName"
                     placeholder="Pérez"
@@ -100,7 +114,9 @@ export default function RegisterPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-white">Email</Label>
+                <Label htmlFor="email" className="text-white">
+                  Email
+                </Label>
                 <Input
                   id="email"
                   type="email"
@@ -113,30 +129,85 @@ export default function RegisterPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-white">Contraseña</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="h-12 bg-[#1A1A1A] border border-[#1DE3F2]/30 rounded-2xl text-white placeholder-[#C5C5C5]/40 focus:border-[#00FFB3] focus:outline-none transition-all"
-                />
+                <Label htmlFor="password" className="text-white">
+                  Contraseña
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    className="h-12 bg-[#1A1A1A] border border-[#1DE3F2]/30 rounded-2xl text-white placeholder-[#C5C5C5]/40 focus:border-[#00FFB3] focus:outline-none transition-all pr-12"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#C5C5C5] hover:text-[#00FFB3] transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
                 {errors.password && <p className="text-sm text-[#FF005C]">{errors.password}</p>}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-white">Confirmar contraseña</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.confirmPassword}
-                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                  className="h-12 bg-[#1A1A1A] border border-[#1DE3F2]/30 rounded-2xl text-white placeholder-[#C5C5C5]/40 focus:border-[#00FFB3] focus:outline-none transition-all"
-                />
+                <Label htmlFor="confirmPassword" className="text-white">
+                  Confirmar contraseña
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={formData.confirmPassword}
+                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                    className="h-12 bg-[#1A1A1A] border border-[#1DE3F2]/30 rounded-2xl text-white placeholder-[#C5C5C5]/40 focus:border-[#00FFB3] focus:outline-none transition-all pr-12"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#C5C5C5] hover:text-[#00FFB3] transition-colors"
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
                 {errors.confirmPassword && <p className="text-sm text-[#FF005C]">{errors.confirmPassword}</p>}
               </div>
+              {/* </CHANGE> */}
+
+              <div className="space-y-2 pt-2">
+                <label className="flex items-start gap-3 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={acceptedTerms}
+                    onChange={(e) => {
+                      setAcceptedTerms(e.target.checked)
+                      if (e.target.checked && errors.terms) {
+                        setErrors({ ...errors, terms: undefined })
+                      }
+                    }}
+                    className="mt-1 w-4 h-4 rounded border-[#1DE3F2]/30 bg-[#1A1A1A] text-[#00FFB3] focus:ring-2 focus:ring-[#00FFB3] focus:ring-offset-0 cursor-pointer"
+                  />
+                  <span className="text-sm text-[#C5C5C5] leading-relaxed">
+                    Al crear una cuenta, confirmo que soy mayor de 18 años y acepto los{" "}
+                    <Link href="/terms-conditions" className="text-[#00FFB3] hover:text-[#1DE3F2] underline transition-colors">
+                      Términos y Condiciones
+                    </Link>{" "}
+                    y la{" "}
+                    <Link
+                      href="/privacy-policy"
+                      className="text-[#00FFB3] hover:text-[#1DE3F2] underline transition-colors"
+                    >
+                      Política de Privacidad
+                    </Link>{" "}
+                    de Radar.
+                  </span>
+                </label>
+                {errors.terms && <p className="text-sm text-[#FF005C]">{errors.terms}</p>}
+              </div>
+              {/* </CHANGE> */}
 
               <Button
                 type="submit"
@@ -147,12 +218,27 @@ export default function RegisterPage() {
               </Button>
             </form>
 
-            <p className="text-center text-sm text-[#C5C5C5]">
-              ¿Ya tenés cuenta?{" "}
-              <Link href="/login" className="text-[#00FFB3] hover:text-[#1DE3F2] underline font-semibold transition-colors">
-                Iniciá sesión
-              </Link>
-            </p>
+            <div className="space-y-3">
+              <p className="text-center text-sm text-[#C5C5C5]">
+                ¿Ya tenés cuenta?{" "}
+                <Link
+                  href="/login"
+                  className="text-[#00FFB3] hover:text-[#1DE3F2] underline font-semibold transition-colors"
+                >
+                  Iniciá sesión
+                </Link>
+              </p>
+              <div className="flex items-center justify-center gap-4 text-xs text-[#C5C5C5]">
+                <Link href="/privacy-policy" className="hover:text-[#00FFB3] transition-colors">
+                  Privacidad
+                </Link>
+                <span>•</span>
+                <Link href="/terms-conditions" className="hover:text-[#00FFB3] transition-colors">
+                  Términos
+                </Link>
+              </div>
+            </div>
+            {/* </CHANGE> */}
           </div>
         </div>
       </div>
