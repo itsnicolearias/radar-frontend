@@ -26,8 +26,8 @@
   },
   "devDependencies": {
     "@types/node": "^22",
-    "@types/react": "~19.2.2",
-    "@types/react-dom": "~19.2.2",
+    "@types/react": "19.2.3",
+    "@types/react-dom": "19.2.3",
     "baseline-browser-mapping": "^2.8.32",
     "nativewind": "^4.0.0",
     "next-transpile-modules": "^10.0.1",
