@@ -8,7 +8,7 @@ import { MotiView } from "moti"
 import { useChatStore, useConnectionStore, useSocketEvent, useProfileViewsStore, useAuthStore } from "@radar/features"
 import { messageService, connectionService, profileViewService } from "@radar/api"
 import type { IMessageResponse, IConnectionResponse } from "@radar/types"
-import { BottomNavNative } from "@radar/ui/navigation/bottom-nav.native"
+import { BottomNavNative } from "../../../packages/ui/navigation/bottom-nav.native"
 
 export default function ChatsScreen() {
   const router = useRouter()

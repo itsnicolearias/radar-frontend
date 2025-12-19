@@ -5,7 +5,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from
 import { useRouter } from "expo-router"
 import { useEventsStore, useAuthStore } from "@radar/features"
 import { eventService } from "@radar/api"
-import { BottomNavNative } from "@radar/ui/navigation/bottom-nav.native"
+import { BottomNavNative } from "../../../packages/ui/navigation/bottom-nav.native"
 import { formatDistance } from "../../../lib/utils/format-distance"
 
 const { width } = Dimensions.get("window")

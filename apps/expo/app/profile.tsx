@@ -5,7 +5,7 @@ import { View, Text, ScrollView, TextInput, TouchableOpacity, StyleSheet, Image,
 import { ArrowLeft, Settings, Eye, EyeOff, LogOut, Crown, Zap, Check, MapPin, Radio } from "lucide-react-native"
 import { useAuthStore } from "@radar/features"
 import { profileService, uploadService } from "@radar/api"
-import { BottomNavNative } from "@radar/ui/navigation/bottom-nav.native"
+import { BottomNavNative } from "../../../packages/ui/navigation/bottom-nav.native"
 import { useRouter } from "expo-router"
 import * as ImagePicker from "expo-image-picker"
 
@@ -37,32 +37,50 @@ export default function ProfileScreen() {
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
       })
 
-      if (!result.canceled && result.assets[0]) {
-        setUploading(true)
+      
+  if (result.canceled || !result.assets?.[0]) return
 
-        const uri = result.assets[0].uri
+    setUploading(true)
 
-        const imageResponse = await fetch(uri)
-        const blob = await imageResponse.blob()
 
-        const response = await uploadService.uploadImage(blob, result.assets[0].fileName!)
+
+    const asset = result.assets[0]
+
+    const mimeType = asset.mimeType ?? "image/jpeg"
+    const fileName =
+      asset.fileName ??
+      `photo.${mimeType.split("/")[1] ?? "jpg"}`
+
+    const response = await fetch(asset.uri)
+    const blob = await response.blob()
+
+
+    console.log({
+  blobType: blob.type,
+  blobSize: blob.size,
+  fileName: result.assets[0].fileName,
+  uri: result.assets[0].uri,
+})
+    const file = new Blob([blob], { type: mimeType })
+    const photoUrl = await uploadService.uploadImage(file, fileName)
 
         await profileService.updateMyProfile({
-          Profile: { photoUrl: response },
+          Profile: { photoUrl },
         })
 
         if (profile) {
-          setProfile({ ...profile, photoUrl: response })
+          setProfile({ ...profile, photoUrl })
         }
 
         Alert.alert("Éxito", "Foto actualizada correctamente")
-      }
+      
+
     } catch (error) {
       console.error("[v0] Error uploading photo:", error)
       Alert.alert("Error", "No se pudo subir la foto")
