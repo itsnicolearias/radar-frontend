@@ -6,7 +6,8 @@
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "check-images": "node scripts/check-images.js"
   },
   "dependencies": {
     "@radar/api": "*",
@@ -25,6 +26,7 @@
     "expo-router": "~6.0.14",
     "expo-secure-store": "~15.0.8",
     "expo-status-bar": "~3.0.8",
+    "expo-system-ui": "~6.0.9",
     "nativewind": "^4.0.0",
     "react": "^19.2.3",
     "react-hook-form": "^7.66.0",
