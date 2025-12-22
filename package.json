@@ -30,6 +30,7 @@
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "expo-linear-gradient": "^15.0.7",
+    "expo-module-scripts": "^5.0.8",
     "framer-motion": "^12.23.24",
     "lucide-react": "0.548.0",
     "lucide-react-native": "^0.553.0",
