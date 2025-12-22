@@ -229,7 +229,7 @@ export default function ChatsScreen() {
                         {request.Sender?.Profile?.photoUrl ? (
                           <Image source={{ uri: request.Sender.Profile.photoUrl }} style={styles.requestAvatarImage} />
                         ) : (
-                          <Text style={styles.requestAvatarText}>{request.Sender.displayName![0]}</Text>
+                          <Text style={styles.requestAvatarText}>{request.Sender.displayName?.[0] || "U"}</Text>
                         )}
                       </View>
 

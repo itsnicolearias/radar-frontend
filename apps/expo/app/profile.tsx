@@ -133,7 +133,7 @@ export default function ProfileScreen() {
   const handleLogout = () => {
     logout()
 
-    router.navigate("/")
+    router.push("/")
   }
 
   const initialLetters = `${user?.firstName?.[0] ?? ""}${user?.lastName?.[0] ?? ""}`.toUpperCase()

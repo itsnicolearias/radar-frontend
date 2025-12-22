@@ -6,7 +6,7 @@ import { useRouter } from "expo-router"
 import { useEventsStore, useAuthStore } from "@radar/features"
 import { eventService } from "@radar/api"
 import { BottomNavNative } from "../../../packages/ui/navigation/bottom-nav.native"
-import { formatDistance } from "../../../lib/utils/format-distance"
+//import { formatDistance } from "../../../lib/utils/format-distance"
 
 const { width } = Dimensions.get("window")
 const CATEGORIES = ["Todos", "Música", "Gastronomía", "Arte", "Deportes", "Social"]
@@ -117,7 +117,7 @@ export default function EventsScreen() {
                     {event.title}
                   </Text>
                   <Text style={styles.eventLocation} numberOfLines={1}>
-                    📍 {event.location} · {formatDistance(event.distance)}
+                    📍 {event.location} · {event.distance}
                   </Text>
                   <View style={styles.eventMeta}>
                     <Text style={styles.eventDate}>🕐 {formatDate(event.startDate)}</Text>
