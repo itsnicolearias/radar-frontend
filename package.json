@@ -48,10 +48,10 @@
   "overrides": {
     "react-native-safe-area-context": "~5.6.0",
     "lucide-react": "0.548.0",
-    "react-native-reanimated": "~4.1.1",
-    "react-native-worklets": "0.6.1",
+    "react-native-reanimated": "4.0.2",
+    "react-native-worklets": "0.4.1",
     "react-native-renderer": "19.2.3",
-    "react-native": "0.83.1",
+    "react-native": "0.81.5",
     "react": "19.2.3"
   }
 }
