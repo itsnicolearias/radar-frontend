@@ -1,4 +1,4 @@
-import { axiosClient } from "../axios-client"
+import { axiosRequestor } from "../../../lib/api/axios-client"
 
 export interface IPresignedUrlResponse {
   signedUrl: string
@@ -7,7 +7,7 @@ export interface IPresignedUrlResponse {
 
 export const uploadService = {
   async getPresignedUrl(fileName: string, fileType: string): Promise<IPresignedUrlResponse> {
-    const response = await axiosClient.get<IPresignedUrlResponse>("/get-signed-url", {
+    const response = await axiosRequestor.get<IPresignedUrlResponse>("/get-signed-url", {
       params: { fileName, fileType },
     })
 

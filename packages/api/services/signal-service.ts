@@ -1,5 +1,5 @@
 import { IRadarSignal } from "@radar/types";
-import { axiosClient } from "../axios-client"
+import { axiosRequestor } from "../../../lib/api/axios-client"
 
 export interface SendSignalInput {
   note?: string
@@ -7,11 +7,11 @@ export interface SendSignalInput {
 
 export const signalService = {
   async sendSignal(note?: string): Promise<IRadarSignal> {
-    const response = await axiosClient.post("/signals/send", { note })
+    const response = await axiosRequestor.post("/signals/send", { note })
     return response.data
   },
   async getSignalById(signalId: string): Promise<IRadarSignal> {
-    const response = await axiosClient.get(`/signals/${signalId}`)
+    const response = await axiosRequestor.get(`/signals/${signalId}`)
     return response.data.data
   },
 }

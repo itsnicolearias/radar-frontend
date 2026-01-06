@@ -13,7 +13,7 @@ try {
 
 const API_BASE_URL = "http://192.168.8.6:8000/api"
 
-export const axiosClient = axios.create({
+export const axiosRequestor = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
@@ -56,7 +56,7 @@ async function removeToken(): Promise<void> {
 }
 
 // Request interceptor - supports async token retrieval
-axiosClient.interceptors.request.use(
+axiosRequestor.interceptors.request.use(
   async (config) => {
     try {
       const token = await getToken()
@@ -74,7 +74,7 @@ axiosClient.interceptors.request.use(
 )
 
 // Response interceptor for error handling
-axiosClient.interceptors.response.use(
+axiosRequestor.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error?.response?.status === 401) {
@@ -89,4 +89,4 @@ axiosClient.interceptors.response.use(
   },
 )
 
-export default axiosClient
+export default axiosRequestor

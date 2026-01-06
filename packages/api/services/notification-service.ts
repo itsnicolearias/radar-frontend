@@ -1,4 +1,4 @@
-import { axiosClient } from "../axios-client"
+import { axiosRequestor } from "../../../lib/api/axios-client"
 import type {
   INotificationResponse,
   IUnreadNotificationCountResponse,
@@ -12,12 +12,12 @@ export interface MarkNotificationsAsReadInput {
 
 export const notificationService = {
   async getNotifications(): Promise<INotificationResponse[]> {
-    const response = await axiosClient.get<INotificationResponse[]>("/notifications")
+    const response = await axiosRequestor.get<INotificationResponse[]>("/notifications")
     return response.data
   },
 
   async getUnreadCount(): Promise<IUnreadNotificationCountResponse> {
-    const response = await axiosClient.get<IUnreadNotificationCountResponse>(
+    const response = await axiosRequestor.get<IUnreadNotificationCountResponse>(
       "/notifications/unread/count",
     )
     return response.data
@@ -26,7 +26,7 @@ export const notificationService = {
   async markAsRead(
     data: MarkNotificationsAsReadInput,
   ): Promise<IMarkNotificationsAsReadResponse> {
-    const response = await axiosClient.patch<IMarkNotificationsAsReadResponse>(
+    const response = await axiosRequestor.patch<IMarkNotificationsAsReadResponse>(
       "/notifications/read",
       data,
     )
@@ -34,7 +34,7 @@ export const notificationService = {
   },
 
   async deleteNotification(notificationId: string): Promise<IDeleteNotificationResponse> {
-    const response = await axiosClient.delete<IDeleteNotificationResponse>(
+    const response = await axiosRequestor.delete<IDeleteNotificationResponse>(
       `/notifications/${notificationId}`,
     )
     return response.data
