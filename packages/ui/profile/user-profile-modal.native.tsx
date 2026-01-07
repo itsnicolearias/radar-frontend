@@ -69,16 +69,18 @@ export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({
             </TouchableOpacity>
           </LinearGradient>
 
+          <View style={styles.avatarContainer}>
+            <View style={styles.avatarLarge}>
+              {user.Profile?.photoUrl ? (
+                <Image source={{ uri: user.Profile.photoUrl }} style={styles.avatarImage} />
+              ) : (
+                <Text style={styles.avatarLargeText}>{user.displayName?.[0]?.toUpperCase() || "?"}</Text>
+              )}
+            </View>
+          </View>
+
           <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
             <View style={styles.profileSection}>
-              <View style={styles.avatarLarge}>
-                {user.Profile?.photoUrl ? (
-                  <Image source={{ uri: user.Profile.photoUrl }} style={styles.avatarImage} />
-                ) : (
-                  <Text style={styles.avatarLargeText}>{user.displayName?.[0]?.toUpperCase() || "?"}</Text>
-                )}
-              </View>
-
               <View style={styles.distanceBadge}>
                 <MapPin color="#00FFB3" size={16} />
                 <Text style={styles.distanceText}>{formatDistance(user.distance)} de distancia</Text>
@@ -165,7 +167,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#000000",
   },
   header: {
-    height: 280, // Increased header height from 240 to 280 to prevent avatar cutoff
+    height: 240,
     justifyContent: "flex-start",
     paddingTop: 60,
     paddingHorizontal: 24,
@@ -181,10 +183,19 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     backgroundColor: "#000000",
+    paddingTop: 80, // Added padding to account for absolute avatar
+  },
+  avatarContainer: {
+    position: "absolute",
+    top: 180, // Position at bottom of gradient
+    left: 0,
+    right: 0,
+    alignItems: "center",
+    zIndex: 10,
   },
   profileSection: {
     alignItems: "center",
-    marginTop: -80, // Increased negative margin from -60 to -80 to show avatar properly
+    marginTop: 0, // Removed negative margin since avatar is now absolute
     marginBottom: 32,
     paddingHorizontal: 24,
   },
@@ -197,7 +208,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 4,
     borderColor: "#000000",
-    marginBottom: 16,
   },
   avatarLargeText: {
     fontSize: 48,

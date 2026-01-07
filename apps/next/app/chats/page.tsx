@@ -342,7 +342,7 @@ export default function ChatsPage() {
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: index * 0.1 }}
-                    className="shrink-0 text-center cursor-pointer"
+                    className={`shrink-0 text-center cursor-pointer ${index > 2 ? "blur-sm opacity-30" : ""}`}
                     onClick={() => router.push(`/profile/${view.viewerId}`)}
                   >
                     <div className="relative">

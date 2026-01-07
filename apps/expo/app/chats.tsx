@@ -172,7 +172,10 @@ export default function ChatsScreen() {
                   animate={{ opacity: 1, translateY: 0 }}
                   transition={{ delay: index * 100 }}
                 >
-                  <TouchableOpacity style={styles.requestCard} onPress={() => handleViewProfile(request.Sender.userId!)}>
+                  <TouchableOpacity
+                    style={styles.requestCard}
+                    onPress={() => handleViewProfile(request.Sender.userId!)}
+                  >
                     <View style={styles.requestContent}>
                       <View style={styles.requestAvatar}>
                         {request.Sender?.Profile?.photoUrl ? (
@@ -294,17 +297,18 @@ export default function ChatsScreen() {
                     from={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: index * 100 }}
+                    style={{ opacity: index > 2 ? 0.3 : 1 }}
                   >
                     <TouchableOpacity
-                      style={styles.profileView}
+                      style={[styles.profileView, index > 2 && styles.profileViewBlurred]}
                       onPress={() => router.push(`/profile/${view.viewerId}`)}
                     >
                       <View style={styles.profileViewAvatarContainer}>
-                        <View style={styles.profileViewAvatar}>
+                        <View style={[styles.profileViewAvatar, index > 2 && { opacity: 0.3 }]}>
                           {view.Viewer?.Profile?.photoUrl ? (
                             <Image
                               source={{ uri: view.Viewer.Profile.photoUrl }}
-                              style={styles.profileViewAvatarImage}
+                              style={[styles.profileViewAvatarImage, index > 2 && { opacity: 0.3 }]}
                             />
                           ) : (
                             <Text style={styles.profileViewAvatarText}>{view.Viewer.displayName?.[0] || "U"}</Text>
@@ -312,8 +316,12 @@ export default function ChatsScreen() {
                         </View>
                         <View style={styles.onlineIndicator} />
                       </View>
-                      <Text style={styles.profileViewName}>{view.Viewer.displayName || "Usuario"}</Text>
-                      <Text style={styles.profileViewTime}>{formatRelativeTime(view.createdAt)}</Text>
+                      <Text style={[styles.profileViewName, index > 2 && { opacity: 0.1 }]}>
+                        {view.Viewer.displayName || "Usuario"}
+                      </Text>
+                      <Text style={[styles.profileViewTime, index > 2 && { opacity: 0.4 }]}>
+                        {formatRelativeTime(view.createdAt)}
+                      </Text>
                     </TouchableOpacity>
                   </MotiView>
                 ))}
@@ -828,5 +836,8 @@ const styles = StyleSheet.create({
   },
   navLabelActive: {
     color: "#00FFB3",
+  },
+  profileViewBlurred: {
+    opacity: 0.4,
   },
 })
