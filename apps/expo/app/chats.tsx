@@ -80,15 +80,20 @@ export default function ChatsScreen() {
 
   const handleRejectConnection = async (connectionId: string) => {
     try {
-      await connectionService.updateConnection(connectionId, "rejected")
+      await connectionService.deleteConnection(connectionId)
       setPendingRequests(pendingRequests.filter((r) => r.connectionId !== connectionId))
     } catch (error) {
       console.error("[v0] Error rejecting connection:", error)
     }
   }
 
+  const handleViewProfile = (userId: string) => {
+    router.push(`/profile/${userId}`)
+  }
+
   const formatDistance = (distance?: number) => {
     if (!distance) return "Cerca"
+    if (distance < 50) return "50m"
     if (distance < 1000) return `${Math.round(distance)}m`
     return `${(distance / 1000).toFixed(1)}km`
   }
@@ -106,6 +111,9 @@ export default function ChatsScreen() {
     if (diffDays === 1) return "Ayer"
     return `Hace ${diffDays} días`
   }
+
+  const filteredPendingRequests = pendingRequests.filter((req) => (req.Sender?.distance || 0) < 50)
+  const filteredChats = chats.filter((chat) => (chat.user.distance || 0) < 50)
 
   return (
     <View style={styles.container}>
@@ -148,18 +156,78 @@ export default function ChatsScreen() {
         </View>
       </View>
 
-      <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Solicitudes Tab */}
+        {activeTab === "solicitudes" && (
+          <View style={styles.section}>
+            {filteredPendingRequests.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyText}>No tienes solicitudes aun</Text>
+              </View>
+            ) : (
+              filteredPendingRequests.map((request, index) => (
+                <MotiView
+                  key={request.connectionId}
+                  from={{ opacity: 0, translateY: 20 }}
+                  animate={{ opacity: 1, translateY: 0 }}
+                  transition={{ delay: index * 100 }}
+                >
+                  <TouchableOpacity style={styles.requestCard} onPress={() => handleViewProfile(request.Sender.userId!)}>
+                    <View style={styles.requestContent}>
+                      <View style={styles.requestAvatar}>
+                        {request.Sender?.Profile?.photoUrl ? (
+                          <Image source={{ uri: request.Sender.Profile.photoUrl }} style={styles.requestAvatarImage} />
+                        ) : (
+                          <Text style={styles.requestAvatarText}>{request.Sender.displayName?.[0] || "U"}</Text>
+                        )}
+                      </View>
+
+                      <View style={styles.requestInfo}>
+                        <Text style={styles.requestName}>
+                          {request.Sender.Profile?.showAge
+                            ? `${request.Sender.displayName}, ${request.Sender.Profile.age}`
+                            : request.Sender.displayName}
+                        </Text>
+                        <View style={styles.requestMeta}>
+                          <View style={styles.distanceDot} />
+                          <Text style={styles.distanceText}>{formatDistance(request.Sender?.distance)}</Text>
+                          {/* <Text style={styles.interestText}> • 3 intereses en común</Text> */}
+                        </View>
+
+                        <View style={styles.requestActions}>
+                          <TouchableOpacity
+                            style={styles.acceptButton}
+                            onPress={() => handleAcceptConnection(request.connectionId)}
+                          >
+                            <Text style={styles.acceptButtonText}>Aceptar</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={styles.rejectButton}
+                            onPress={() => handleRejectConnection(request.connectionId)}
+                          >
+                            <X size={16} color="#FF005C" />
+                            <Text style={styles.rejectButtonText}>Rechazar</Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                </MotiView>
+              ))
+            )}
+          </View>
+        )}
+
         {/* Chats Tab */}
         {activeTab === "chats" && (
           <View style={styles.section}>
-            {chats.length === 0 ? (
+            {filteredChats.length === 0 ? (
               <View style={styles.emptyState}>
-                <Text style={styles.emptyText}>No tienes conversaciones aún</Text>
+                <Text style={styles.emptyText}>No tienes conversaciones aun</Text>
                 <Text style={styles.emptySubtext}>Conecta con personas cercanas para empezar a chatear</Text>
               </View>
             ) : (
-              chats.map((chat, index) => (
-
+              filteredChats.map((chat, index) => (
                 <MotiView
                   key={chat.conversationId}
                   from={{ opacity: 0, translateX: -20 }}
@@ -202,67 +270,6 @@ export default function ChatsScreen() {
                       </View>
                     </View>
                   </TouchableOpacity>
-                </MotiView>
-              ))
-            )}
-          </View>
-        )}
-
-        {/* Solicitudes Tab */}
-        {activeTab === "solicitudes" && (
-          <View style={styles.section}>
-            {pendingRequests.length === 0 ? (
-              <View style={styles.emptyState}>
-                <Text style={styles.emptyText}>No tienes solicitudes pendientes</Text>
-              </View>
-            ) : (
-              pendingRequests.map((request, index) => (
-                <MotiView
-                  key={request.connectionId}
-                  from={{ opacity: 0, translateY: 20 }}
-                  animate={{ opacity: 1, translateY: 0 }}
-                  transition={{ delay: index * 100 }}
-                >
-                  <View style={styles.requestCard}>
-                    <View style={styles.requestContent}>
-                      <View style={styles.requestAvatar}>
-                        {request.Sender?.Profile?.photoUrl ? (
-                          <Image source={{ uri: request.Sender.Profile.photoUrl }} style={styles.requestAvatarImage} />
-                        ) : (
-                          <Text style={styles.requestAvatarText}>{request.Sender.displayName?.[0] || "U"}</Text>
-                        )}
-                      </View>
-
-                      <View style={styles.requestInfo}>
-                        <Text style={styles.requestName}>
-                          {request.Sender.Profile?.showAge
-                            ? `${request.Sender.displayName}, ${request.Sender.Profile.age}`
-                            : request.Sender.displayName}
-                        </Text>
-                        <View style={styles.requestMeta}>
-                          <View style={styles.distanceDot} />
-                          <Text style={styles.distanceText}>{formatDistance(request.Sender?.distance)}</Text>
-                          {/* <Text style={styles.interestText}> • 3 intereses en común</Text> */}
-                        </View>
-
-                        <View style={styles.requestActions}>
-                          <TouchableOpacity
-                            style={styles.acceptButton}
-                            onPress={() => handleAcceptConnection(request.connectionId)}
-                          >
-                            <Text style={styles.acceptButtonText}>Aceptar</Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            style={styles.rejectButton}
-                            onPress={() => handleRejectConnection(request.connectionId)}
-                          >
-                            <X size={16} color="#FF005C" />
-                            <Text style={styles.rejectButtonText}>Rechazar</Text>
-                          </TouchableOpacity>
-                        </View>
-                      </View>
-                    </View>
-                  </View>
                 </MotiView>
               ))
             )}
@@ -376,11 +383,8 @@ export default function ChatsScreen() {
 
       <BottomNavNative
         activeTab="chats"
-        onTabChange={(tab) => {
-          if (tab === "events") router.push("/events")
-          else if (tab === "radar") router.push("/radar")
-          else if (tab === "profile") router.push("/profile")
-        }}
+        onTabChange={(tab) => router.push(tab === "chats" ? "/chats" : `/${tab}`)}
+        showNotification={pendingRequests.length > 0}
       />
     </View>
   )

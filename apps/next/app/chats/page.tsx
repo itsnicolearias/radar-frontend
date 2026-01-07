@@ -88,7 +88,7 @@ export default function ChatsPage() {
 
   const handleRejectConnection = async (connectionId: string) => {
     try {
-      await connectionService.updateConnection(connectionId, "rejected")
+      await connectionService.deleteConnection(connectionId)
       setPendingRequests(pendingRequests.filter((r) => r.connectionId !== connectionId))
     } catch (error) {
       console.error("[v0] Error rejecting connection:", error)
@@ -108,6 +108,13 @@ export default function ChatsPage() {
     if (diffDays === 1) return "Ayer"
     return `Hace ${diffDays} días`
   }
+
+  const handleViewProfile = (userId: string) => {
+    router.push(`/profile/${userId}`)
+  }
+
+  const filteredPendingRequests = pendingRequests.filter((req) => (req.Sender?.distance || 0) < 50)
+  const filteredChats = chats.filter((chat) => (chat.user.distance || 0) < 50)
 
   return (
     <div className="h-screen bg-black flex flex-col relative overflow-hidden">
@@ -167,13 +174,13 @@ export default function ChatsPage() {
         {/* Chats Tab */}
         {activeTab === "chats" && (
           <div className="space-y-3">
-            {chats.length === 0 ? (
+            {filteredChats.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-                <p className="text-[#C5C5C5]">No tienes conversaciones aún</p>
+                <p className="text-[#C5C5C5]">No tienes conversaciones aun</p>
                 <p className="text-sm text-white/50 mt-2">Conecta con personas cercanas para empezar a chatear</p>
               </div>
             ) : (
-              chats.map((chat, index) => (
+              filteredChats.map((chat, index) => (
                 <motion.div
                   key={chat.conversationId}
                   initial={{ opacity: 0, x: -20 }}
@@ -233,18 +240,19 @@ export default function ChatsPage() {
         {/* Solicitudes Tab */}
         {activeTab === "solicitudes" && (
           <div className="space-y-4">
-            {pendingRequests.length === 0 ? (
+            {filteredPendingRequests.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-                <p className="text-[#C5C5C5]">No tienes solicitudes pendientes</p>
+                <p className="text-[#C5C5C5]">No tienes solicitudes aun</p>
               </div>
             ) : (
-              pendingRequests.map((request, index) => (
+              filteredPendingRequests.map((request, index) => (
                 <motion.div
                   key={request.connectionId}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="rounded-2xl p-5 bg-linear-to-br from-[#00FFB3]/10 to-[#1DE3F2]/5 border border-[#00FFB3]/30"
+                  className="rounded-2xl p-5 bg-gradient-to-br from-[#00FFB3]/10 to-[#1DE3F2]/5 border border-[#00FFB3]/30 cursor-pointer"
+                  onClick={() => handleViewProfile(request.Sender.userId)}
                 >
                   <div className="flex items-start gap-4">
                     {/* Avatar */}
@@ -279,13 +287,19 @@ export default function ChatsPage() {
                       {/* Action buttons */}
                       <div className="flex gap-2 mt-4">
                         <button
-                          onClick={() => handleAcceptConnection(request.connectionId)}
-                          className="flex-1 h-10 rounded-xl bg-linear-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-medium shadow-lg shadow-[#00FFB3]/30 hover:scale-105 transition-transform"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleAcceptConnection(request.connectionId)
+                          }}
+                          className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-medium shadow-lg shadow-[#00FFB3]/30 hover:scale-105 transition-transform"
                         >
                           Aceptar
                         </button>
                         <button
-                          onClick={() => handleRejectConnection(request.connectionId)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleRejectConnection(request.connectionId)
+                          }}
                           className="flex-1 h-10 rounded-xl bg-[#1A1A1A] border border-[#FF005C]/30 hover:bg-[#FF005C]/10 text-[#FF005C] transition-all"
                         >
                           <X className="w-4 h-4 inline mr-1" />
@@ -395,7 +409,7 @@ export default function ChatsPage() {
 
                       <button
                         onClick={() => handleChatClick(connectedUser.userId)}
-                        className="px-4 py-2 rounded-xl bg-linear-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-medium shadow-lg shadow-[#00FFB3]/30 hover:scale-105 transition-transform flex items-center gap-2"
+                        className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-medium shadow-lg shadow-[#00FFB3]/30 hover:scale-105 transition-transform flex items-center gap-2"
                       >
                         <MessageCircle className="w-4 h-4" />
                         <span>Chat</span>

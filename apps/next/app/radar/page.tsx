@@ -161,9 +161,12 @@ export default function RadarPage() {
     }
   }
 
-  const handleDeleteConnection = async (receiverId: string) => {
+  const handleDeleteConnection = async (userId: string) => {
     try {
-      await connectionService.deleteConnection(receiverId!)
+      const conecc = connections.find((c => (c.receiverId === userId || c.senderId === userId)))
+      if (!conecc) return
+      const { connectionId } = conecc
+      await connectionService.deleteConnection(connectionId)
     } catch (error) {
       console.error("[v0] Error:", error)
     }
@@ -352,6 +355,8 @@ export default function RadarPage() {
           onClose={() => setSelectedSignal(null)}
           onRespond={() => handleRespond(selectedSignal)}
           onViewProfile={() => handleSignalClick(selectedSignal.senderId)}
+          isUserConnected={isUserConnected(selectedSignal.senderId)}
+          sendConnection={() => handleConnect(selectedSignal.senderId)}
         />
       )}
 

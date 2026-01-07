@@ -57,7 +57,10 @@ export default function UserProfileScreen() {
 
   const handleDeleteConnection = async () => {
     try {
-      await connectionService.deleteConnection(userId!)
+      const conecc = connections.find((c => (c.receiverId === userId || c.senderId === userId)))
+      if (!conecc) return
+      const { connectionId } = conecc
+      await connectionService.deleteConnection(connectionId)
     } catch (error) {
       console.error("[v0] Error:", error)
     }

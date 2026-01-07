@@ -1,10 +1,11 @@
 "use client"
 
-import type React from "react"
+import type { IRadarUser } from "@radar/types"
 import { motion } from "framer-motion"
 import { X, MapPin, MessageCircle, Heart, HeartOff } from "lucide-react"
-import type { IRadarUser } from "@radar/types"
 import { formatDistance } from "../../../lib/utils/format-distance"
+import type React from "react"
+import { useState } from "react"
 
 interface UserProfileModalProps {
   user: IRadarUser
@@ -24,10 +25,17 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   deleteConnection,
 }) => {
   const connectionMade = isUserConnected()
+  const [isAnimating, setIsAnimating] = useState(false)
+
+  const handleSendConnection = () => {
+    setIsAnimating(true)
+    sendConnection()
+    setTimeout(() => setIsAnimating(false), 600)
+  }
 
   return (
     <motion.div
-      className="fixed inset-0 bg-black/90 backdrop-blur-sm z-9999 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-black/90 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -107,31 +115,33 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
           {/* Action buttons */}
           <div className="flex gap-3 pt-4">
-            {connectionMade && (
+            {connectionMade ? (
               <>
                 <button
                   onClick={onMessage}
-                  className="flex-1 h-14 rounded-full bg-linear-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-semibold hover:shadow-lg transition-all duration-300 shadow-[#00FFB3]/30 flex items-center justify-center gap-2"
+                  className="flex-1 h-14 rounded-full bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-semibold hover:shadow-lg transition-all duration-300 shadow-[#00FFB3]/30 flex items-center justify-center gap-2"
                 >
                   <MessageCircle className="w-5 h-5" />
                   Enviar mensaje
                 </button>
                 <button
-                  className="w-14 h-14 rounded-full border border-[#FF005C]/30 flex items-center justify-center hover:bg-[#FF005C]/10 transition-colors bg-[#FF005C]"
+                  className="h-14 px-6 rounded-full border border-[#FF005C]/30 flex items-center justify-center gap-2 hover:bg-[#FF005C]/10 transition-colors bg-[#1A1A1A] text-[#FF005C] font-medium"
                   onClick={deleteConnection}
                 >
-                  <HeartOff className="w-6 h-6 text-[#FF005C]" />
+                  <HeartOff className="w-5 h-5" />
+                  Eliminar amigo
                 </button>
               </>
-            )}
-
-            {!connectionMade && (
-              <button
-                className="w-14 h-14 rounded-full border border-[#FF005C]/30 flex items-center justify-center hover:bg-[#FF005C]/10 transition-colors bg-[#FF005C]"
-                onClick={sendConnection}
+            ) : (
+              <motion.button
+                className="flex-1 h-14 rounded-full border border-[#FF005C]/30 flex items-center justify-center gap-2 hover:bg-[#FF005C]/10 transition-colors bg-[#1A1A1A] text-[#FF005C] font-medium"
+                onClick={handleSendConnection}
+                animate={isAnimating ? { scale: [1, 1.05, 1] } : {}}
+                transition={{ duration: 0.3 }}
               >
-                <Heart className="w-6 h-6 text-[#FF005C]" />
-              </button>
+                <Heart className="w-5 h-5" />
+                Enviar solicitud
+              </motion.button>
             )}
           </div>
         </div>

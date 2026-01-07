@@ -105,14 +105,15 @@ export default function RadarScreen() {
 
   const getMarkerPosition = (index: number, total: number, distance: number, type: "user" | "event") => {
     const normalizedDistance = Math.min(distance / 1000 / radiusKm, 1)
-    const minRadiusPercent = type === "event" ? 0.15 : 0.2
-    const maxRadiusPercent = type === "event" ? 0.3 : 0.45
+    const minRadiusPercent = type === "event" ? 0.25 : 0.3
+    const maxRadiusPercent = type === "event" ? 0.55 : 0.75
     const radiusPercent = minRadiusPercent + normalizedDistance * (maxRadiusPercent - minRadiusPercent)
 
     const angleOffset = type === "event" ? Math.PI / 4 : 0
-    const angle = (index / Math.max(total, 1)) * Math.PI * 2 + angleOffset
+    const randomAngleOffset = (Math.random() - 0.5) * 0.4
+    const angle = (index / Math.max(total, 1)) * Math.PI * 2 + angleOffset + randomAngleOffset
 
-    const radarSize = width * 0.7
+    const radarSize = width * 0.85
     const centerX = width / 2
     const centerY = height / 2 - 80
 
@@ -168,9 +169,12 @@ export default function RadarScreen() {
     }
   }
 
-  const handleDeleteConnection = async (receiverId: string) => {
+  const handleDeleteConnection = async (userId: string) => {
     try {
-      await connectionService.deleteConnection(receiverId!)
+      const conecc = connections.find((c => (c.receiverId === userId || c.senderId === userId)))
+      if (!conecc) return
+      const { connectionId } = conecc
+      await connectionService.deleteConnection(connectionId)
     } catch (error) {
       console.error("[v0] Error:", error)
     }
@@ -216,11 +220,11 @@ export default function RadarScreen() {
         {[0, 1, 2].map((i) => (
           <MotiView
             key={i}
-            from={{ scale: 0.5, opacity: 0.6 }}
-            animate={{ scale: 2, opacity: 0 }}
+            from={{ scale: 0.7, opacity: 0.8 }}
+            animate={{ scale: 2.5, opacity: 0 }}
             transition={{
               type: "timing",
-              duration: 3000,
+              duration: 3500,
               delay: i * 1000,
               loop: true,
             }}
@@ -228,14 +232,14 @@ export default function RadarScreen() {
           />
         ))}
 
-        {[0.25, 0.5, 0.75].map((scale, i) => (
+        {[0.35, 0.6, 0.85].map((scale, i) => (
           <View
             key={i}
             style={[
               styles.radarCircle,
               {
-                width: width * 0.7 * scale,
-                height: width * 0.7 * scale,
+                width: width * 0.85 * scale,
+                height: width * 0.85 * scale,
               },
             ]}
           />
@@ -316,6 +320,8 @@ export default function RadarScreen() {
           onClose={() => setSelectedSignal(null)}
           onRespond={() => handleRespond(selectedSignal)}
           onViewProfile={() => handleViewProfile(selectedSignal.senderId)}
+          isUserConnected={ isUserConnected(selectedSignal.senderId) }
+          sendConnection={ () => handleConnect(selectedSignal.senderId)}
         />
       )}
 
@@ -422,21 +428,21 @@ const styles = StyleSheet.create({
   },
   scanWave: {
     position: "absolute",
-    width: width * 0.35,
-    height: width * 0.35,
-    borderRadius: (width * 0.35) / 2,
-    borderWidth: 2,
-    borderColor: "rgba(0, 255, 179, 0.3)",
+    width: width * 0.5,
+    height: width * 0.5,
+    borderRadius: (width * 0.5) / 2,
+    borderWidth: 3,
+    borderColor: "rgba(0, 255, 179, 0.4)",
   },
   scanWaveActive: {
-    borderColor: "rgba(0, 255, 179, 0.6)",
-    borderWidth: 4,
+    borderColor: "rgba(0, 255, 179, 0.7)",
+    borderWidth: 5,
   },
   radarCircle: {
     position: "absolute",
     borderRadius: 9999,
-    borderWidth: 1,
-    borderColor: "rgba(0, 255, 179, 0.15)",
+    borderWidth: 1.5,
+    borderColor: "rgba(0, 255, 179, 0.2)",
   },
   centralUserWrapper: {
     position: "absolute",
@@ -447,24 +453,24 @@ const styles = StyleSheet.create({
   sendSignalButton: {
     position: "absolute",
     bottom: 32,
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
     justifyContent: "center",
     alignItems: "center",
     zIndex: 30,
   },
   sendSignalPulse: {
     position: "absolute",
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
     backgroundColor: "rgba(0, 255, 179, 0.3)",
   },
   sendSignalGradient: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     justifyContent: "center",
     alignItems: "center",
   },

@@ -2,6 +2,7 @@ import type React from "react"
 import { View, Text, TouchableOpacity, Modal, StyleSheet, ScrollView, Image } from "react-native"
 import { X, MessageCircle, MapPin, Heart, HeartOff } from "lucide-react-native"
 import { LinearGradient } from "expo-linear-gradient"
+import Animated, { useAnimatedStyle, withSpring, useSharedValue } from "react-native-reanimated"
 import type { IRadarUser } from "@radar/types"
 
 interface UserProfileModalNativeProps {
@@ -21,11 +22,24 @@ export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({
   sendConnection,
   deleteConnection,
 }) => {
+  const scale = useSharedValue(1)
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }))
+
+  const handleSendConnection = () => {
+    scale.value = withSpring(1.1, {}, () => {
+      scale.value = withSpring(1)
+    })
+    sendConnection()
+  }
+
   const formatDistance = (distance?: number) => {
     if (!distance) return "Cerca"
-    if (distance < 50) return "50 m"
-    if (distance < 1000) return `${Math.round(distance)} m`
-    return `${(distance / 1000).toFixed(1)} km`
+    if (distance < 50) return "50m"
+    if (distance < 1000) return `${Math.round(distance)}m`
+    return `${(distance / 1000).toFixed(1)}km`
   }
 
   return (
@@ -90,7 +104,7 @@ export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({
               </View>
             )}
 
-            {isUserConnected() && (
+            {isUserConnected() ? (
               <>
                 <TouchableOpacity style={styles.messageButton} onPress={onMessage}>
                   <LinearGradient
@@ -104,16 +118,18 @@ export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({
                   </LinearGradient>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.likeButton} onPress={deleteConnection}>
+                <TouchableOpacity style={styles.deleteButton} onPress={deleteConnection}>
                   <HeartOff color="#FF005C" size={20} />
+                  <Text style={styles.deleteButtonText}>Eliminar amigo</Text>
                 </TouchableOpacity>
               </>
-            )}
-
-            {!isUserConnected() && (
-              <TouchableOpacity style={styles.likeButton} onPress={sendConnection}>
-                <Heart color="#FF005C" size={20} />
-              </TouchableOpacity>
+            ) : (
+              <Animated.View style={animatedStyle}>
+                <TouchableOpacity style={styles.sendRequestButton} onPress={handleSendConnection}>
+                  <Heart color="#FF005C" size={20} />
+                  <Text style={styles.sendRequestText}>Enviar solicitud</Text>
+                </TouchableOpacity>
+              </Animated.View>
             )}
           </ScrollView>
         </View>
@@ -270,5 +286,41 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 40,
+  },
+  deleteButton: {
+    alignSelf: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderRadius: 28,
+    backgroundColor: "#1A1A1A",
+    borderWidth: 1,
+    borderColor: "rgba(255, 0, 92, 0.4)",
+    marginBottom: 40,
+  },
+  deleteButtonText: {
+    color: "#FF005C",
+    fontWeight: "600",
+    fontSize: 16,
+  },
+  sendRequestButton: {
+    alignSelf: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderRadius: 28,
+    backgroundColor: "#1A1A1A",
+    borderWidth: 1,
+    borderColor: "rgba(255, 0, 92, 0.4)",
+    marginBottom: 40,
+  },
+  sendRequestText: {
+    color: "#FF005C",
+    fontWeight: "600",
+    fontSize: 16,
   },
 })

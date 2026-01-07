@@ -1,18 +1,37 @@
 "use client"
 
-import type React from "react"
 import { motion } from "framer-motion"
-import { MessageCircle, User } from "lucide-react"
+import { MessageCircle, User, Heart } from "lucide-react"
 import type { IRadarSignal } from "@radar/types"
+import React from "react"
 
 interface SignalDetailModalProps {
   signal: IRadarSignal
   onClose: () => void
   onRespond: (signal: IRadarSignal) => void
   onViewProfile: () => void
+  isUserConnected?: boolean
+  sendConnection?: () => void
 }
 
-export const SignalDetailModal: React.FC<SignalDetailModalProps> = ({ signal, onClose, onRespond, onViewProfile }) => {
+export const SignalDetailModal: React.FC<SignalDetailModalProps> = ({
+  signal,
+  onClose,
+  onRespond,
+  onViewProfile,
+  isUserConnected,
+  sendConnection,
+}) => {
+  const [isAnimating, setIsAnimating] = React.useState(false)
+  const connected = isUserConnected ? isUserConnected : false
+
+  const handleSendConnection = () => {
+    if (sendConnection) {
+      setIsAnimating(true)
+      sendConnection()
+      setTimeout(() => setIsAnimating(false), 600)
+    }
+  }
 
   const formatRelativeTime = (date: string | Date) => {
     const now = new Date()
@@ -28,17 +47,16 @@ export const SignalDetailModal: React.FC<SignalDetailModalProps> = ({ signal, on
     return `Hace ${diffDays} días`
   }
 
-
   const formatDistance = (distance?: number) => {
     if (!distance) return "Cerca"
+    if (distance < 50) return "50m"
     if (distance < 1000) return `${Math.round(distance)}m`
     return `${(distance / 1000).toFixed(1)}km`
   }
 
-
   return (
     <motion.div
-      className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-8"
+      className="fixed inset-0 bg-black/90 backdrop-blur-sm z-[9999] flex items-center justify-center p-8"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -75,22 +93,31 @@ export const SignalDetailModal: React.FC<SignalDetailModalProps> = ({ signal, on
 
         {/* Signal message */}
         <div className="bg-[#1A1A1A] rounded-2xl p-4 mb-2 border border-[#FF005C]/30">
-          <p className="text-white font-semibold text-center flex items-center justify-center gap-2">
-            {signal.note} 
-          </p>
+          <p className="text-white font-semibold text-center flex items-center justify-center gap-2">{signal.note}</p>
           <p className="text-[#C5C5C5] text-xs text-center mb-6">{formatRelativeTime(signal.createdAt)}</p>
         </div>
-        
 
         {/* Action buttons */}
         <div className="space-y-3">
-          <button
-            onClick={() => onRespond(signal)}
-            className="w-full h-12 rounded-full bg-linear-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-semibold hover:shadow-lg transition-all duration-300 shadow-[#00FFB3]/30 flex items-center justify-center gap-2"
-          >
-            <MessageCircle className="w-5 h-5" />
-            Responder señal
-          </button>
+          {connected ? (
+            <button
+              onClick={() => onRespond(signal)}
+              className="w-full h-12 rounded-full bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-semibold hover:shadow-lg transition-all duration-300 shadow-[#00FFB3]/30 flex items-center justify-center gap-2"
+            >
+              <MessageCircle className="w-5 h-5" />
+              Responder señal
+            </button>
+          ) : (
+            <motion.button
+              onClick={handleSendConnection}
+              className="w-full h-12 rounded-full border border-[#FF005C]/30 text-[#FF005C] font-semibold hover:bg-[#FF005C]/10 transition-all flex items-center justify-center gap-2 bg-[#1A1A1A]"
+              animate={isAnimating ? { scale: [1, 1.05, 1] } : {}}
+              transition={{ duration: 0.3 }}
+            >
+              <Heart className="w-5 h-5" />
+              Enviar solicitud
+            </motion.button>
+          )}
 
           <button
             onClick={onViewProfile}
