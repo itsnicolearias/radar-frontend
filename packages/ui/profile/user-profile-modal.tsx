@@ -15,6 +15,7 @@ interface UserProfileModalProps {
   isUserConnected: () => boolean
   sendConnection: () => void
   deleteConnection: () => void
+  isConnectionPending: boolean
 }
 
 export const UserProfileModal: React.FC<UserProfileModalProps> = ({
@@ -24,13 +25,14 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   isUserConnected,
   sendConnection,
   deleteConnection,
+  isConnectionPending,
 }) => {
   const { getLocalConnectionState, setLocalConnectionState } = useConnectionStore()
   const [isAnimating, setIsAnimating] = useState(false)
 
   const localState = getLocalConnectionState(user.userId)
   const connectionMade = localState === "connected" || isUserConnected()
-  const isPending = localState === "pending"
+  const isPending = localState === "pending" && isConnectionPending
 
   const handleSendConnection = () => {
     setIsAnimating(true)
@@ -97,7 +99,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
             {user.Profile.showLocation && (
               <p className="text-[#1DE3F2] flex items-center gap-1 mt-1">
                 <MapPin className="w-4 h-4" />
-                {user.Profile.province || "Buenos Aires"}
+                {user.Profile.province || "Cerca"}
               </p>
             )}
           </div>

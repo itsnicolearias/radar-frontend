@@ -182,6 +182,11 @@ export default function RadarPage() {
     }
   }
 
+  const isTheConnectionPending = (userId: string): boolean => {
+    const isPending = connections.some((c) => c.receiverId === userId)
+    return isPending;
+  }
+
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden flex flex-col">
       {/* Radial gradient background */}
@@ -378,6 +383,7 @@ export default function RadarPage() {
           isUserConnected={() => isUserConnected(selectedUser.userId)}
           sendConnection={() => handleConnect(selectedUser.userId)}
           deleteConnection={() => handleDeleteConnection(selectedUser.userId)}   
+          isConnectionPending={isTheConnectionPending(selectedUser.userId)}
         />
       )}
 

@@ -126,6 +126,11 @@ export default function ChatsPage() {
   const filteredPendingRequests = pendingRequests.filter((req) => (req.Sender?.distance || 0) < 50)
   const filteredChats = chats.filter((chat) => (chat.user.distance || 0) < 50)
 
+  const isTheConnectionPending = (userId: string): boolean => {
+    const isPending = connections.some((c) => c.receiverId === userId)
+    return isPending;
+  }
+
   return (
     <div className="h-screen bg-black flex flex-col relative overflow-hidden">
       <div
@@ -344,6 +349,7 @@ export default function ChatsPage() {
                     transition={{ delay: index * 0.1 }}
                     className={`shrink-0 text-center cursor-pointer ${index > 2 ? "blur-sm opacity-30" : ""}`}
                     onClick={() => router.push(`/profile/${view.viewerId}`)}
+                    inert={index > 2}
                   >
                     <div className="relative">
                       <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center border-2 border-[#1DE3F2] shadow-lg shadow-[#1DE3F2]/30 overflow-hidden">
@@ -463,6 +469,7 @@ export default function ChatsPage() {
               console.error("[v0] Error deleting connection:", error)
             }
           }}
+          isConnectionPending={isTheConnectionPending(selectedUser.userId)}
         />
       )}
 

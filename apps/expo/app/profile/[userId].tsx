@@ -6,18 +6,19 @@ import { useRouter, useLocalSearchParams } from "expo-router"
 import { useAuthStore, useConnectionStore, useRadarStore } from "@radar/features"
 import { connectionService, profileViewService } from "@radar/api"
 import { IRadarUser } from "@radar/types"
-import { Heart, HeartOff } from "lucide-react-native"
+import { Clock, Heart, HeartOff } from "lucide-react-native"
 
 export default function UserProfileScreen() {
   const router = useRouter()
   const { userId } = useLocalSearchParams<{ userId: string }>()
 
-  const { connections } = useConnectionStore()
+  const { connections, getLocalConnectionState } = useConnectionStore()
   const [ profileData, setProfileData ] = useState<IRadarUser | null>(null)
   const [ isConnected, setIsConnected ] = useState(false)
   const { user } = useAuthStore()
   const { nearbyUsers } = useRadarStore()
-
+  const localState = getLocalConnectionState(userId)
+  const isPending = localState === "pending" && connections.some((c) => c.receiverId === userId)
   
   useEffect(() => {
     const connected = connections.some((c) => c.receiverId === userId || c.senderId === userId)
@@ -76,6 +77,7 @@ export default function UserProfileScreen() {
 
   const formatDistance = (distance?: number) => {
     if (!distance) return "Cerca"
+    if (distance < 50) return "50m"
     if (distance < 1000) return `${Math.round(distance)}m`
     return `${(distance / 1000).toFixed(1)}km`
   }
@@ -96,9 +98,10 @@ export default function UserProfileScreen() {
         </View>
 
         <Text style={styles.name}>
-          {profileData.firstName} {profileData.lastName}, {profileData.Profile.age}
+          { profileData.Profile.showAge ? `${profileData.displayName}, ${profileData.Profile.age}` : profileData.displayName }
+
         </Text>
-        <Text style={styles.location}>{profileData.Profile.province}</Text>
+        <Text style={styles.location}>{ profileData.Profile.showLocation ?  `${profileData.Profile.province}, ${profileData.Profile.country}` : "Cerca" } </Text>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Intereses</Text>
@@ -133,6 +136,12 @@ export default function UserProfileScreen() {
             </TouchableOpacity>
             </>
             
+          )}
+          { isPending && !isConnected && (
+            <View style={styles.pendingButton}>
+              <Clock color="#EAB308" size={20} />
+              <Text style={styles.pendingButtonText}>Pendiente</Text>
+            </View>
           )}
         </View>
       </View>
@@ -265,5 +274,23 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     textAlign: "center",
     marginTop: 100,
+  },
+  pendingButton: {
+    alignSelf: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderRadius: 28,
+    backgroundColor: "rgba(234, 179, 8, 0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(234, 179, 8, 0.4)",
+    marginBottom: 40,
+  },
+  pendingButtonText: {
+    color: "#EAB308",
+    fontWeight: "600",
+    fontSize: 16,
   },
 })

@@ -17,6 +17,8 @@ interface ProfileCardProps {
   onConnect?: () => void
   onMessage?: () => void
   className?: string
+  showAge?: boolean
+  showLocation?: boolean
 }
 
 export const ProfileCard: React.FC<ProfileCardProps> = ({
@@ -32,9 +34,11 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
   onMessage,
   className,
   onDeleteConnection,
+  showAge,
 }) => {
   const formatDistance = (distance?: number) => {
     if (!distance) return "Cerca"
+    if (distance < 50) return "50m"
     if (distance < 1000) return `${Math.round(distance)}m`
     return `${(distance / 1000).toFixed(1)}km`
   }
@@ -53,7 +57,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
       <div className="mb-4">
         <h2 className="text-2xl font-bold mb-1">
           {name}
-          {age ? `, ${age}` : ""}
+          {showAge ? `, ${age}` : ""}
         </h2>
         {location && (
           <div className="flex items-center gap-1 text-sm text-gray-300">

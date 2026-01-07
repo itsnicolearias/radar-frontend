@@ -302,6 +302,7 @@ export default function ChatsScreen() {
                     <TouchableOpacity
                       style={[styles.profileView, index > 2 && styles.profileViewBlurred]}
                       onPress={() => router.push(`/profile/${view.viewerId}`)}
+                      disabled={index > 2}
                     >
                       <View style={styles.profileViewAvatarContainer}>
                         <View style={[styles.profileViewAvatar, index > 2 && { opacity: 0.3 }]}>

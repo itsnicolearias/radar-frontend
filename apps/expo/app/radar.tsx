@@ -191,6 +191,11 @@ export default function RadarScreen() {
     }
   }
 
+  const isTheConnectionPending = (userId: string): boolean => {
+    const isPending = connections.some((c) => c.receiverId === userId)
+    return isPending;
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -344,6 +349,7 @@ export default function RadarScreen() {
           isUserConnected={() => isUserConnected(selectedUser.userId)}
           sendConnection={() => handleConnect(selectedUser.userId)}
           deleteConnection={() => handleDeleteConnection(selectedUser.userId)}
+          isConnectionPending={isTheConnectionPending(selectedUser.userId)}
         />
       )}
 

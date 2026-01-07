@@ -13,6 +13,7 @@ interface UserProfileModalNativeProps {
   isUserConnected: () => boolean
   sendConnection: () => void
   deleteConnection: () => void
+  isConnectionPending: boolean
 }
 
 export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({
@@ -22,13 +23,14 @@ export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({
   isUserConnected,
   sendConnection,
   deleteConnection,
+  isConnectionPending,
 }) => {
   const scale = useSharedValue(1)
   const { getLocalConnectionState, setLocalConnectionState } = useConnectionStore()
 
   const localState = getLocalConnectionState(user.userId)
   const connectionMade = localState === "connected" || isUserConnected()
-  const isPending = localState === "pending"
+  const isPending = localState === "pending" && isConnectionPending
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -93,7 +95,7 @@ export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({
               {user.Profile.showLocation && (
                 <View style={styles.locationContainer}>
                   <MapPin color="#8B8B8B" size={16} />
-                  <Text style={styles.locationText}>{user.Profile.province || "Buenos Aires"}</Text>
+                  <Text style={styles.locationText}>{user.Profile.province || "Cerca"}</Text>
                 </View>
               )}
             </View>

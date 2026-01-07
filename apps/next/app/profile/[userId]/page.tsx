@@ -108,6 +108,7 @@ export default function UserProfilePage() {
           onConnect={handleConnect}
           onMessage={handleMessage}
           onDeleteConnection={handleDeleteConnection}
+          showAge={profileData.Profile?.showAge}
         />
       </div>
     </div>
