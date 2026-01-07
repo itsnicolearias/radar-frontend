@@ -1,9 +1,10 @@
 import type React from "react"
 import { View, Text, TouchableOpacity, Modal, StyleSheet, ScrollView, Image } from "react-native"
-import { X, MessageCircle, MapPin, Heart, HeartOff } from "lucide-react-native"
+import { X, MessageCircle, MapPin, Heart, HeartOff, Clock } from "lucide-react-native"
 import { LinearGradient } from "expo-linear-gradient"
 import Animated, { useAnimatedStyle, withSpring, useSharedValue } from "react-native-reanimated"
 import type { IRadarUser } from "@radar/types"
+import { useConnectionStore } from "@radar/features"
 
 interface UserProfileModalNativeProps {
   user: IRadarUser
@@ -23,6 +24,11 @@ export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({
   deleteConnection,
 }) => {
   const scale = useSharedValue(1)
+  const { getLocalConnectionState, setLocalConnectionState } = useConnectionStore()
+
+  const localState = getLocalConnectionState(user.userId)
+  const connectionMade = localState === "connected" || isUserConnected()
+  const isPending = localState === "pending"
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -32,7 +38,13 @@ export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({
     scale.value = withSpring(1.1, {}, () => {
       scale.value = withSpring(1)
     })
+    setLocalConnectionState(user.userId, "pending")
     sendConnection()
+  }
+
+  const handleDeleteConnection = () => {
+    setLocalConnectionState(user.userId, null)
+    deleteConnection()
   }
 
   const formatDistance = (distance?: number) => {
@@ -104,7 +116,7 @@ export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({
               </View>
             )}
 
-            {isUserConnected() ? (
+            {connectionMade ? (
               <>
                 <TouchableOpacity style={styles.messageButton} onPress={onMessage}>
                   <LinearGradient
@@ -118,11 +130,16 @@ export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({
                   </LinearGradient>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.deleteButton} onPress={deleteConnection}>
+                <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteConnection}>
                   <HeartOff color="#FF005C" size={20} />
                   <Text style={styles.deleteButtonText}>Eliminar amigo</Text>
                 </TouchableOpacity>
               </>
+            ) : isPending ? (
+              <View style={styles.pendingButton}>
+                <Clock color="#EAB308" size={20} />
+                <Text style={styles.pendingButtonText}>Pendiente</Text>
+              </View>
             ) : (
               <Animated.View style={animatedStyle}>
                 <TouchableOpacity style={styles.sendRequestButton} onPress={handleSendConnection}>
@@ -148,7 +165,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#000000",
   },
   header: {
-    height: 240,
+    height: 280, // Increased header height from 240 to 280 to prevent avatar cutoff
     justifyContent: "flex-start",
     paddingTop: 60,
     paddingHorizontal: 24,
@@ -167,7 +184,7 @@ const styles = StyleSheet.create({
   },
   profileSection: {
     alignItems: "center",
-    marginTop: -60,
+    marginTop: -80, // Increased negative margin from -60 to -80 to show avatar properly
     marginBottom: 32,
     paddingHorizontal: 24,
   },
@@ -320,6 +337,24 @@ const styles = StyleSheet.create({
   },
   sendRequestText: {
     color: "#FF005C",
+    fontWeight: "600",
+    fontSize: 16,
+  },
+  pendingButton: {
+    alignSelf: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderRadius: 28,
+    backgroundColor: "rgba(234, 179, 8, 0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(234, 179, 8, 0.4)",
+    marginBottom: 40,
+  },
+  pendingButtonText: {
+    color: "#EAB308",
     fontWeight: "600",
     fontSize: 16,
   },

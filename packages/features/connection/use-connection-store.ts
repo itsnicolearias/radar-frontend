@@ -6,20 +6,24 @@ interface ConnectionState {
   connections: IConnectionResponse[]
   pendingRequests: IConnectionResponse[]
   isLoading: boolean
+  localConnectionStates: Record<string, "pending" | "connected" | null>
   setConnections: (connections: IConnectionResponse[]) => void
   setPendingRequests: (requests: IConnectionResponse[]) => void
   addConnection: (connection: IConnectionResponse) => void
   updateConnection: (connectionId: string, status: "accepted" | "rejected") => void
   removeConnection: (connectionId: string) => void
   setLoading: (loading: boolean) => void
+  setLocalConnectionState: (userId: string, state: "pending" | "connected" | null) => void
+  getLocalConnectionState: (userId: string) => "pending" | "connected" | null
   reset: () => void
 }
 
 export const useConnectionStore = create<ConnectionState>()(
-  immer((set) => ({
+  immer((set, get) => ({
     connections: [],
     pendingRequests: [],
     isLoading: false,
+    localConnectionStates: {},
     setConnections: (connections) =>
       set((state) => {
         state.connections = connections
@@ -58,11 +62,23 @@ export const useConnectionStore = create<ConnectionState>()(
       set((state) => {
         state.isLoading = loading
       }),
+    setLocalConnectionState: (userId, state) =>
+      set((draft) => {
+        if (state === null) {
+          delete draft.localConnectionStates[userId]
+        } else {
+          draft.localConnectionStates[userId] = state
+        }
+      }),
+    getLocalConnectionState: (userId) => {
+      return get().localConnectionStates[userId] || null
+    },
     reset: () =>
       set((state) => {
         state.connections = []
         state.pendingRequests = []
         state.isLoading = false
+        state.localConnectionStates = {}
       }),
   })),
 )

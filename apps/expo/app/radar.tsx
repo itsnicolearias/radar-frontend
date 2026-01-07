@@ -19,6 +19,7 @@ import { EventMarkerNative } from "../../../packages/ui/radar/event-marker.nativ
 import { CentralUserMarkerNative } from "../../../packages/ui/radar/central-user-marker.native"
 import GhostButton from "../../../packages/ui/components/ghost-button.native"
 import InvisibleBadge from "../../../packages/ui/components/invisible-badge.native"
+import { WelcomeModalNative } from "@radar/ui/modals/welcome-modal.native"
 
 const { width, height } = Dimensions.get("window")
 
@@ -46,6 +47,16 @@ export default function RadarScreen() {
   const [selectedEvent, setSelectedEvent] = useState<IEventResponse | null>(null)
   const [isScanning, setIsScanning] = useState(false)
   const [connections, setConnections] = useState<IConnectionResponse[]>([])
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false)
+
+  /*useEffect(() => {
+    // Show welcome modal if user needs onboarding
+    const needsOnboarding = !user?.displayName || user.displayName.trim() === "" || !user?.isVerified
+
+    if (needsOnboarding) {
+      setShowWelcomeModal(true)
+    }
+  }, [user])*/
 
   useEffect(() => {
     const fetchNearbyData = async () => {
@@ -337,6 +348,15 @@ export default function RadarScreen() {
       )}
 
       {selectedEvent && <EventDetailModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />}
+
+      {showWelcomeModal && (
+        <WelcomeModalNative
+          isOpen={showWelcomeModal}
+          onClose={() => setShowWelcomeModal(false)}
+          userDisplayName={user?.displayName}
+          userEmailConfirmed={user?.isVerified}
+        />
+      )}
     </View>
   )
 }

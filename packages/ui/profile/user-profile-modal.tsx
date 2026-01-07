@@ -2,10 +2,11 @@
 
 import type { IRadarUser } from "@radar/types"
 import { motion } from "framer-motion"
-import { X, MapPin, MessageCircle, Heart, HeartOff } from "lucide-react"
+import { X, MapPin, MessageCircle, Heart, HeartOff, Clock } from "lucide-react"
 import { formatDistance } from "../../../lib/utils/format-distance"
 import type React from "react"
 import { useState } from "react"
+import { useConnectionStore } from "@radar/features"
 
 interface UserProfileModalProps {
   user: IRadarUser
@@ -24,13 +25,23 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   sendConnection,
   deleteConnection,
 }) => {
-  const connectionMade = isUserConnected()
+  const { getLocalConnectionState, setLocalConnectionState } = useConnectionStore()
   const [isAnimating, setIsAnimating] = useState(false)
+
+  const localState = getLocalConnectionState(user.userId)
+  const connectionMade = localState === "connected" || isUserConnected()
+  const isPending = localState === "pending"
 
   const handleSendConnection = () => {
     setIsAnimating(true)
+    setLocalConnectionState(user.userId, "pending")
     sendConnection()
     setTimeout(() => setIsAnimating(false), 600)
+  }
+
+  const handleDeleteConnection = () => {
+    setLocalConnectionState(user.userId, null)
+    deleteConnection()
   }
 
   return (
@@ -126,12 +137,20 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 </button>
                 <button
                   className="h-14 px-6 rounded-full border border-[#FF005C]/30 flex items-center justify-center gap-2 hover:bg-[#FF005C]/10 transition-colors bg-[#1A1A1A] text-[#FF005C] font-medium"
-                  onClick={deleteConnection}
+                  onClick={handleDeleteConnection}
                 >
                   <HeartOff className="w-5 h-5" />
                   Eliminar amigo
                 </button>
               </>
+            ) : isPending ? (
+              <button
+                className="flex-1 h-14 rounded-full border border-yellow-500/30 flex items-center justify-center gap-2 bg-yellow-500/10 text-yellow-500 font-medium cursor-not-allowed"
+                disabled
+              >
+                <Clock className="w-5 h-5" />
+                Pendiente
+              </button>
             ) : (
               <motion.button
                 className="flex-1 h-14 rounded-full border border-[#FF005C]/30 flex items-center justify-center gap-2 hover:bg-[#FF005C]/10 transition-colors bg-[#1A1A1A] text-[#FF005C] font-medium"

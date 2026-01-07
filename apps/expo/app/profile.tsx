@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { View, Text, ScrollView, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from "react-native"
 import { ArrowLeft, Settings, Eye, EyeOff, LogOut, Crown, Zap, Check, MapPin, Radio } from "lucide-react-native"
 import { useAuthStore } from "@radar/features"
@@ -37,50 +37,42 @@ export default function ProfileScreen() {
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
+        mediaTypes: ["images"],
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
       })
 
-      
-  if (result.canceled || !result.assets?.[0]) return
+      if (result.canceled || !result.assets?.[0]) return
 
-    setUploading(true)
+      setUploading(true)
 
+      const asset = result.assets[0]
 
+      const mimeType = asset.mimeType ?? "image/jpeg"
+      const fileName = asset.fileName ?? `photo.${mimeType.split("/")[1] ?? "jpg"}`
 
-    const asset = result.assets[0]
+      const response = await fetch(asset.uri)
+      const blob = await response.blob()
 
-    const mimeType = asset.mimeType ?? "image/jpeg"
-    const fileName =
-      asset.fileName ??
-      `photo.${mimeType.split("/")[1] ?? "jpg"}`
+      console.log({
+        blobType: blob.type,
+        blobSize: blob.size,
+        fileName: result.assets[0].fileName,
+        uri: result.assets[0].uri,
+      })
+      const file = new Blob([blob], { type: mimeType })
+      const photoUrl = await uploadService.uploadImage(file, fileName)
 
-    const response = await fetch(asset.uri)
-    const blob = await response.blob()
+      await profileService.updateMyProfile({
+        Profile: { photoUrl },
+      })
 
+      if (profile) {
+        setProfile({ ...profile, photoUrl })
+      }
 
-    console.log({
-  blobType: blob.type,
-  blobSize: blob.size,
-  fileName: result.assets[0].fileName,
-  uri: result.assets[0].uri,
-})
-    const file = new Blob([blob], { type: mimeType })
-    const photoUrl = await uploadService.uploadImage(file, fileName)
-
-        await profileService.updateMyProfile({
-          Profile: { photoUrl },
-        })
-
-        if (profile) {
-          setProfile({ ...profile, photoUrl })
-        }
-
-        Alert.alert("Éxito", "Foto actualizada correctamente")
-      
-
+      Alert.alert("Éxito", "Foto actualizada correctamente")
     } catch (error) {
       console.error("[v0] Error uploading photo:", error)
       Alert.alert("Error", "No se pudo subir la foto")
@@ -111,10 +103,10 @@ export default function ProfileScreen() {
       })
 
       if (response?.data?.User) {
-        setUser({ ...user, ...response.data.User as any })
+        setUser({ ...user, ...(response.data.User as any) })
       }
       if (response?.data) {
-        setProfile({ ...profile, ...response.data.Profile as any })
+        setProfile({ ...profile, ...(response.data.Profile as any) })
       }
 
       Alert.alert("Éxito", "Perfil actualizado correctamente")

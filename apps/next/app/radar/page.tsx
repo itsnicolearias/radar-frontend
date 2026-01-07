@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useRadarStore, useAuthStore, useSocket, useSocketEvent } from "@radar/features"
 import { connectionService, profileViewService, radarService, signalService } from "@radar/api"
 import type { IEventResponse, IRadarUser, IRadarSignal, IConnectionResponse } from "@radar/types"
-import { BottomNav, GhostButton, InvisibleBadge } from "@radar/ui"
+import { BottomNav, GhostButton, InvisibleBadge, WelcomeModal } from "@radar/ui"
 import { SendSignalModal } from "../../../../packages/ui/modals/send-signal-modal"
 import { SignalDetailModal } from "../../../../packages/ui/signals/signal-detail-modal"
 import { UserProfileModal } from "../../../../packages/ui/profile/user-profile-modal"
@@ -41,6 +41,16 @@ export default function RadarPage() {
   const [isSendSignalModalOpen, setIsSendSignalModalOpen] = useState(false)
   const [isAnimatingSignal, setIsAnimatingSignal] = useState(false)
   const socket = useSocket()
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false)
+
+  /*useEffect(() => {
+    // Show welcome modal if user needs onboarding
+    const needsOnboarding = !user?.displayName || user.displayName.trim() === "" || !user?.isVerified
+
+    if (needsOnboarding) {
+      setShowWelcomeModal(true)
+    }
+  }, [user])*/
 
   useEffect(() => {
     const fetchNearbyData = async () => {
@@ -372,6 +382,15 @@ export default function RadarPage() {
       )}
 
       {selectedEvent && <EventDetailModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />}
+
+      {showWelcomeModal && (
+      <WelcomeModal
+        isOpen={showWelcomeModal}
+        onClose={() => setShowWelcomeModal(false)}
+        userDisplayName={user?.displayName}
+        userEmailConfirmed={user?.isVerified}
+      />
+      )}
     </div>
   )
 }

@@ -6,14 +6,16 @@ import { MessageCircle, Users, Check, X, Crown } from "lucide-react"
 import { motion } from "framer-motion"
 import { useChatStore, useConnectionStore, useSocketEvent, useProfileViewsStore, useAuthStore } from "@radar/features"
 import { messageService, connectionService, profileViewService } from "@radar/api"
-import type { IConnectionResponse, IMessageResponse } from "@radar/types"
+import type { IConnectionResponse, IMessageResponse, IRadarUser } from "@radar/types"
 import { BottomNav } from "@radar/ui"
 import { formatDistance } from "../../../../lib/utils/format-distance"
+import { UserProfileModal } from "@radar/ui"
 
 export default function ChatsPage() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<"chats" | "solicitudes" | "conectados">("chats")
   const [showProfileViews, setShowProfileViews] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<IRadarUser | null>(null)
 
   const { user } = useAuthStore()
   const { chats, setChats, updateChatLastMessage, incrementUnreadCount } = useChatStore()
@@ -110,7 +112,15 @@ export default function ChatsPage() {
   }
 
   const handleViewProfile = (userId: string) => {
-    router.push(`/profile/${userId}`)
+    // Find user in pendingRequests or connections
+    const request = pendingRequests.find((r) => r.Sender.userId === userId)
+    if (request) {
+      setSelectedUser(request.Sender as IRadarUser)
+    }
+  }
+
+  const handleCloseProfile = () => {
+    setSelectedUser(null)
   }
 
   const filteredPendingRequests = pendingRequests.filter((req) => (req.Sender?.distance || 0) < 50)
@@ -422,6 +432,39 @@ export default function ChatsPage() {
           </div>
         )}
       </div>
+
+      {selectedUser && (
+        <UserProfileModal
+          user={selectedUser}
+          onClose={handleCloseProfile}
+          onMessage={() => {
+            handleCloseProfile()
+            router.push(`/chats/${selectedUser.userId}`)
+          }}
+          isUserConnected={() => {
+            return connections.some((c) => c.senderId === selectedUser.userId || c.receiverId === selectedUser.userId)
+          }}
+          sendConnection={async () => {
+            try {
+              await connectionService.createConnection(selectedUser.userId)
+            } catch (error) {
+              console.error("[v0] Error sending connection:", error)
+            }
+          }}
+          deleteConnection={async () => {
+            try {
+              const connection = connections.find(
+                (c) => c.senderId === selectedUser.userId || c.receiverId === selectedUser.userId,
+              )
+              if (connection) {
+                await connectionService.deleteConnection(connection.connectionId)
+              }
+            } catch (error) {
+              console.error("[v0] Error deleting connection:", error)
+            }
+          }}
+        />
+      )}
 
       <BottomNav activeTab="chats" onTabChange={(tab) => router.push(`/${tab === "chats" ? "chats" : tab}`)} />
     </div>

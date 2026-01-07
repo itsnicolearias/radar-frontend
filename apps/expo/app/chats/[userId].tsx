@@ -18,11 +18,13 @@ import { MotiView } from "moti"
 import { useChatStore, useAuthStore, useSocketEvent } from "@radar/features"
 import { messageService, emitSocketEvent } from "@radar/api"
 import type { IMessageResponse } from "@radar/types"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 function ChatConversationPage() {
   const router = useRouter()
   const params = useLocalSearchParams()
   const userId = params.userId as string
+  const insets = useSafeAreaInsets()
 
   const { user } = useAuthStore()
   const { messages, setMessages, addMessage, resetUnreadCount, replyingToSignal, setReplyingToSignal } = useChatStore()
@@ -127,12 +129,11 @@ function ChatConversationPage() {
 
           <View style={styles.headerInfo}>
             <View style={styles.headerAvatar}>
-            {photoUrl && photoUrl !== ""  ? (
-               <Image source={{ uri: photoUrl }} style={styles.avatarImage} />
-            ) : (
-              <Text style={styles.headerAvatarText}>{name?.[0] || "?"}</Text>
-            )}
-              
+              {photoUrl && photoUrl !== "" ? (
+                <Image source={{ uri: photoUrl }} style={styles.avatarImage} />
+              ) : (
+                <Text style={styles.headerAvatarText}>{name?.[0] || "?"}</Text>
+              )}
             </View>
             <View style={styles.headerTextContainer}>
               <Text style={styles.headerTitle}>{name}</Text>
@@ -183,7 +184,7 @@ function ChatConversationPage() {
         </View>
       )}
 
-      <View style={styles.inputContainer}>
+      <View style={[styles.inputContainer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
         <View style={styles.inputWrapper}>
           <TextInput
             style={styles.input}
