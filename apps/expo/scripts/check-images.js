@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const Jimp = require('jimp-compact');
 
-const exts = ['.png','.jpg','.jpeg','.ico','.webp','.bmp','.gif','svg'];
+const exts = ['.png','.jpg','.jpeg','.ico','.webp','.bmp','.gif','.svg'];
 const start = process.argv[2] || process.cwd();
 
 const files = [];
