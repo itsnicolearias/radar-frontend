@@ -38,7 +38,7 @@ export default function RadarPage() {
   const [selectedUser, setSelectedUser] = useState<IRadarUser | null>(null)
   const [selectedEvent, setSelectedEvent] = useState<IEventResponse | null>(null)
   const [selectedSignal, setSelectedSignal] = useState<IRadarSignal | null>(null)
-  const [ connectionsFriends, setConnectionsFriends] = useState<IConnectionResponse[]>(null)
+  const [ pendingsConnections, setPendingsConnections] = useState<IConnectionResponse[]>(null)
   const [isSendSignalModalOpen, setIsSendSignalModalOpen] = useState(false)
   const [isAnimatingSignal, setIsAnimatingSignal] = useState(false)
   const socket = useSocket()
@@ -67,8 +67,10 @@ export default function RadarPage() {
         setNearbySignals(signals)
 
         const friends = await connectionService.getAcceptedConnections()
-        setConnectionsFriends(friends)
         setConnections(friends)
+
+        const pendings = await connectionService.getMyPendingConnections()
+        setPendingsConnections(pendings);
       } catch (error) {
         console.error("[v0] Error fetching nearby data:", error)
       }
@@ -95,7 +97,7 @@ export default function RadarPage() {
   }
 
   const isUserConnected = (userId: string): boolean => {
-    const isConnected = connections.some((c) => c.status === "accepted" && (c.receiverId === userId || c.senderId === userId))
+    const isConnected = connections.some((c) => c.receiverId === userId || c.senderId === userId)
     return isConnected;
   }
 
@@ -185,7 +187,7 @@ export default function RadarPage() {
   }
 
   const isTheConnectionPending = (userId: string): boolean => {
-    const isPending = connections.some((c) => c.receiverId === userId && c.status === "pending")
+    const isPending = pendingsConnections.some((c) => c.receiverId === userId)
     return isPending;
   }
 

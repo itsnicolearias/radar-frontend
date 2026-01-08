@@ -7,22 +7,26 @@ import { useAuthStore, useConnectionStore, useRadarStore } from "@radar/features
 import { connectionService, profileViewService } from "@radar/api"
 import { IRadarUser } from "@radar/types"
 import { Clock, Heart, HeartOff } from "lucide-react-native"
+import { formatDistance } from "../../../../lib/utils/format-distance"
 
 export default function UserProfileScreen() {
   const router = useRouter()
   const { userId } = useLocalSearchParams<{ userId: string }>()
 
-  const { connections, getLocalConnectionState } = useConnectionStore()
+  const { connections, getLocalConnectionState, removeConnection, setLocalConnectionState, myPendingRequests } = useConnectionStore()
   const [ profileData, setProfileData ] = useState<IRadarUser | null>(null)
   const [ isConnected, setIsConnected ] = useState(false)
+  const [ isPending, setIsPending ] = useState(false)
   const { user } = useAuthStore()
   const { nearbyUsers } = useRadarStore()
   const localState = getLocalConnectionState(userId)
-  const isPending = localState === "pending" && connections.some((c) => c.receiverId === userId)
   
   useEffect(() => {
     const connected = connections.some((c) => c.receiverId === userId || c.senderId === userId)
     setIsConnected(connected)
+
+    const isPending = localState === "pending" || myPendingRequests.some((c) => c.receiverId === userId)
+    setIsPending(isPending)
   }, [connections, userId])
 
 
@@ -51,6 +55,7 @@ export default function UserProfileScreen() {
   const handleConnect = async () => {
     try {
       await connectionService.createConnection(userId!)
+      setLocalConnectionState(userId!, "pending")
     } catch (error) {
       console.error("[v0] Error:", error)
     }
@@ -62,6 +67,7 @@ export default function UserProfileScreen() {
       if (!conecc) return
       const { connectionId } = conecc
       await connectionService.deleteConnection(connectionId)
+      removeConnection(connectionId)
     } catch (error) {
       console.error("[v0] Error:", error)
     }
@@ -75,12 +81,6 @@ export default function UserProfileScreen() {
     )
   }
 
-  const formatDistance = (distance?: number) => {
-    if (!distance) return "Cerca"
-    if (distance < 50) return "50m"
-    if (distance < 1000) return `${Math.round(distance)}m`
-    return `${(distance / 1000).toFixed(1)}km`
-  }
 
 
   return (
@@ -94,14 +94,14 @@ export default function UserProfileScreen() {
 
       <View style={styles.card}>
         <View style={styles.distanceBadge}>
-          <Text style={styles.distanceText}>{formatDistance(profileData.distance)} de distancia</Text>
+          <Text style={styles.distanceText}>{formatDistance(profileData.distance)}</Text>
         </View>
 
         <Text style={styles.name}>
           { profileData.Profile.showAge ? `${profileData.displayName}, ${profileData.Profile.age}` : profileData.displayName }
 
         </Text>
-        <Text style={styles.location}>{ profileData.Profile.showLocation ?  `${profileData.Profile.province}, ${profileData.Profile.country}` : "Cerca" } </Text>
+        <Text style={styles.location}>{ profileData.Profile.showLocation && profileData.Profile?.province && profileData.Profile.country ?  `${profileData.Profile?.province}, ${profileData.Profile?.country}` : "Cerca" } </Text>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Intereses</Text>
@@ -120,7 +120,7 @@ export default function UserProfileScreen() {
         </View>
 
         <View style={styles.actions}>
-          {!isConnected && (
+          {!isConnected && !isPending && (
             <TouchableOpacity style={styles.connectButton} onPress={handleConnect}>
                <Heart color="#FF005C" size={20} />
             </TouchableOpacity>

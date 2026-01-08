@@ -19,22 +19,24 @@ export default function ChatsPage() {
 
   const { user } = useAuthStore()
   const { chats, setChats, updateChatLastMessage, incrementUnreadCount } = useChatStore()
-  const { connections, pendingRequests, setConnections, setPendingRequests, removeConnection } = useConnectionStore()
+  const { connections, pendingRequests, setConnections, setPendingRequests, removeConnection, myPendingRequests, setMyPendingRequests } = useConnectionStore()
   const { profileViews, setProfileViews } = useProfileViewsStore()
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [chatsData, connectionsData, requestsData, viewsData] = await Promise.all([
+        const [chatsData, connectionsData, requestsData, viewsData, pendingData ] = await Promise.all([
           messageService.getConversations(),
           connectionService.getAcceptedConnections(),
           connectionService.getPendingConnections(),
           profileViewService.getProfileViews(),
+          connectionService.getMyPendingConnections()
         ])
         setChats(chatsData)
         setConnections(connectionsData)
         setPendingRequests(requestsData)
         setProfileViews(viewsData)
+        setMyPendingRequests(pendingData)
       } catch (error) {
         console.error("[v0] Error fetching chats data:", error)
       }
@@ -127,7 +129,7 @@ export default function ChatsPage() {
   const filteredChats = chats.filter((chat) => (chat.user.distance || 0) < 50)
 
   const isTheConnectionPending = (userId: string): boolean => {
-    const isPending = connections.some((c) => c.receiverId === userId && c.status === "pending")
+    const isPending = myPendingRequests.some((c) => c.receiverId === userId)
     return isPending;
   }
 
@@ -348,7 +350,7 @@ export default function ChatsPage() {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: index * 0.1 }}
                     className={`shrink-0 text-center cursor-pointer ${index > 2 ? "blur-sm opacity-30" : ""}`}
-                    onClick={() => router.push(`/profile/${view.viewerId}`)}
+                    onClick={() => handleViewProfile(view.viewerId)}
                     inert={index > 2}
                   >
                     <div className="relative">

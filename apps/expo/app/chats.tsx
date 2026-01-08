@@ -7,8 +7,10 @@ import { MessageCircle, Users, Check, X, Crown } from "lucide-react-native"
 import { MotiView } from "moti"
 import { useChatStore, useConnectionStore, useSocketEvent, useProfileViewsStore, useAuthStore } from "@radar/features"
 import { messageService, connectionService, profileViewService } from "@radar/api"
-import type { IMessageResponse, IConnectionResponse } from "@radar/types"
+import type { IMessageResponse, IConnectionResponse, IRadarUser } from "@radar/types"
 import { BottomNavNative } from "../../../packages/ui/navigation/bottom-nav.native"
+import { formatDistance } from "../../../lib/utils/format-distance"
+import { UserProfileModalNative } from "@radar/ui/profile/user-profile-modal.native"
 
 export default function ChatsScreen() {
   const router = useRouter()
@@ -16,23 +18,26 @@ export default function ChatsScreen() {
 
   const { user } = useAuthStore()
   const { chats, setChats, updateChatLastMessage, incrementUnreadCount } = useChatStore()
-  const { connections, pendingRequests, setConnections, setPendingRequests } = useConnectionStore()
+  const { connections, pendingRequests, setConnections, setPendingRequests, myPendingRequests, setMyPendingRequests, removeConnection } = useConnectionStore()
   const { profileViews, setProfileViews } = useProfileViewsStore()
+  const [selectedUser, setSelectedUser] = useState<IRadarUser | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [chatsData, connectionsData, requestsData, viewsData] = await Promise.all([
+        const [chatsData, connectionsData, requestsData, viewsData, pendingData] = await Promise.all([
           messageService.getConversations(),
           connectionService.getAcceptedConnections(),
           connectionService.getPendingConnections(),
           profileViewService.getProfileViews(),
+          connectionService.getMyPendingConnections()
         ])
 
         setChats(chatsData)
         setConnections(connectionsData)
         setPendingRequests(requestsData)
         setProfileViews(viewsData)
+        setMyPendingRequests(pendingData)
       } catch (error) {
         console.error("[v0] Error fetching chats data:", error)
       }
@@ -87,17 +92,6 @@ export default function ChatsScreen() {
     }
   }
 
-  const handleViewProfile = (userId: string) => {
-    router.push(`/profile/${userId}`)
-  }
-
-  const formatDistance = (distance?: number) => {
-    if (!distance) return "Cerca"
-    if (distance < 50) return "50m"
-    if (distance < 1000) return `${Math.round(distance)}m`
-    return `${(distance / 1000).toFixed(1)}km`
-  }
-
   const formatRelativeTime = (date: string | Date) => {
     const now = new Date()
     const diffMs = now.getTime() - new Date(date).getTime()
@@ -114,6 +108,51 @@ export default function ChatsScreen() {
 
   const filteredPendingRequests = pendingRequests.filter((req) => (req.Sender?.distance || 0) < 50)
   const filteredChats = chats.filter((chat) => (chat.user.distance || 0) < 50)
+
+  const handleViewProfile = (userId: string) => {
+    // Find user in pendingRequests or connections
+    const request = pendingRequests.find((r) => r.Sender.userId === userId)
+    if (request) {
+      setSelectedUser(request.Sender as IRadarUser)
+    }
+  }
+
+  const handleMessageUser = (userId: string) => {
+      setSelectedUser(null)
+      router.push(`/chats/${userId}`)
+    }
+  
+    const isUserConnected = (userId: string): boolean => {
+      const isConnected = connections.some((c) => c.receiverId === userId || c.senderId === userId)
+      return isConnected
+    }
+  
+    const handleConnect = async (receiverId: string) => {
+      try {
+        await connectionService.createConnection(receiverId!)
+      } catch (error) {
+        console.error("[v0] Error:", error)
+      }
+    }
+  
+    const handleDeleteConnection = async (userId: string) => {
+      try {
+        const conecc = connections.find((c => (c.receiverId === userId || c.senderId === userId)))
+        if (!conecc) return
+        const { connectionId } = conecc
+        await connectionService.deleteConnection(connectionId)
+        removeConnection(connectionId)
+      } catch (error) {
+        console.error("[v0] Error:", error)
+      }
+    }
+  
+    const isTheConnectionPending = (userId: string): boolean => {
+      const isPending = myPendingRequests.some((c) => c.receiverId === userId)
+      return isPending;
+    }
+
+
 
   return (
     <View style={styles.container}>
@@ -301,7 +340,7 @@ export default function ChatsScreen() {
                   >
                     <TouchableOpacity
                       style={[styles.profileView, index > 2 && styles.profileViewBlurred]}
-                      onPress={() => router.push(`/profile/${view.viewerId}`)}
+                      onPress={() => handleViewProfile(view.viewerId)}
                       disabled={index > 2}
                     >
                       <View style={styles.profileViewAvatarContainer}>
@@ -389,6 +428,18 @@ export default function ChatsScreen() {
           </View>
         )}
       </ScrollView>
+
+      { selectedUser && (
+        <UserProfileModalNative
+          user={selectedUser}
+          onClose={() => setSelectedUser(null)}
+          onMessage={() => handleMessageUser(selectedUser.userId)}
+          isUserConnected={() => isUserConnected(selectedUser.userId)}
+          sendConnection={() => handleConnect(selectedUser.userId)}
+          deleteConnection={() => handleDeleteConnection(selectedUser.userId)}
+          isConnectionPending={() => isTheConnectionPending(selectedUser.userId)}
+        />
+      )}
 
       <BottomNavNative
         activeTab="chats"

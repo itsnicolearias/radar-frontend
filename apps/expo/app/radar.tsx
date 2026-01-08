@@ -76,7 +76,7 @@ export default function RadarScreen() {
         const friends = await connectionService.getAcceptedConnections()
         setConnections(friends)
 
-        const pendings = await connectionService.getPendingConnections()
+        const pendings = await connectionService.getMyPendingConnections()
         setPendingsConnections(pendings)
       } catch (error) {
         console.error("[v0] Error fetching nearby data:", error)
@@ -172,7 +172,7 @@ export default function RadarScreen() {
   }
 
   const isUserConnected = (userId: string): boolean => {
-    const isConnected = connections.some((c) => c.status === "accepted" && (c.receiverId === userId || c.senderId === userId))
+    const isConnected = connections.some((c) => c.receiverId === userId || c.senderId === userId)
     return isConnected
   }
 
@@ -197,7 +197,7 @@ export default function RadarScreen() {
   }
 
   const isTheConnectionPending = (userId: string): boolean => {
-    const isPending = pendingsConnections.some((c) => c.receiverId === userId && c.status === "pending")
+    const isPending = pendingsConnections.some((c) => c.receiverId === userId)
     return isPending;
   }
 

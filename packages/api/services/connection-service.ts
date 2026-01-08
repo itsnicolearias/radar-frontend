@@ -12,6 +12,11 @@ export const connectionService = {
     return response.data.data
   },
 
+  async getMyPendingConnections(): Promise<IConnectionResponse[]> {
+  const response = await axiosRequestor.get("/connections/pendings/me")
+  return response.data.data
+},
+
   async createConnection(receiverId: string): Promise<IConnectionResponse> {
     const response = await axiosRequestor.post("/connections", {
       receiverId,

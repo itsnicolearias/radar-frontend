@@ -3,6 +3,7 @@
 import type React from "react"
 import { MapPin, Heart, MessageCircle, HeartOff } from "lucide-react"
 import { cn } from "../lib/utils"
+import { formatDistance } from "lib/utils/format-distance"
 
 interface ProfileCardProps {
   name: string
@@ -19,6 +20,7 @@ interface ProfileCardProps {
   className?: string
   showAge?: boolean
   showLocation?: boolean
+  isConnectionPending?: boolean
 }
 
 export const ProfileCard: React.FC<ProfileCardProps> = ({
@@ -35,21 +37,16 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
   className,
   onDeleteConnection,
   showAge,
+  showLocation,
+  isConnectionPending,
 }) => {
-  const formatDistance = (distance?: number) => {
-    if (!distance) return "Cerca"
-    if (distance < 50) return "50m"
-    if (distance < 1000) return `${Math.round(distance)}m`
-    return `${(distance / 1000).toFixed(1)}km`
-  }
-
   return (
     <div className={cn("bg-[#1A3A52] rounded-3xl p-6 text-white shadow-xl", className)}>
       {/* Distance badge */}
       {distance !== undefined && (
         <div className="flex items-center gap-2 mb-4">
           <MapPin className="w-4 h-4 text-[#00FFB3]" />
-          <span className="text-sm text-[#00FFB3]">{formatDistance(distance)} de distancia</span>
+          <span className="text-sm text-[#00FFB3]">{formatDistance(distance)}</span>
         </div>
       )}
 
@@ -59,10 +56,15 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
           {name}
           {showAge ? `, ${age}` : ""}
         </h2>
-        {location && (
+        {showLocation && location ? (
           <div className="flex items-center gap-1 text-sm text-gray-300">
             <MapPin className="w-4 h-4" />
             <span>{location}</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1 text-sm text-gray-300">
+            <MapPin className="w-4 h-4" />
+            <span>Cerca</span>
           </div>
         )}
       </div>

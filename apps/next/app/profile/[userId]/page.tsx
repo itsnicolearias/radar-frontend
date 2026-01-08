@@ -14,15 +14,22 @@ export default function UserProfilePage() {
   const userId = params.userId as string
 
   const { user } = useAuthStore()
-  const { connections } = useConnectionStore()
+  const { connections, getLocalConnectionState, myPendingRequests } = useConnectionStore()
   const { nearbyUsers } = useRadarStore()
   const [profileData, setProfileData] = useState<IRadarUser | null>(null)
   const [isConnected, setIsConnected] = useState(false)
+  const [isPending, setIsPending] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+
+  const localState = getLocalConnectionState(user.userId)
+  
 
   useEffect(() => {
     const connected = connections.some((c) => c.receiverId === userId || c.senderId === userId)
     setIsConnected(connected)
+
+    const isPending = localState === "pending" || myPendingRequests.some((c) => c.receiverId === userId)
+    setIsPending(isPending)
   }, [connections, userId])
 
   useEffect(() => {
@@ -101,6 +108,7 @@ export default function UserProfilePage() {
         <ProfileCard
           name={profileData.displayName!}
           age={profileData.Profile?.age!}
+          location={ `${profileData.Profile?.province}, ${profileData.Profile?.country}`}
           distance={profileData.distance}
           bio={profileData.Profile?.bio!}
           interests={profileData.Profile?.interests!}
@@ -109,6 +117,8 @@ export default function UserProfilePage() {
           onMessage={handleMessage}
           onDeleteConnection={handleDeleteConnection}
           showAge={profileData.Profile?.showAge}
+          showLocation={profileData.Profile?.showLocation}
+          isConnectionPending={isPending}
         />
       </div>
     </div>
