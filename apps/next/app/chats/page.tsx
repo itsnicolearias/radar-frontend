@@ -19,7 +19,7 @@ export default function ChatsPage() {
 
   const { user } = useAuthStore()
   const { chats, setChats, updateChatLastMessage, incrementUnreadCount } = useChatStore()
-  const { connections, pendingRequests, setConnections, setPendingRequests } = useConnectionStore()
+  const { connections, pendingRequests, setConnections, setPendingRequests, removeConnection } = useConnectionStore()
   const { profileViews, setProfileViews } = useProfileViewsStore()
 
   useEffect(() => {
@@ -127,7 +127,7 @@ export default function ChatsPage() {
   const filteredChats = chats.filter((chat) => (chat.user.distance || 0) < 50)
 
   const isTheConnectionPending = (userId: string): boolean => {
-    const isPending = connections.some((c) => c.receiverId === userId)
+    const isPending = connections.some((c) => c.receiverId === userId && c.status === "pending")
     return isPending;
   }
 
@@ -448,7 +448,7 @@ export default function ChatsPage() {
             router.push(`/chats/${selectedUser.userId}`)
           }}
           isUserConnected={() => {
-            return connections.some((c) => c.senderId === selectedUser.userId || c.receiverId === selectedUser.userId)
+            return connections.some((c) => c.status === "accepted" && (c.receiverId === user.userId || c.senderId === user.userId))
           }}
           sendConnection={async () => {
             try {
@@ -469,7 +469,7 @@ export default function ChatsPage() {
               console.error("[v0] Error deleting connection:", error)
             }
           }}
-          isConnectionPending={isTheConnectionPending(selectedUser.userId)}
+          isConnectionPending={() => isTheConnectionPending(selectedUser.userId)}
         />
       )}
 

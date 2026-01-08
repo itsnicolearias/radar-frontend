@@ -6,7 +6,7 @@ import { LinearGradient } from "expo-linear-gradient"
 import { useRouter } from "expo-router"
 import { MotiView } from "moti"
 import { Radio, MapPin } from "lucide-react-native"
-import { useRadarStore, useAuthStore, useSocketEvent, useChatStore } from "@radar/features"
+import { useRadarStore, useAuthStore, useSocketEvent, useChatStore, useConnectionStore } from "@radar/features"
 import { connectionService, profileViewService, radarService, signalService } from "@radar/api"
 import type { IRadarUser, IRadarSignal, IEventResponse, IConnectionResponse } from "@radar/types"
 import { BottomNavNative } from "../../../packages/ui/navigation/bottom-nav.native"
@@ -39,6 +39,7 @@ export default function RadarScreen() {
     updateUserLocation,
     setNearbyEvents,
   } = useRadarStore()
+  const { getLocalConnectionState, setLocalConnectionState, removeConnection, connections, setConnections } = useConnectionStore()
 
   const [radiusKm, setRadiusKm] = useState(10)
   const [isSendSignalModalOpen, setIsSendSignalModalOpen] = useState(false)
@@ -46,7 +47,7 @@ export default function RadarScreen() {
   const [selectedUser, setSelectedUser] = useState<IRadarUser | null>(null)
   const [selectedEvent, setSelectedEvent] = useState<IEventResponse | null>(null)
   const [isScanning, setIsScanning] = useState(false)
-  const [connections, setConnections] = useState<IConnectionResponse[]>([])
+  const [pendingsConnections, setPendingsConnections] = useState<IConnectionResponse[]>([])
   const [showWelcomeModal, setShowWelcomeModal] = useState(false)
 
   /*useEffect(() => {
@@ -74,6 +75,9 @@ export default function RadarScreen() {
 
         const friends = await connectionService.getAcceptedConnections()
         setConnections(friends)
+
+        const pendings = await connectionService.getPendingConnections()
+        setPendingsConnections(pendings)
       } catch (error) {
         console.error("[v0] Error fetching nearby data:", error)
       }
@@ -168,7 +172,7 @@ export default function RadarScreen() {
   }
 
   const isUserConnected = (userId: string): boolean => {
-    const isConnected = connections.some((c) => c.receiverId === userId || c.senderId === userId)
+    const isConnected = connections.some((c) => c.status === "accepted" && (c.receiverId === userId || c.senderId === userId))
     return isConnected
   }
 
@@ -186,13 +190,14 @@ export default function RadarScreen() {
       if (!conecc) return
       const { connectionId } = conecc
       await connectionService.deleteConnection(connectionId)
+      removeConnection(connectionId)
     } catch (error) {
       console.error("[v0] Error:", error)
     }
   }
 
   const isTheConnectionPending = (userId: string): boolean => {
-    const isPending = connections.some((c) => c.receiverId === userId)
+    const isPending = pendingsConnections.some((c) => c.receiverId === userId && c.status === "pending")
     return isPending;
   }
 
@@ -349,7 +354,7 @@ export default function RadarScreen() {
           isUserConnected={() => isUserConnected(selectedUser.userId)}
           sendConnection={() => handleConnect(selectedUser.userId)}
           deleteConnection={() => handleDeleteConnection(selectedUser.userId)}
-          isConnectionPending={isTheConnectionPending(selectedUser.userId)}
+          isConnectionPending={() => isTheConnectionPending(selectedUser.userId)}
         />
       )}
 

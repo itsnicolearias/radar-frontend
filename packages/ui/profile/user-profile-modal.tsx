@@ -15,7 +15,7 @@ interface UserProfileModalProps {
   isUserConnected: () => boolean
   sendConnection: () => void
   deleteConnection: () => void
-  isConnectionPending: boolean
+  isConnectionPending: () =>  boolean
 }
 
 export const UserProfileModal: React.FC<UserProfileModalProps> = ({
@@ -27,12 +27,12 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   deleteConnection,
   isConnectionPending,
 }) => {
-  const { getLocalConnectionState, setLocalConnectionState } = useConnectionStore()
+  const { getLocalConnectionState, setLocalConnectionState, removeConnection } = useConnectionStore()
   const [isAnimating, setIsAnimating] = useState(false)
 
   const localState = getLocalConnectionState(user.userId)
   const connectionMade = localState === "connected" || isUserConnected()
-  const isPending = localState === "pending" && isConnectionPending
+  const isPending = localState === "pending" || isConnectionPending()
 
   const handleSendConnection = () => {
     setIsAnimating(true)
@@ -43,6 +43,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
   const handleDeleteConnection = () => {
     setLocalConnectionState(user.userId, null)
+    //removeConnection(user.userId)
     deleteConnection()
   }
 
@@ -84,7 +85,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
             </div>
             <div className="flex items-center gap-2 text-white/90">
               <MapPin className="w-4 h-4 text-[#1DE3F2]" />
-              <span>{formatDistance(user.distance)} de distancia</span>
+              <span>{formatDistance(user.distance)}</span>
             </div>
           </div>
         </div>

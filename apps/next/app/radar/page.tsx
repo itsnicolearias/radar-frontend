@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { useRadarStore, useAuthStore, useSocket, useSocketEvent } from "@radar/features"
+import { useRadarStore, useAuthStore, useSocket, useSocketEvent, useConnectionStore } from "@radar/features"
 import { connectionService, profileViewService, radarService, signalService } from "@radar/api"
 import type { IEventResponse, IRadarUser, IRadarSignal, IConnectionResponse } from "@radar/types"
 import { BottomNav, GhostButton, InvisibleBadge, WelcomeModal } from "@radar/ui"
@@ -31,13 +31,14 @@ export default function RadarPage() {
     addNearbySignal,
     updateUserLocation,
   } = useRadarStore()
+  const { getLocalConnectionState, setLocalConnectionState, removeConnection, setConnections, connections } = useConnectionStore()
 
 
   const [radius, setRadius] = useState(10000) // default 10km
   const [selectedUser, setSelectedUser] = useState<IRadarUser | null>(null)
   const [selectedEvent, setSelectedEvent] = useState<IEventResponse | null>(null)
   const [selectedSignal, setSelectedSignal] = useState<IRadarSignal | null>(null)
-  const [ connections, setConnections] = useState<IConnectionResponse[]>(null)
+  const [ connectionsFriends, setConnectionsFriends] = useState<IConnectionResponse[]>(null)
   const [isSendSignalModalOpen, setIsSendSignalModalOpen] = useState(false)
   const [isAnimatingSignal, setIsAnimatingSignal] = useState(false)
   const socket = useSocket()
@@ -66,6 +67,7 @@ export default function RadarPage() {
         setNearbySignals(signals)
 
         const friends = await connectionService.getAcceptedConnections()
+        setConnectionsFriends(friends)
         setConnections(friends)
       } catch (error) {
         console.error("[v0] Error fetching nearby data:", error)
@@ -93,7 +95,7 @@ export default function RadarPage() {
   }
 
   const isUserConnected = (userId: string): boolean => {
-    const isConnected = connections.some((c) => c.receiverId === userId || c.senderId === userId)
+    const isConnected = connections.some((c) => c.status === "accepted" && (c.receiverId === userId || c.senderId === userId))
     return isConnected;
   }
 
@@ -183,7 +185,7 @@ export default function RadarPage() {
   }
 
   const isTheConnectionPending = (userId: string): boolean => {
-    const isPending = connections.some((c) => c.receiverId === userId)
+    const isPending = connections.some((c) => c.receiverId === userId && c.status === "pending")
     return isPending;
   }
 
@@ -383,7 +385,7 @@ export default function RadarPage() {
           isUserConnected={() => isUserConnected(selectedUser.userId)}
           sendConnection={() => handleConnect(selectedUser.userId)}
           deleteConnection={() => handleDeleteConnection(selectedUser.userId)}   
-          isConnectionPending={isTheConnectionPending(selectedUser.userId)}
+          isConnectionPending={() => isTheConnectionPending(selectedUser.userId)}
         />
       )}
 

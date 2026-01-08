@@ -15,6 +15,7 @@ module.exports = function (api) {
             '@radar/features': '../../packages/features',
             '@radar/types': '../../packages/types',
             '@radar/ui': '../../packages/ui',
+            '@radar/utils': '../../lib/utils',
           },
         },
       ],

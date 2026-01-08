@@ -53,7 +53,7 @@ export const SignalDetailModal: React.FC<SignalDetailModalProps> = ({ signal, on
           </div>
           <h3 className="text-white font-bold text-lg">{signal.Sender.displayName}</h3>
           <p className="text-[#1DE3F2] text-sm flex items-center gap-1">
-            <span>{formatDistance(signal.distance)} de distancia</span>
+            <span>{formatDistance(signal.distance)}</span>
           </p>
         </div>
 

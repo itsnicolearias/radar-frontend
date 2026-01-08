@@ -4,6 +4,7 @@ import { motion } from "framer-motion"
 import { MessageCircle, User, Heart } from "lucide-react"
 import type { IRadarSignal } from "@radar/types"
 import React from "react"
+import { formatDistance } from "lib/utils/format-distance"
 
 interface SignalDetailModalProps {
   signal: IRadarSignal
@@ -47,13 +48,6 @@ export const SignalDetailModal: React.FC<SignalDetailModalProps> = ({
     return `Hace ${diffDays} días`
   }
 
-  const formatDistance = (distance?: number) => {
-    if (!distance) return "Cerca"
-    if (distance < 50) return "50m"
-    if (distance < 1000) return `${Math.round(distance)}m`
-    return `${(distance / 1000).toFixed(1)}km`
-  }
-
   return (
     <motion.div
       className="fixed inset-0 bg-black/90 backdrop-blur-sm z-[9999] flex items-center justify-center p-8"
@@ -87,7 +81,7 @@ export const SignalDetailModal: React.FC<SignalDetailModalProps> = ({
           </div>
           <h3 className="text-white font-bold text-lg">{signal.Sender.displayName}</h3>
           <p className="text-[#1DE3F2] text-sm flex items-center gap-1">
-            <span>{formatDistance(signal.distance)} de distancia</span>
+            <span>{formatDistance(signal.distance)}</span>
           </p>
         </div>
 

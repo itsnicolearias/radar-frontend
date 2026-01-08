@@ -5,6 +5,7 @@ import { LinearGradient } from "expo-linear-gradient"
 import Animated, { useAnimatedStyle, withSpring, useSharedValue } from "react-native-reanimated"
 import type { IRadarUser } from "@radar/types"
 import { useConnectionStore } from "@radar/features"
+import { formatDistance } from "../../../lib/utils/format-distance"
 
 interface UserProfileModalNativeProps {
   user: IRadarUser
@@ -13,7 +14,7 @@ interface UserProfileModalNativeProps {
   isUserConnected: () => boolean
   sendConnection: () => void
   deleteConnection: () => void
-  isConnectionPending: boolean
+  isConnectionPending: () => boolean
 }
 
 export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({
@@ -26,11 +27,11 @@ export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({
   isConnectionPending,
 }) => {
   const scale = useSharedValue(1)
-  const { getLocalConnectionState, setLocalConnectionState } = useConnectionStore()
+  const { getLocalConnectionState, setLocalConnectionState, removeConnection } = useConnectionStore()
 
   const localState = getLocalConnectionState(user.userId)
   const connectionMade = localState === "connected" || isUserConnected()
-  const isPending = localState === "pending" && isConnectionPending
+  const isPending = localState === "pending" || isConnectionPending()
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -47,15 +48,8 @@ export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({
   const handleDeleteConnection = () => {
     setLocalConnectionState(user.userId, null)
     deleteConnection()
+    //removeConnection(user.userId)
   }
-
-  const formatDistance = (distance?: number) => {
-    if (!distance) return "Cerca"
-    if (distance < 50) return "50m"
-    if (distance < 1000) return `${Math.round(distance)}m`
-    return `${(distance / 1000).toFixed(1)}km`
-  }
-
   return (
     <Modal visible transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.overlay}>
@@ -85,7 +79,7 @@ export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({
             <View style={styles.profileSection}>
               <View style={styles.distanceBadge}>
                 <MapPin color="#00FFB3" size={16} />
-                <Text style={styles.distanceText}>{formatDistance(user.distance)} de distancia</Text>
+                <Text style={styles.distanceText}>{formatDistance(user.distance)}</Text>
               </View>
 
               <Text style={styles.profileName}>

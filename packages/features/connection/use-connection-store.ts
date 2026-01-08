@@ -6,15 +6,15 @@ interface ConnectionState {
   connections: IConnectionResponse[]
   pendingRequests: IConnectionResponse[]
   isLoading: boolean
-  localConnectionStates: Record<string, "pending" | "connected" | null>
+  localConnectionStates: Record<string, "pending" | "connected" | "rejected" | null>
   setConnections: (connections: IConnectionResponse[]) => void
   setPendingRequests: (requests: IConnectionResponse[]) => void
   addConnection: (connection: IConnectionResponse) => void
   updateConnection: (connectionId: string, status: "accepted" | "rejected") => void
   removeConnection: (connectionId: string) => void
   setLoading: (loading: boolean) => void
-  setLocalConnectionState: (userId: string, state: "pending" | "connected" | null) => void
-  getLocalConnectionState: (userId: string) => "pending" | "connected" | null
+  setLocalConnectionState: (userId: string, state: "pending" | "connected" | "rejected" | null) => void
+  getLocalConnectionState: (userId: string) => "pending" | "connected" | "rejected" | null
   reset: () => void
 }
 
