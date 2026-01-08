@@ -3,7 +3,7 @@ module.exports = function (api) {
   return {
     presets: ['babel-preset-expo'],
     plugins: [
-      'react-native-reanimated/plugin',
+      'react-native-worklets/plugin',
       [
         'module-resolver',
         {
@@ -15,6 +15,7 @@ module.exports = function (api) {
             '@radar/features': '../../packages/features',
             '@radar/types': '../../packages/types',
             '@radar/ui': '../../packages/ui',
+            '@radar/utils': '../../lib/utils',
           },
         },
       ],

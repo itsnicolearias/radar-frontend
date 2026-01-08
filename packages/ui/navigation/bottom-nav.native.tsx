@@ -1,6 +1,7 @@
 import type React from "react"
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native"
 import { MapPin, MessageCircle, Calendar, User } from "lucide-react-native"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 interface BottomNavProps {
   activeTab: "radar" | "chats" | "events" | "profile"
@@ -9,6 +10,8 @@ interface BottomNavProps {
 }
 
 export const BottomNavNative: React.FC<BottomNavProps> = ({ activeTab, onTabChange, showNotification }) => {
+  const insets = useSafeAreaInsets()
+
   const tabs = [
     { id: "radar" as const, label: "Radar", icon: MapPin },
     { id: "chats" as const, label: "Chats", icon: MessageCircle },
@@ -17,7 +20,7 @@ export const BottomNavNative: React.FC<BottomNavProps> = ({ activeTab, onTabChan
   ]
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingBottom: insets.bottom || 8 }]}>
       <View style={styles.content}>
         {tabs.map((tab) => {
           const Icon = tab.icon
@@ -42,7 +45,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingHorizontal: 24,
-    paddingVertical: 6,
+    paddingTop: 12,
     borderTopWidth: 1,
     borderTopColor: "rgba(0, 255, 179, 0.2)",
   },

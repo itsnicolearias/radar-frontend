@@ -6,20 +6,27 @@ interface ConnectionState {
   connections: IConnectionResponse[]
   pendingRequests: IConnectionResponse[]
   isLoading: boolean
+  localConnectionStates: Record<string, "pending" | "connected" | "rejected" | null>
   setConnections: (connections: IConnectionResponse[]) => void
   setPendingRequests: (requests: IConnectionResponse[]) => void
   addConnection: (connection: IConnectionResponse) => void
   updateConnection: (connectionId: string, status: "accepted" | "rejected") => void
   removeConnection: (connectionId: string) => void
   setLoading: (loading: boolean) => void
+  setLocalConnectionState: (userId: string, state: "pending" | "connected" | "rejected" | null) => void
+  getLocalConnectionState: (userId: string) => "pending" | "connected" | "rejected" | null
   reset: () => void
+  myPendingRequests: IConnectionResponse[]
+  setMyPendingRequests: (requests: IConnectionResponse[]) => void
 }
 
 export const useConnectionStore = create<ConnectionState>()(
-  immer((set) => ({
+  immer((set, get) => ({
     connections: [],
     pendingRequests: [],
     isLoading: false,
+    localConnectionStates: {},
+    myPendingRequests: [],
     setConnections: (connections) =>
       set((state) => {
         state.connections = connections
@@ -27,6 +34,10 @@ export const useConnectionStore = create<ConnectionState>()(
     setPendingRequests: (requests) =>
       set((state) => {
         state.pendingRequests = requests
+      }),
+    setMyPendingRequests: (requests) =>
+      set((state) => {
+        state.myPendingRequests = requests
       }),
     addConnection: (connection) =>
       set((state) => {
@@ -58,11 +69,24 @@ export const useConnectionStore = create<ConnectionState>()(
       set((state) => {
         state.isLoading = loading
       }),
+    setLocalConnectionState: (userId, state) =>
+      set((draft) => {
+        if (state === null) {
+          delete draft.localConnectionStates[userId]
+        } else {
+          draft.localConnectionStates[userId] = state
+        }
+      }),
+    getLocalConnectionState: (userId) => {
+      return get().localConnectionStates[userId] || null
+    },
     reset: () =>
       set((state) => {
         state.connections = []
         state.pendingRequests = []
         state.isLoading = false
+        state.localConnectionStates = {}
+        state.myPendingRequests = []
       }),
   })),
 )

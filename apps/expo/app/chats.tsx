@@ -7,8 +7,10 @@ import { MessageCircle, Users, Check, X, Crown } from "lucide-react-native"
 import { MotiView } from "moti"
 import { useChatStore, useConnectionStore, useSocketEvent, useProfileViewsStore, useAuthStore } from "@radar/features"
 import { messageService, connectionService, profileViewService } from "@radar/api"
-import type { IMessageResponse, IConnectionResponse } from "@radar/types"
-import { BottomNavNative } from "@radar/ui/navigation/bottom-nav.native"
+import type { IMessageResponse, IConnectionResponse, IRadarUser } from "@radar/types"
+import { BottomNavNative } from "../../../packages/ui/navigation/bottom-nav.native"
+import { formatDistance } from "../../../lib/utils/format-distance"
+import { UserProfileModalNative } from "@radar/ui/profile/user-profile-modal.native"
 
 export default function ChatsScreen() {
   const router = useRouter()
@@ -16,23 +18,26 @@ export default function ChatsScreen() {
 
   const { user } = useAuthStore()
   const { chats, setChats, updateChatLastMessage, incrementUnreadCount } = useChatStore()
-  const { connections, pendingRequests, setConnections, setPendingRequests } = useConnectionStore()
+  const { connections, pendingRequests, setConnections, setPendingRequests, myPendingRequests, setMyPendingRequests, removeConnection } = useConnectionStore()
   const { profileViews, setProfileViews } = useProfileViewsStore()
+  const [selectedUser, setSelectedUser] = useState<IRadarUser | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [chatsData, connectionsData, requestsData, viewsData] = await Promise.all([
+        const [chatsData, connectionsData, requestsData, viewsData, pendingData] = await Promise.all([
           messageService.getConversations(),
           connectionService.getAcceptedConnections(),
           connectionService.getPendingConnections(),
           profileViewService.getProfileViews(),
+          connectionService.getMyPendingConnections()
         ])
 
         setChats(chatsData)
         setConnections(connectionsData)
         setPendingRequests(requestsData)
         setProfileViews(viewsData)
+        setMyPendingRequests(pendingData)
       } catch (error) {
         console.error("[v0] Error fetching chats data:", error)
       }
@@ -80,17 +85,11 @@ export default function ChatsScreen() {
 
   const handleRejectConnection = async (connectionId: string) => {
     try {
-      await connectionService.updateConnection(connectionId, "rejected")
+      await connectionService.deleteConnection(connectionId)
       setPendingRequests(pendingRequests.filter((r) => r.connectionId !== connectionId))
     } catch (error) {
       console.error("[v0] Error rejecting connection:", error)
     }
-  }
-
-  const formatDistance = (distance?: number) => {
-    if (!distance) return "Cerca"
-    if (distance < 1000) return `${Math.round(distance)}m`
-    return `${(distance / 1000).toFixed(1)}km`
   }
 
   const formatRelativeTime = (date: string | Date) => {
@@ -106,6 +105,54 @@ export default function ChatsScreen() {
     if (diffDays === 1) return "Ayer"
     return `Hace ${diffDays} días`
   }
+
+  const filteredPendingRequests = pendingRequests.filter((req) => (req.Sender?.distance || 0) < 50)
+  const filteredChats = chats.filter((chat) => (chat.user.distance || 0) < 50)
+
+  const handleViewProfile = (userId: string) => {
+    // Find user in pendingRequests or connections
+    const request = pendingRequests.find((r) => r.Sender.userId === userId)
+    if (request) {
+      setSelectedUser(request.Sender as IRadarUser)
+    }
+  }
+
+  const handleMessageUser = (userId: string) => {
+      setSelectedUser(null)
+      router.push(`/chats/${userId}`)
+    }
+  
+    const isUserConnected = (userId: string): boolean => {
+      const isConnected = connections.some((c) => c.receiverId === userId || c.senderId === userId)
+      return isConnected
+    }
+  
+    const handleConnect = async (receiverId: string) => {
+      try {
+        await connectionService.createConnection(receiverId!)
+      } catch (error) {
+        console.error("[v0] Error:", error)
+      }
+    }
+  
+    const handleDeleteConnection = async (userId: string) => {
+      try {
+        const conecc = connections.find((c => (c.receiverId === userId || c.senderId === userId)))
+        if (!conecc) return
+        const { connectionId } = conecc
+        await connectionService.deleteConnection(connectionId)
+        removeConnection(connectionId)
+      } catch (error) {
+        console.error("[v0] Error:", error)
+      }
+    }
+  
+    const isTheConnectionPending = (userId: string): boolean => {
+      const isPending = myPendingRequests.some((c) => c.receiverId === userId)
+      return isPending;
+    }
+
+
 
   return (
     <View style={styles.container}>
@@ -148,18 +195,81 @@ export default function ChatsScreen() {
         </View>
       </View>
 
-      <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Solicitudes Tab */}
+        {activeTab === "solicitudes" && (
+          <View style={styles.section}>
+            {filteredPendingRequests.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyText}>No tienes solicitudes aun</Text>
+              </View>
+            ) : (
+              filteredPendingRequests.map((request, index) => (
+                <MotiView
+                  key={request.connectionId}
+                  from={{ opacity: 0, translateY: 20 }}
+                  animate={{ opacity: 1, translateY: 0 }}
+                  transition={{ delay: index * 100 }}
+                >
+                  <TouchableOpacity
+                    style={styles.requestCard}
+                    onPress={() => handleViewProfile(request.Sender.userId!)}
+                  >
+                    <View style={styles.requestContent}>
+                      <View style={styles.requestAvatar}>
+                        {request.Sender?.Profile?.photoUrl ? (
+                          <Image source={{ uri: request.Sender.Profile.photoUrl }} style={styles.requestAvatarImage} />
+                        ) : (
+                          <Text style={styles.requestAvatarText}>{request.Sender.displayName?.[0] || "U"}</Text>
+                        )}
+                      </View>
+
+                      <View style={styles.requestInfo}>
+                        <Text style={styles.requestName}>
+                          {request.Sender.Profile?.showAge
+                            ? `${request.Sender.displayName}, ${request.Sender.Profile.age}`
+                            : request.Sender.displayName}
+                        </Text>
+                        <View style={styles.requestMeta}>
+                          <View style={styles.distanceDot} />
+                          <Text style={styles.distanceText}>{formatDistance(request.Sender?.distance)}</Text>
+                          {/* <Text style={styles.interestText}> • 3 intereses en común</Text> */}
+                        </View>
+
+                        <View style={styles.requestActions}>
+                          <TouchableOpacity
+                            style={styles.acceptButton}
+                            onPress={() => handleAcceptConnection(request.connectionId)}
+                          >
+                            <Text style={styles.acceptButtonText}>Aceptar</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={styles.rejectButton}
+                            onPress={() => handleRejectConnection(request.connectionId)}
+                          >
+                            <X size={16} color="#FF005C" />
+                            <Text style={styles.rejectButtonText}>Rechazar</Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                </MotiView>
+              ))
+            )}
+          </View>
+        )}
+
         {/* Chats Tab */}
         {activeTab === "chats" && (
           <View style={styles.section}>
-            {chats.length === 0 ? (
+            {filteredChats.length === 0 ? (
               <View style={styles.emptyState}>
-                <Text style={styles.emptyText}>No tienes conversaciones aún</Text>
+                <Text style={styles.emptyText}>No tienes conversaciones aun</Text>
                 <Text style={styles.emptySubtext}>Conecta con personas cercanas para empezar a chatear</Text>
               </View>
             ) : (
-              chats.map((chat, index) => (
-
+              filteredChats.map((chat, index) => (
                 <MotiView
                   key={chat.conversationId}
                   from={{ opacity: 0, translateX: -20 }}
@@ -208,67 +318,6 @@ export default function ChatsScreen() {
           </View>
         )}
 
-        {/* Solicitudes Tab */}
-        {activeTab === "solicitudes" && (
-          <View style={styles.section}>
-            {pendingRequests.length === 0 ? (
-              <View style={styles.emptyState}>
-                <Text style={styles.emptyText}>No tienes solicitudes pendientes</Text>
-              </View>
-            ) : (
-              pendingRequests.map((request, index) => (
-                <MotiView
-                  key={request.connectionId}
-                  from={{ opacity: 0, translateY: 20 }}
-                  animate={{ opacity: 1, translateY: 0 }}
-                  transition={{ delay: index * 100 }}
-                >
-                  <View style={styles.requestCard}>
-                    <View style={styles.requestContent}>
-                      <View style={styles.requestAvatar}>
-                        {request.Sender?.Profile?.photoUrl ? (
-                          <Image source={{ uri: request.Sender.Profile.photoUrl }} style={styles.requestAvatarImage} />
-                        ) : (
-                          <Text style={styles.requestAvatarText}>{request.Sender.displayName![0]}</Text>
-                        )}
-                      </View>
-
-                      <View style={styles.requestInfo}>
-                        <Text style={styles.requestName}>
-                          {request.Sender.Profile?.showAge
-                            ? `${request.Sender.displayName}, ${request.Sender.Profile.age}`
-                            : request.Sender.displayName}
-                        </Text>
-                        <View style={styles.requestMeta}>
-                          <View style={styles.distanceDot} />
-                          <Text style={styles.distanceText}>{formatDistance(request.Sender?.distance)}</Text>
-                          {/* <Text style={styles.interestText}> • 3 intereses en común</Text> */}
-                        </View>
-
-                        <View style={styles.requestActions}>
-                          <TouchableOpacity
-                            style={styles.acceptButton}
-                            onPress={() => handleAcceptConnection(request.connectionId)}
-                          >
-                            <Text style={styles.acceptButtonText}>Aceptar</Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            style={styles.rejectButton}
-                            onPress={() => handleRejectConnection(request.connectionId)}
-                          >
-                            <X size={16} color="#FF005C" />
-                            <Text style={styles.rejectButtonText}>Rechazar</Text>
-                          </TouchableOpacity>
-                        </View>
-                      </View>
-                    </View>
-                  </View>
-                </MotiView>
-              ))
-            )}
-          </View>
-        )}
-
         {/* Conectados Tab */}
         {activeTab === "conectados" && (
           <View style={styles.section}>
@@ -287,17 +336,19 @@ export default function ChatsScreen() {
                     from={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: index * 100 }}
+                    style={{ opacity: index > 2 ? 0.3 : 1 }}
                   >
                     <TouchableOpacity
-                      style={styles.profileView}
-                      onPress={() => router.push(`/profile/${view.viewerId}`)}
+                      style={[styles.profileView, index > 2 && styles.profileViewBlurred]}
+                      onPress={() => handleViewProfile(view.viewerId)}
+                      disabled={index > 2}
                     >
                       <View style={styles.profileViewAvatarContainer}>
-                        <View style={styles.profileViewAvatar}>
+                        <View style={[styles.profileViewAvatar, index > 2 && { opacity: 0.3 }]}>
                           {view.Viewer?.Profile?.photoUrl ? (
                             <Image
                               source={{ uri: view.Viewer.Profile.photoUrl }}
-                              style={styles.profileViewAvatarImage}
+                              style={[styles.profileViewAvatarImage, index > 2 && { opacity: 0.3 }]}
                             />
                           ) : (
                             <Text style={styles.profileViewAvatarText}>{view.Viewer.displayName?.[0] || "U"}</Text>
@@ -305,8 +356,12 @@ export default function ChatsScreen() {
                         </View>
                         <View style={styles.onlineIndicator} />
                       </View>
-                      <Text style={styles.profileViewName}>{view.Viewer.displayName || "Usuario"}</Text>
-                      <Text style={styles.profileViewTime}>{formatRelativeTime(view.createdAt)}</Text>
+                      <Text style={[styles.profileViewName, index > 2 && { opacity: 0.1 }]}>
+                        {view.Viewer.displayName || "Usuario"}
+                      </Text>
+                      <Text style={[styles.profileViewTime, index > 2 && { opacity: 0.4 }]}>
+                        {formatRelativeTime(view.createdAt)}
+                      </Text>
                     </TouchableOpacity>
                   </MotiView>
                 ))}
@@ -374,13 +429,22 @@ export default function ChatsScreen() {
         )}
       </ScrollView>
 
+      { selectedUser && (
+        <UserProfileModalNative
+          user={selectedUser}
+          onClose={() => setSelectedUser(null)}
+          onMessage={() => handleMessageUser(selectedUser.userId)}
+          isUserConnected={() => isUserConnected(selectedUser.userId)}
+          sendConnection={() => handleConnect(selectedUser.userId)}
+          deleteConnection={() => handleDeleteConnection(selectedUser.userId)}
+          isConnectionPending={() => isTheConnectionPending(selectedUser.userId)}
+        />
+      )}
+
       <BottomNavNative
         activeTab="chats"
-        onTabChange={(tab) => {
-          if (tab === "events") router.push("/events")
-          else if (tab === "radar") router.push("/radar")
-          else if (tab === "profile") router.push("/profile")
-        }}
+        onTabChange={(tab) => router.push(tab === "chats" ? "/chats" : `/${tab}`)}
+        showNotification={pendingRequests.length > 0}
       />
     </View>
   )
@@ -824,5 +888,8 @@ const styles = StyleSheet.create({
   },
   navLabelActive: {
     color: "#00FFB3",
+  },
+  profileViewBlurred: {
+    opacity: 0.4,
   },
 })

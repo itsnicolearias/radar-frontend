@@ -7,7 +7,7 @@ import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEventsStore, useGeolocation } from "@radar/features"
 import { eventService } from "@radar/api"
-import { EventInput, eventSchema } from "@radar/api/validations"
+import { EventInput } from "../../../../packages/api/validations"
 
 export default function CreateEventScreen() {
   const router = useRouter()
