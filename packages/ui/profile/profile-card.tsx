@@ -3,7 +3,7 @@
 import type React from "react"
 import { MapPin, Heart, MessageCircle, HeartOff } from "lucide-react"
 import { cn } from "../lib/utils"
-import { formatDistance } from "lib/utils/format-distance"
+import { formatDistance } from "../../../lib/utils/format-distance"
 
 interface ProfileCardProps {
   name: string

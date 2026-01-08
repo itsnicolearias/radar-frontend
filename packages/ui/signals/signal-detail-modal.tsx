@@ -4,7 +4,7 @@ import { motion } from "framer-motion"
 import { MessageCircle, User, Heart } from "lucide-react"
 import type { IRadarSignal } from "@radar/types"
 import React from "react"
-import { formatDistance } from "lib/utils/format-distance"
+import { formatDistance } from "../../../lib/utils/format-distance"
 
 interface SignalDetailModalProps {
   signal: IRadarSignal
