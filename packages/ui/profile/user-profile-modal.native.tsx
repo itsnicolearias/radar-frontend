@@ -1,8 +1,11 @@
 import type React from "react"
 import { View, Text, TouchableOpacity, Modal, StyleSheet, ScrollView, Image } from "react-native"
-import { X, MessageCircle, MapPin, Heart, HeartOff } from "lucide-react-native"
+import { X, MessageCircle, MapPin, Heart, HeartOff, Clock } from "lucide-react-native"
 import { LinearGradient } from "expo-linear-gradient"
+import Animated, { useAnimatedStyle, withSpring, useSharedValue } from "react-native-reanimated"
 import type { IRadarUser } from "@radar/types"
+import { useConnectionStore } from "@radar/features"
+import { formatDistance } from "../../../lib/utils/format-distance"
 
 interface UserProfileModalNativeProps {
   user: IRadarUser
@@ -11,6 +14,7 @@ interface UserProfileModalNativeProps {
   isUserConnected: () => boolean
   sendConnection: () => void
   deleteConnection: () => void
+  isConnectionPending: () => boolean
 }
 
 export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({
@@ -20,14 +24,32 @@ export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({
   isUserConnected,
   sendConnection,
   deleteConnection,
+  isConnectionPending,
 }) => {
-  const formatDistance = (distance?: number) => {
-    if (!distance) return "Cerca"
-    if (distance < 50) return "50 m"
-    if (distance < 1000) return `${Math.round(distance)} m`
-    return `${(distance / 1000).toFixed(1)} km`
+  const scale = useSharedValue(1)
+  const { getLocalConnectionState, setLocalConnectionState, removeConnection } = useConnectionStore()
+
+  const localState = getLocalConnectionState(user.userId)
+  const connectionMade = localState === "connected" || isUserConnected()
+  const isPending = localState === "pending" || isConnectionPending()
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }))
+
+  const handleSendConnection = () => {
+    scale.value = withSpring(1.1, {}, () => {
+      scale.value = withSpring(1)
+    })
+    setLocalConnectionState(user.userId, "pending")
+    sendConnection()
   }
 
+  const handleDeleteConnection = () => {
+    setLocalConnectionState(user.userId, null)
+    deleteConnection()
+    //removeConnection(user.userId)
+  }
   return (
     <Modal visible transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.overlay}>
@@ -43,19 +65,21 @@ export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({
             </TouchableOpacity>
           </LinearGradient>
 
+          <View style={styles.avatarContainer}>
+            <View style={styles.avatarLarge}>
+              {user.Profile?.photoUrl ? (
+                <Image source={{ uri: user.Profile.photoUrl }} style={styles.avatarImage} />
+              ) : (
+                <Text style={styles.avatarLargeText}>{user.displayName?.[0]?.toUpperCase() || "?"}</Text>
+              )}
+            </View>
+          </View>
+
           <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
             <View style={styles.profileSection}>
-              <View style={styles.avatarLarge}>
-                {user.Profile?.photoUrl ? (
-                  <Image source={{ uri: user.Profile.photoUrl }} style={styles.avatarImage} />
-                ) : (
-                  <Text style={styles.avatarLargeText}>{user.displayName?.[0]?.toUpperCase() || "?"}</Text>
-                )}
-              </View>
-
               <View style={styles.distanceBadge}>
                 <MapPin color="#00FFB3" size={16} />
-                <Text style={styles.distanceText}>{formatDistance(user.distance)} de distancia</Text>
+                <Text style={styles.distanceText}>{formatDistance(user.distance)}</Text>
               </View>
 
               <Text style={styles.profileName}>
@@ -65,7 +89,7 @@ export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({
               {user.Profile.showLocation && (
                 <View style={styles.locationContainer}>
                   <MapPin color="#8B8B8B" size={16} />
-                  <Text style={styles.locationText}>{user.Profile.province || "Buenos Aires"}</Text>
+                  <Text style={styles.locationText}>{user.Profile.province || "Cerca"}</Text>
                 </View>
               )}
             </View>
@@ -90,7 +114,7 @@ export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({
               </View>
             )}
 
-            {isUserConnected() && (
+            {connectionMade ? (
               <>
                 <TouchableOpacity style={styles.messageButton} onPress={onMessage}>
                   <LinearGradient
@@ -104,16 +128,23 @@ export const UserProfileModalNative: React.FC<UserProfileModalNativeProps> = ({
                   </LinearGradient>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.likeButton} onPress={deleteConnection}>
+                <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteConnection}>
                   <HeartOff color="#FF005C" size={20} />
+                  <Text style={styles.deleteButtonText}>Eliminar amigo</Text>
                 </TouchableOpacity>
               </>
-            )}
-
-            {!isUserConnected() && (
-              <TouchableOpacity style={styles.likeButton} onPress={sendConnection}>
-                <Heart color="#FF005C" size={20} />
-              </TouchableOpacity>
+            ) : isPending ? (
+              <View style={styles.pendingButton}>
+                <Clock color="#EAB308" size={20} />
+                <Text style={styles.pendingButtonText}>Pendiente</Text>
+              </View>
+            ) : (
+              <Animated.View style={animatedStyle}>
+                <TouchableOpacity style={styles.sendRequestButton} onPress={handleSendConnection}>
+                  <Heart color="#FF005C" size={20} />
+                  <Text style={styles.sendRequestText}>Enviar solicitud</Text>
+                </TouchableOpacity>
+              </Animated.View>
             )}
           </ScrollView>
         </View>
@@ -148,10 +179,19 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     backgroundColor: "#000000",
+    paddingTop: 80, // Added padding to account for absolute avatar
+  },
+  avatarContainer: {
+    position: "absolute",
+    top: 180, // Position at bottom of gradient
+    left: 0,
+    right: 0,
+    alignItems: "center",
+    zIndex: 10,
   },
   profileSection: {
     alignItems: "center",
-    marginTop: -60,
+    marginTop: 0, // Removed negative margin since avatar is now absolute
     marginBottom: 32,
     paddingHorizontal: 24,
   },
@@ -164,7 +204,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 4,
     borderColor: "#000000",
-    marginBottom: 16,
   },
   avatarLargeText: {
     fontSize: 48,
@@ -270,5 +309,59 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 40,
+  },
+  deleteButton: {
+    alignSelf: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderRadius: 28,
+    backgroundColor: "#1A1A1A",
+    borderWidth: 1,
+    borderColor: "rgba(255, 0, 92, 0.4)",
+    marginBottom: 40,
+  },
+  deleteButtonText: {
+    color: "#FF005C",
+    fontWeight: "600",
+    fontSize: 16,
+  },
+  sendRequestButton: {
+    alignSelf: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderRadius: 28,
+    backgroundColor: "#1A1A1A",
+    borderWidth: 1,
+    borderColor: "rgba(255, 0, 92, 0.4)",
+    marginBottom: 40,
+  },
+  sendRequestText: {
+    color: "#FF005C",
+    fontWeight: "600",
+    fontSize: 16,
+  },
+  pendingButton: {
+    alignSelf: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderRadius: 28,
+    backgroundColor: "rgba(234, 179, 8, 0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(234, 179, 8, 0.4)",
+    marginBottom: 40,
+  },
+  pendingButtonText: {
+    color: "#EAB308",
+    fontWeight: "600",
+    fontSize: 16,
   },
 })

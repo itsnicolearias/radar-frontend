@@ -30,9 +30,12 @@ export * from "./components/ghost-button"
 export * from "./components/invisible-badge"
 //export * from "./components/invisible-badge.native"
 
+export * from "./modals/send-signal-modal"
+export * from "./modals/welcome-modal"
+//export * from "./modals/welcome-modal.native"
 
 export * from "./signals/radar-signal-marker"
-export * from "./signals/send-signal-modal"
+//export * from "./signals/send-signal-modal"
 export * from "./signals/signal-item"
 
 export * from "./components/plan-card"

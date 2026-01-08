@@ -1,4 +1,4 @@
-import { axiosClient } from "../axios-client"
+import { axiosRequestor } from "../../../lib/api/axios-client"
 import type {
   IConversationsResponse,
   IMessageResponse,
@@ -21,7 +21,7 @@ export const messageService = {
     limit?: number,
     all?: boolean,
   ) {
-    const response = await axiosClient.get("/messages", {
+    const response = await axiosRequestor.get("/messages", {
       params: { page, limit, all },
     })
 
@@ -29,23 +29,23 @@ export const messageService = {
   },
 
   async getMessages(userId: string): Promise<IMessageResponse[]> {
-    const response = await axiosClient.get(`/messages/${userId}`)
+    const response = await axiosRequestor.get(`/messages/${userId}`)
     return response.data.data;
   },
 
   async sendMessage(data: SendMessageInput): Promise<IMessageResponse> {
-    const response = await axiosClient.post<{ data: IMessageResponse }>("/messages", data)
+    const response = await axiosRequestor.post<{ data: IMessageResponse }>("/messages", data)
     return response.data?.data
   },
 
   async markAsRead(messageIds: string[]): Promise<IMarkAsReadResponse> {
     const requestData = { messageIds: messageIds }
-    const response = await axiosClient.patch<IMarkAsReadResponse>("/messages/read", requestData)
+    const response = await axiosRequestor.patch<IMarkAsReadResponse>("/messages/read", requestData)
     return response.data
   },
 
   async getUnreadCount(): Promise<IUnreadMessagesResponse> {
-    const response = await axiosClient.get<IUnreadMessagesResponse>("/messages/unread/count")
+    const response = await axiosRequestor.get<IUnreadMessagesResponse>("/messages/unread/count")
     return response.data
   },
 }

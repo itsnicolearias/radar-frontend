@@ -6,33 +6,37 @@ import { MessageCircle, Users, Check, X, Crown } from "lucide-react"
 import { motion } from "framer-motion"
 import { useChatStore, useConnectionStore, useSocketEvent, useProfileViewsStore, useAuthStore } from "@radar/features"
 import { messageService, connectionService, profileViewService } from "@radar/api"
-import type { IConnectionResponse, IMessageResponse } from "@radar/types"
+import type { IConnectionResponse, IMessageResponse, IRadarUser } from "@radar/types"
 import { BottomNav } from "@radar/ui"
 import { formatDistance } from "../../../../lib/utils/format-distance"
+import { UserProfileModal } from "@radar/ui"
 
 export default function ChatsPage() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<"chats" | "solicitudes" | "conectados">("chats")
   const [showProfileViews, setShowProfileViews] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<IRadarUser | null>(null)
 
   const { user } = useAuthStore()
   const { chats, setChats, updateChatLastMessage, incrementUnreadCount } = useChatStore()
-  const { connections, pendingRequests, setConnections, setPendingRequests } = useConnectionStore()
+  const { connections, pendingRequests, setConnections, setPendingRequests, removeConnection, myPendingRequests, setMyPendingRequests } = useConnectionStore()
   const { profileViews, setProfileViews } = useProfileViewsStore()
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [chatsData, connectionsData, requestsData, viewsData] = await Promise.all([
+        const [chatsData, connectionsData, requestsData, viewsData, pendingData ] = await Promise.all([
           messageService.getConversations(),
           connectionService.getAcceptedConnections(),
           connectionService.getPendingConnections(),
           profileViewService.getProfileViews(),
+          connectionService.getMyPendingConnections()
         ])
         setChats(chatsData)
         setConnections(connectionsData)
         setPendingRequests(requestsData)
         setProfileViews(viewsData)
+        setMyPendingRequests(pendingData)
       } catch (error) {
         console.error("[v0] Error fetching chats data:", error)
       }
@@ -88,7 +92,7 @@ export default function ChatsPage() {
 
   const handleRejectConnection = async (connectionId: string) => {
     try {
-      await connectionService.updateConnection(connectionId, "rejected")
+      await connectionService.deleteConnection(connectionId)
       setPendingRequests(pendingRequests.filter((r) => r.connectionId !== connectionId))
     } catch (error) {
       console.error("[v0] Error rejecting connection:", error)
@@ -107,6 +111,26 @@ export default function ChatsPage() {
     if (diffHours < 24) return `Hace ${diffHours}h`
     if (diffDays === 1) return "Ayer"
     return `Hace ${diffDays} días`
+  }
+
+  const handleViewProfile = (userId: string) => {
+    // Find user in pendingRequests or connections
+    const request = pendingRequests.find((r) => r.Sender.userId === userId)
+    if (request) {
+      setSelectedUser(request.Sender as IRadarUser)
+    }
+  }
+
+  const handleCloseProfile = () => {
+    setSelectedUser(null)
+  }
+
+  const filteredPendingRequests = pendingRequests.filter((req) => (req.Sender?.distance || 0) < 50)
+  const filteredChats = chats.filter((chat) => (chat.user.distance || 0) < 50)
+
+  const isTheConnectionPending = (userId: string): boolean => {
+    const isPending = myPendingRequests.some((c) => c.receiverId === userId)
+    return isPending;
   }
 
   return (
@@ -167,13 +191,13 @@ export default function ChatsPage() {
         {/* Chats Tab */}
         {activeTab === "chats" && (
           <div className="space-y-3">
-            {chats.length === 0 ? (
+            {filteredChats.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-                <p className="text-[#C5C5C5]">No tienes conversaciones aún</p>
+                <p className="text-[#C5C5C5]">No tienes conversaciones aun</p>
                 <p className="text-sm text-white/50 mt-2">Conecta con personas cercanas para empezar a chatear</p>
               </div>
             ) : (
-              chats.map((chat, index) => (
+              filteredChats.map((chat, index) => (
                 <motion.div
                   key={chat.conversationId}
                   initial={{ opacity: 0, x: -20 }}
@@ -233,18 +257,19 @@ export default function ChatsPage() {
         {/* Solicitudes Tab */}
         {activeTab === "solicitudes" && (
           <div className="space-y-4">
-            {pendingRequests.length === 0 ? (
+            {filteredPendingRequests.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-                <p className="text-[#C5C5C5]">No tienes solicitudes pendientes</p>
+                <p className="text-[#C5C5C5]">No tienes solicitudes aun</p>
               </div>
             ) : (
-              pendingRequests.map((request, index) => (
+              filteredPendingRequests.map((request, index) => (
                 <motion.div
                   key={request.connectionId}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="rounded-2xl p-5 bg-linear-to-br from-[#00FFB3]/10 to-[#1DE3F2]/5 border border-[#00FFB3]/30"
+                  className="rounded-2xl p-5 bg-gradient-to-br from-[#00FFB3]/10 to-[#1DE3F2]/5 border border-[#00FFB3]/30 cursor-pointer"
+                  onClick={() => handleViewProfile(request.Sender.userId)}
                 >
                   <div className="flex items-start gap-4">
                     {/* Avatar */}
@@ -279,13 +304,19 @@ export default function ChatsPage() {
                       {/* Action buttons */}
                       <div className="flex gap-2 mt-4">
                         <button
-                          onClick={() => handleAcceptConnection(request.connectionId)}
-                          className="flex-1 h-10 rounded-xl bg-linear-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-medium shadow-lg shadow-[#00FFB3]/30 hover:scale-105 transition-transform"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleAcceptConnection(request.connectionId)
+                          }}
+                          className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-medium shadow-lg shadow-[#00FFB3]/30 hover:scale-105 transition-transform"
                         >
                           Aceptar
                         </button>
                         <button
-                          onClick={() => handleRejectConnection(request.connectionId)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleRejectConnection(request.connectionId)
+                          }}
                           className="flex-1 h-10 rounded-xl bg-[#1A1A1A] border border-[#FF005C]/30 hover:bg-[#FF005C]/10 text-[#FF005C] transition-all"
                         >
                           <X className="w-4 h-4 inline mr-1" />
@@ -318,8 +349,9 @@ export default function ChatsPage() {
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: index * 0.1 }}
-                    className="shrink-0 text-center cursor-pointer"
-                    onClick={() => router.push(`/profile/${view.viewerId}`)}
+                    className={`shrink-0 text-center cursor-pointer ${index > 2 ? "blur-sm opacity-30" : ""}`}
+                    onClick={() => handleViewProfile(view.viewerId)}
+                    inert={index > 2}
                   >
                     <div className="relative">
                       <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center border-2 border-[#1DE3F2] shadow-lg shadow-[#1DE3F2]/30 overflow-hidden">
@@ -395,7 +427,7 @@ export default function ChatsPage() {
 
                       <button
                         onClick={() => handleChatClick(connectedUser.userId)}
-                        className="px-4 py-2 rounded-xl bg-linear-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-medium shadow-lg shadow-[#00FFB3]/30 hover:scale-105 transition-transform flex items-center gap-2"
+                        className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-medium shadow-lg shadow-[#00FFB3]/30 hover:scale-105 transition-transform flex items-center gap-2"
                       >
                         <MessageCircle className="w-4 h-4" />
                         <span>Chat</span>
@@ -408,6 +440,40 @@ export default function ChatsPage() {
           </div>
         )}
       </div>
+
+      {selectedUser && (
+        <UserProfileModal
+          user={selectedUser}
+          onClose={handleCloseProfile}
+          onMessage={() => {
+            handleCloseProfile()
+            router.push(`/chats/${selectedUser.userId}`)
+          }}
+          isUserConnected={() => {
+            return connections.some((c) => c.status === "accepted" && (c.receiverId === user.userId || c.senderId === user.userId))
+          }}
+          sendConnection={async () => {
+            try {
+              await connectionService.createConnection(selectedUser.userId)
+            } catch (error) {
+              console.error("[v0] Error sending connection:", error)
+            }
+          }}
+          deleteConnection={async () => {
+            try {
+              const connection = connections.find(
+                (c) => c.senderId === selectedUser.userId || c.receiverId === selectedUser.userId,
+              )
+              if (connection) {
+                await connectionService.deleteConnection(connection.connectionId)
+              }
+            } catch (error) {
+              console.error("[v0] Error deleting connection:", error)
+            }
+          }}
+          isConnectionPending={() => isTheConnectionPending(selectedUser.userId)}
+        />
+      )}
 
       <BottomNav activeTab="chats" onTabChange={(tab) => router.push(`/${tab === "chats" ? "chats" : tab}`)} />
     </div>

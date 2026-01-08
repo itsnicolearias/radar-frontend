@@ -1,7 +1,8 @@
 import type React from "react"
 import { View, Text, TouchableOpacity, Modal, StyleSheet, Image } from "react-native"
-import { X, MessageCircle, User } from "lucide-react-native"
+import { X, MessageCircle, User, Heart } from "lucide-react-native"
 import { LinearGradient } from "expo-linear-gradient"
+import Animated, { useAnimatedStyle, withSpring, useSharedValue } from "react-native-reanimated"
 import type { IRadarSignal } from "@radar/types"
 
 interface SignalDetailModalNativeProps {
@@ -9,6 +10,8 @@ interface SignalDetailModalNativeProps {
   onClose: () => void
   onRespond: (signal: IRadarSignal) => void
   onViewProfile: () => void
+  isUserConnected?: boolean
+  sendConnection?: () => void
 }
 
 export const SignalDetailModalNative: React.FC<SignalDetailModalNativeProps> = ({
@@ -16,7 +19,25 @@ export const SignalDetailModalNative: React.FC<SignalDetailModalNativeProps> = (
   onClose,
   onRespond,
   onViewProfile,
+  isUserConnected,
+  sendConnection,
 }) => {
+  const scale = useSharedValue(1)
+  const connected = isUserConnected || false
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }))
+
+  const handleSendConnection = () => {
+    if (sendConnection) {
+      scale.value = withSpring(1.1, {}, () => {
+        scale.value = withSpring(1)
+      })
+      sendConnection()
+    }
+  }
+
   const getTimeAgo = () => {
     const now = new Date()
     const signalTime = new Date(signal.createdAt)
@@ -28,7 +49,7 @@ export const SignalDetailModalNative: React.FC<SignalDetailModalNativeProps> = (
     return `Hace ${diffHours}h`
   }
 
-    const formatDistance = (distance?: number) => {
+  const formatDistance = (distance?: number) => {
     if (!distance) return "Cerca"
     if (distance < 1000) return `${Math.round(distance)}m`
     return `${(distance / 1000).toFixed(1)}km`
@@ -40,11 +61,11 @@ export const SignalDetailModalNative: React.FC<SignalDetailModalNativeProps> = (
         <View style={styles.modal}>
           <View style={styles.userInfo}>
             <View style={styles.avatarContainer}>
-                {signal?.Sender?.Profile?.photoUrl ? (
-                  <Image source={{ uri: signal?.Sender?.Profile?.photoUrl }} style={styles.avatarImage} />
-                ) : (
-                  <Text style={styles.avatarText}>{signal.Sender.displayName?.[0]?.toUpperCase() || "U"}</Text>
-                )}
+              {signal?.Sender?.Profile?.photoUrl ? (
+                <Image source={{ uri: signal?.Sender?.Profile?.photoUrl }} style={styles.avatarImage} />
+              ) : (
+                <Text style={styles.avatarText}>{signal.Sender.displayName?.[0]?.toUpperCase() || "U"}</Text>
+              )}
               <View style={styles.onlineIndicator} />
             </View>
 
@@ -66,17 +87,26 @@ export const SignalDetailModalNative: React.FC<SignalDetailModalNativeProps> = (
           </View>
 
           <View style={styles.actions}>
-            <TouchableOpacity style={styles.respondButton} onPress={() => onRespond(signal)}>
-              <LinearGradient
-                colors={["#00FFB3", "#1DE3F2"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.respondButtonGradient}
-              >
-                <MessageCircle color="#000000" size={20} />
-                <Text style={styles.respondButtonText}>Responder señal</Text>
-              </LinearGradient>
-            </TouchableOpacity>
+            {connected ? (
+              <TouchableOpacity style={styles.respondButton} onPress={() => onRespond(signal)}>
+                <LinearGradient
+                  colors={["#00FFB3", "#1DE3F2"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.respondButtonGradient}
+                >
+                  <MessageCircle color="#000000" size={20} />
+                  <Text style={styles.respondButtonText}>Responder señal</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            ) : (
+              <Animated.View style={animatedStyle}>
+                <TouchableOpacity style={styles.sendRequestButton} onPress={handleSendConnection}>
+                  <Heart color="#FF005C" size={20} />
+                  <Text style={styles.sendRequestText}>Enviar solicitud</Text>
+                </TouchableOpacity>
+              </Animated.View>
+            )}
 
             <TouchableOpacity style={styles.profileButton} onPress={onViewProfile}>
               <User color="#C5C5C5" size={20} />
@@ -241,5 +271,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "500",
     textAlign: "center",
+  },
+  sendRequestButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 14,
+    backgroundColor: "#1A1A1A",
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "rgba(255, 0, 92, 0.4)",
+    gap: 8,
+  },
+  sendRequestText: {
+    color: "#FF005C",
+    fontWeight: "bold",
+    fontSize: 16,
   },
 })

@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { useRadarStore, useAuthStore, useSocket, useSocketEvent } from "@radar/features"
+import { useRadarStore, useAuthStore, useSocket, useSocketEvent, useConnectionStore } from "@radar/features"
 import { connectionService, profileViewService, radarService, signalService } from "@radar/api"
 import type { IEventResponse, IRadarUser, IRadarSignal, IConnectionResponse } from "@radar/types"
-import { BottomNav, GhostButton, InvisibleBadge } from "@radar/ui"
+import { BottomNav, GhostButton, InvisibleBadge, WelcomeModal } from "@radar/ui"
 import { SendSignalModal } from "../../../../packages/ui/modals/send-signal-modal"
 import { SignalDetailModal } from "../../../../packages/ui/signals/signal-detail-modal"
 import { UserProfileModal } from "../../../../packages/ui/profile/user-profile-modal"
@@ -31,16 +31,27 @@ export default function RadarPage() {
     addNearbySignal,
     updateUserLocation,
   } = useRadarStore()
+  const { getLocalConnectionState, setLocalConnectionState, removeConnection, setConnections, connections } = useConnectionStore()
 
 
   const [radius, setRadius] = useState(10000) // default 10km
   const [selectedUser, setSelectedUser] = useState<IRadarUser | null>(null)
   const [selectedEvent, setSelectedEvent] = useState<IEventResponse | null>(null)
   const [selectedSignal, setSelectedSignal] = useState<IRadarSignal | null>(null)
-  const [ connections, setConnections] = useState<IConnectionResponse[]>(null)
+  const [ pendingsConnections, setPendingsConnections] = useState<IConnectionResponse[]>(null)
   const [isSendSignalModalOpen, setIsSendSignalModalOpen] = useState(false)
   const [isAnimatingSignal, setIsAnimatingSignal] = useState(false)
   const socket = useSocket()
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false)
+
+  /*useEffect(() => {
+    // Show welcome modal if user needs onboarding
+    const needsOnboarding = !user?.displayName || user.displayName.trim() === "" || !user?.isVerified
+
+    if (needsOnboarding) {
+      setShowWelcomeModal(true)
+    }
+  }, [user])*/
 
   useEffect(() => {
     const fetchNearbyData = async () => {
@@ -57,6 +68,9 @@ export default function RadarPage() {
 
         const friends = await connectionService.getAcceptedConnections()
         setConnections(friends)
+
+        const pendings = await connectionService.getMyPendingConnections()
+        setPendingsConnections(pendings);
       } catch (error) {
         console.error("[v0] Error fetching nearby data:", error)
       }
@@ -161,12 +175,20 @@ export default function RadarPage() {
     }
   }
 
-  const handleDeleteConnection = async (receiverId: string) => {
+  const handleDeleteConnection = async (userId: string) => {
     try {
-      await connectionService.deleteConnection(receiverId!)
+      const conecc = connections.find((c => (c.receiverId === userId || c.senderId === userId)))
+      if (!conecc) return
+      const { connectionId } = conecc
+      await connectionService.deleteConnection(connectionId)
     } catch (error) {
       console.error("[v0] Error:", error)
     }
+  }
+
+  const isTheConnectionPending = (userId: string): boolean => {
+    const isPending = pendingsConnections.some((c) => c.receiverId === userId)
+    return isPending;
   }
 
   return (
@@ -352,6 +374,8 @@ export default function RadarPage() {
           onClose={() => setSelectedSignal(null)}
           onRespond={() => handleRespond(selectedSignal)}
           onViewProfile={() => handleSignalClick(selectedSignal.senderId)}
+          isUserConnected={isUserConnected(selectedSignal.senderId)}
+          sendConnection={() => handleConnect(selectedSignal.senderId)}
         />
       )}
 
@@ -363,10 +387,20 @@ export default function RadarPage() {
           isUserConnected={() => isUserConnected(selectedUser.userId)}
           sendConnection={() => handleConnect(selectedUser.userId)}
           deleteConnection={() => handleDeleteConnection(selectedUser.userId)}   
+          isConnectionPending={() => isTheConnectionPending(selectedUser.userId)}
         />
       )}
 
       {selectedEvent && <EventDetailModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />}
+
+      {showWelcomeModal && (
+      <WelcomeModal
+        isOpen={showWelcomeModal}
+        onClose={() => setShowWelcomeModal(false)}
+        userDisplayName={user?.displayName}
+        userEmailConfirmed={user?.isVerified}
+      />
+      )}
     </div>
   )
 }

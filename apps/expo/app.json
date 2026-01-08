@@ -8,7 +8,7 @@
     "icon": "./assets/radar-app-icon-1024x1024.png",
     "userInterfaceStyle": "dark",
     "splash": {
-      "image": "./assets/R_A_D_A_R__está_escuchando__version_1.png",
+      "image": "./assets/radar-splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#000000"
     },
@@ -20,13 +20,10 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.radar.app"
+      "bundleIdentifier": "com.itsnicolearias.radar.app"
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/radar-app-icon-1024x1024.png",
-        "backgroundColor": "#000000"
-      },
+      "icon": "./assets/radar-app-icon-1024x1024.png",
       "package": "com.radar.app"
     },
     "web": {

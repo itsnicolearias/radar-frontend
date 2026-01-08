@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ArrowLeft, Settings, LogOut } from "lucide-react"
 import { useAuthStore } from "@radar/features"
 import PlanCard from "@radar/ui/components/plan-card"
@@ -70,7 +70,7 @@ export default function ProfilePage() {
       })
 
       if (response?.data?.User) {
-        setUser({ ...user, ...response.data.User as any})
+        setUser({ ...user, ...(response.data.User as any) })
       }
       if (response?.data) {
         setProfile({ ...profile, ...response.data.Profile })
@@ -159,9 +159,10 @@ export default function ProfilePage() {
         />
 
         <div className="pt-4 border-t border-[#197387]/20">
-          <button 
+          <button
             onClick={handleLogout}
-            className="w-full h-12 rounded-full bg-[#0A0E12]/50 border border-[#197387]/30 hover:bg-[#0A0E12]/80 text-[#C5C5C5] hover:text-white transition-all duration-300 flex items-center justify-center gap-2">
+            className="w-full h-12 rounded-full bg-[#0A0E12]/50 border border-[#197387]/30 hover:bg-[#0A0E12]/80 text-[#C5C5C5] hover:text-white transition-all duration-300 flex items-center justify-center gap-2"
+          >
             <LogOut className="w-5 h-5" />
             Cerrar sesión
           </button>
