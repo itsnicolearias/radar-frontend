@@ -21,16 +21,16 @@ export default function UserProfilePage() {
   const [isPending, setIsPending] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
-  const localState = getLocalConnectionState(user.userId)
-  
+    const localState = getLocalConnectionState(userId)
+    
 
-  useEffect(() => {
-    const connected = connections.some((c) => c.receiverId === userId || c.senderId === userId)
-    setIsConnected(connected)
+    useEffect(() => {
+      const connected = connections.some((c) => c.receiverId === userId || c.senderId === userId)
+      setIsConnected(connected)
 
-    const isPending = localState === "pending" || myPendingRequests.some((c) => c.receiverId === userId)
-    setIsPending(isPending)
-  }, [connections, userId])
+      const isPending = localState === "pending" || myPendingRequests.some((c) => c.receiverId === userId)
+      setIsPending(isPending)
+    }, [connections, userId, localState])
 
   useEffect(() => {
     const registerView = async () => {
