@@ -2,15 +2,16 @@ import type React from "react"
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native"
 import { MapPin, MessageCircle, Calendar, User } from "lucide-react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
+import { useNotificationStore } from "@radar/features"
 
 interface BottomNavProps {
   activeTab: "radar" | "chats" | "events" | "profile"
   onTabChange: (tab: "radar" | "chats" | "events" | "profile") => void
-  showNotification?: boolean
 }
 
-export const BottomNavNative: React.FC<BottomNavProps> = ({ activeTab, onTabChange, showNotification }) => {
+export const BottomNavNative: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
   const insets = useSafeAreaInsets()
+  const { unreadCount } = useNotificationStore()
 
   const tabs = [
     { id: "radar" as const, label: "Radar", icon: MapPin },
@@ -28,7 +29,11 @@ export const BottomNavNative: React.FC<BottomNavProps> = ({ activeTab, onTabChan
 
           return (
             <TouchableOpacity key={tab.id} onPress={() => onTabChange(tab.id)} style={styles.tab}>
-              {tab.id === "chats" && showNotification && <View style={styles.notification} />}
+              {tab.id === "chats" && unreadCount > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{unreadCount > 99 ? "99+" : unreadCount}</Text>
+                </View>
+              )}
               <Icon color={isActive ? "#00FFB3" : "#C5C5C5"} size={24} />
               <Text style={[styles.label, isActive && styles.labelActive]}>{tab.label}</Text>
             </TouchableOpacity>
@@ -61,19 +66,27 @@ const styles = StyleSheet.create({
     gap: 4,
     padding: 8,
   },
-  notification: {
+  badge: {
     position: "absolute",
-    top: 0,
-    right: 8,
-    width: 8,
-    height: 8,
+    top: -4,
+    right: 4,
+    minWidth: 20,
+    height: 20,
+    paddingHorizontal: 6,
     backgroundColor: "#FF005C",
-    borderRadius: 4,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
     shadowColor: "#FF005C",
     shadowOpacity: 0.5,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 0 },
     elevation: 4,
+  },
+  badgeText: {
+    color: "#FFFFFF",
+    fontSize: 10,
+    fontWeight: "bold",
   },
   label: {
     fontSize: 12,
