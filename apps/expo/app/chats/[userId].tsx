@@ -11,6 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Image,
+  Alert,
 } from "react-native"
 import { useRouter, useLocalSearchParams } from "expo-router"
 import { ArrowLeft, Send, X } from "lucide-react-native"
@@ -32,11 +33,12 @@ function ChatConversationPage() {
   const { connections, pendingRequests, removeConnection, myPendingRequests } = useConnectionStore()
   const [isTyping, setIsTyping] = useState(false)
   const [message, setMessage] = useState("")
+  const [optimisticMessages, setOptimisticMessages] = useState<IMessageResponse[]>([])
   const [showProfileModal, setShowProfileModal] = useState(false)
   const [profileUser, setProfileUser] = useState<IRadarUser | null>(null)
   const scrollViewRef = useRef<ScrollView>(null)
 
-  const userMessages = messages[userId] || []
+  const userMessages = [...(messages[userId] || []), ...optimisticMessages]
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -68,21 +70,39 @@ function ChatConversationPage() {
   const handleSendMessage = async () => {
     if (!message.trim()) return
 
+    const optimisticMessage: IMessageResponse = {
+      messageId: `temp-${Date.now()}`,
+      senderId: user?.userId!,
+      receiverId: userId,
+      content: message,
+      createdAt: new Date(),
+      isRead: false,
+      Signal: replyingToSignal ? replyingToSignal : undefined,
+      Sender: user as any,
+      Receiver: {} as any,
+    }
+
+    setOptimisticMessages((prev) => [...prev, optimisticMessage])
+    const messageContent = message
+    setMessage("")
+    setReplyingToSignal(null)
+
     try {
       const messageData = {
         receiverId: userId,
-        content: message,
+        content: messageContent,
         signalId: replyingToSignal ? replyingToSignal.signalId : undefined,
       }
       const msg = await messageService.sendMessage(messageData)
       emitSocketEvent("send-message", messageData)
-      setReplyingToSignal(null)
-      setMessage("")
 
+      setOptimisticMessages((prev) => prev.filter((m) => m.messageId !== optimisticMessage.messageId))
       addMessage(userId, msg)
       await messageService.markAsRead([msg.messageId])
     } catch (error) {
       console.error("[v0] Error sending message:", error)
+      setOptimisticMessages((prev) => prev.filter((m) => m.messageId !== optimisticMessage.messageId))
+      Alert.alert("Error", "No se pudo enviar el mensaje")
     }
   }
 
@@ -126,7 +146,6 @@ function ChatConversationPage() {
     setShowProfileModal(true)
   }
 
-
   const isUserConnected = (userId: string): boolean => {
     const isConnected = connections.some((c) => c.receiverId === userId || c.senderId === userId)
     return isConnected
@@ -142,7 +161,7 @@ function ChatConversationPage() {
 
   const handleDeleteConnection = async (userId: string) => {
     try {
-      const conecc = connections.find((c => (c.receiverId === userId || c.senderId === userId)))
+      const conecc = connections.find((c) => c.receiverId === userId || c.senderId === userId)
       if (!conecc) return
       const { connectionId } = conecc
       await connectionService.deleteConnection(connectionId)
@@ -154,7 +173,7 @@ function ChatConversationPage() {
 
   const isTheConnectionPending = (userId: string): boolean => {
     const isPending = myPendingRequests.some((c) => c.receiverId === userId)
-    return isPending;
+    return isPending
   }
 
   return (

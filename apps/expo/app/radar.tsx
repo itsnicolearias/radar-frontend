@@ -39,7 +39,8 @@ export default function RadarScreen() {
     updateUserLocation,
     setNearbyEvents,
   } = useRadarStore()
-  const { getLocalConnectionState, setLocalConnectionState, removeConnection, connections, setConnections } = useConnectionStore()
+  const { getLocalConnectionState, setLocalConnectionState, removeConnection, connections, setConnections } =
+    useConnectionStore()
 
   const [radiusKm, setRadiusKm] = useState(10)
   const [isSendSignalModalOpen, setIsSendSignalModalOpen] = useState(false)
@@ -49,40 +50,60 @@ export default function RadarScreen() {
   const [isScanning, setIsScanning] = useState(false)
   const [pendingsConnections, setPendingsConnections] = useState<IConnectionResponse[]>([])
   const [showWelcomeModal, setShowWelcomeModal] = useState(false)
+  const [isSearching, setIsSearching] = useState(false)
+  const [searchMessage, setSearchMessage] = useState("")
+  const [newMarkersCount, setNewMarkersCount] = useState(0)
+  const [newMarkerIds, setNewMarkerIds] = useState<Set<string>>(new Set())
+  const [countdown, setCountdown] = useState(30)
 
-  /*useEffect(() => {
-    // Show welcome modal if user needs onboarding
-    const needsOnboarding = !user?.displayName || user.displayName.trim() === "" || !user?.isVerified
+  const searchMessages = [
+    "Buscando nuevas señales",
+    "Detectando señales en el Radar",
+    "Escuchando nuevas señales",
+    "Rastreando usuarios cercanos",
+    "Explorando el área",
+    "Señales en detección",
+  ]
 
-    if (needsOnboarding) {
-      setShowWelcomeModal(true)
+  const fetchNearbyData = async () => {
+    if (!currentLocation) return
+
+    setIsSearching(true)
+    try {
+      const { users, events, signals } = await radarService.getNearby(
+        currentLocation.latitude,
+        currentLocation.longitude,
+        radiusKm * 1000,
+      )
+
+      const previousUserIds = new Set(nearbyUsers.map((u) => u.userId))
+      const newUsers = users.filter((u) => !previousUserIds.has(u.userId))
+      const newIds = new Set(newUsers.map((u) => u.userId))
+
+      setNewMarkerIds(newIds)
+      setNewMarkersCount(newUsers.length)
+      setNearbyUsers(users)
+      setNearbySignals(signals)
+      setNearbyEvents(events)
+
+      const friends = await connectionService.getAcceptedConnections()
+      setConnections(friends)
+
+      const pendings = await connectionService.getMyPendingConnections()
+      setPendingsConnections(pendings)
+
+      setTimeout(() => {
+        setNewMarkerIds(new Set())
+        setNewMarkersCount(0)
+      }, 3000)
+    } catch (error) {
+      console.error("[v0] Error fetching nearby data:", error)
+    } finally {
+      setTimeout(() => setIsSearching(false), 2000)
     }
-  }, [user])*/
+  }
 
   useEffect(() => {
-    const fetchNearbyData = async () => {
-      if (!currentLocation) return
-
-      try {
-        const { users, events, signals } = await radarService.getNearby(
-          currentLocation.latitude,
-          currentLocation.longitude,
-          radiusKm * 1000,
-        )
-        setNearbyUsers(users)
-        setNearbySignals(signals)
-        setNearbyEvents(events)
-
-        const friends = await connectionService.getAcceptedConnections()
-        setConnections(friends)
-
-        const pendings = await connectionService.getMyPendingConnections()
-        setPendingsConnections(pendings)
-      } catch (error) {
-        console.error("[v0] Error fetching nearby data:", error)
-      }
-    }
-
     if (isVisible) {
       fetchNearbyData()
     } else {
@@ -90,7 +111,33 @@ export default function RadarScreen() {
       setNearbyEvents([])
       setNearbySignals([])
     }
-  }, [currentLocation, isVisible, radiusKm, setNearbyUsers, setNearbyEvents, setNearbySignals])
+  }, [isVisible, radiusKm, setNearbyUsers, setNearbyEvents, setNearbySignals])
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          fetchNearbyData()
+          return 30
+        }
+        return prev - 1
+      })
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [])
+
+  useEffect(() => {
+    if (!isSearching) return
+
+    let index = 0
+    const messageTimer = setInterval(() => {
+      setSearchMessage(searchMessages[index])
+      index = (index + 1) % searchMessages.length
+    }, 2000)
+
+    return () => clearInterval(messageTimer)
+  }, [isSearching])
 
   const handleSendSignal = async (note?: string, quickReply?: string, availableToChat?: boolean, inPark?: boolean) => {
     try {
@@ -186,7 +233,7 @@ export default function RadarScreen() {
 
   const handleDeleteConnection = async (userId: string) => {
     try {
-      const conecc = connections.find((c => (c.receiverId === userId || c.senderId === userId)))
+      const conecc = connections.find((c) => c.receiverId === userId || c.senderId === userId)
       if (!conecc) return
       const { connectionId } = conecc
       await connectionService.deleteConnection(connectionId)
@@ -198,7 +245,7 @@ export default function RadarScreen() {
 
   const isTheConnectionPending = (userId: string): boolean => {
     const isPending = pendingsConnections.some((c) => c.receiverId === userId)
-    return isPending;
+    return isPending
   }
 
   return (
@@ -216,7 +263,6 @@ export default function RadarScreen() {
         </View>
       </View>
 
-      {/* Radius filter buttons */}
       <View style={styles.radiusFilter}>
         {[2, 5, 10].map((km) => (
           <TouchableOpacity
@@ -235,9 +281,58 @@ export default function RadarScreen() {
         ))}
       </View>
 
+      {isSearching && (
+        <MotiView
+          from={{ opacity: 0, translateY: -20 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          exit={{ opacity: 0, translateY: -20 }}
+          style={styles.searchingBadge}
+        >
+          <Text style={styles.searchingText}>{searchMessage}</Text>
+        </MotiView>
+      )}
+
+      {!isSearching && (
+        <View style={styles.countdownBadge}>
+          <Text style={styles.countdownText}>
+            Próxima búsqueda en {Math.floor(countdown / 60)}:{(countdown % 60).toString().padStart(2, "0")}
+          </Text>
+        </View>
+      )}
+
       {!isVisible && <InvisibleBadge />}
 
       <View style={styles.radarContainer}>
+        {[...Array(8)].map((_, i) => (
+          <MotiView
+            key={`particle-${i}`}
+            from={{
+              opacity: 0.2,
+              translateX: Math.random() * width - width / 2,
+              translateY: Math.random() * height - height / 2,
+            }}
+            animate={{
+              opacity: [0.2, 0.5, 0.2],
+              translateX: [
+                Math.random() * width - width / 2,
+                Math.random() * width - width / 2,
+                Math.random() * width - width / 2,
+              ],
+              translateY: [
+                Math.random() * height - height / 2,
+                Math.random() * height - height / 2,
+                Math.random() * height - height / 2,
+              ],
+            }}
+            transition={{
+              type: "timing",
+              duration: 10000 + Math.random() * 5000,
+              loop: true,
+            }}
+            style={styles.particle}
+          />
+        ))}
+
         {[0, 1, 2].map((i) => (
           <MotiView
             key={i}
@@ -277,16 +372,35 @@ export default function RadarScreen() {
             const hasSignal = nearbySignals.some((s) => s.senderId === nearbyUser.userId)
             const findSignal = nearbySignals.find((s) => s.senderId === nearbyUser.userId)
             const position = getMarkerPosition(index, nearbyUsers.length, nearbyUser.distance, "user")
+            const isNew = newMarkerIds.has(nearbyUser.userId)
+
             return (
-              <UserMarkerNative
-                key={nearbyUser.userId}
-                user={nearbyUser}
-                position={position}
-                hasSignal={hasSignal}
-                onPress={() => handleSelectUser(nearbyUser)}
-                index={index}
-                onSelectSignal={() => setSelectedSignal(findSignal!)}
-              />
+              <View key={nearbyUser.userId}>
+                {isNew && (
+                  <MotiView
+                    from={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.5 }}
+                    style={[
+                      styles.newBadge,
+                      {
+                        left: position.x - 30,
+                        top: position.y - 60,
+                      },
+                    ]}
+                  >
+                    <Text style={styles.newBadgeText}>Nuevo!</Text>
+                  </MotiView>
+                )}
+                <UserMarkerNative
+                  user={nearbyUser}
+                  position={position}
+                  hasSignal={hasSignal}
+                  onPress={() => handleSelectUser(nearbyUser)}
+                  index={index}
+                  onSelectSignal={() => setSelectedSignal(findSignal!)}
+                />
+              </View>
             )
           })}
 
@@ -307,8 +421,9 @@ export default function RadarScreen() {
 
         <TouchableOpacity style={styles.sendSignalButton} onPress={() => setIsSendSignalModalOpen(true)}>
           <MotiView
-            from={{ scale: 1 }}
-            animate={{ scale: 1.2 }}
+            animate={{
+              scale: isScanning ? 1.2 : 1,
+            }}
             transition={{
               type: "timing",
               duration: 1000,
@@ -319,6 +434,31 @@ export default function RadarScreen() {
           <LinearGradient colors={["#00FFB3", "#1DE3F2"]} style={styles.sendSignalGradient}>
             <Radio color="#000000" size={28} />
           </LinearGradient>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.refreshButton} onPress={fetchNearbyData} disabled={isSearching}>
+          {newMarkersCount > 0 && (
+            <View style={styles.refreshBadge}>
+              <Text style={styles.refreshBadgeText}>{newMarkersCount}</Text>
+            </View>
+          )}
+          <MotiView
+            animate={{
+              rotate: isSearching ? "360deg" : "0deg",
+            }}
+            transition={{
+              type: "timing",
+              duration: 1000,
+              loop: isSearching,
+            }}
+          >
+            <Radio color="#00FFB3" size={20} />
+          </MotiView>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.searchButton} onPress={fetchNearbyData} disabled={isSearching}>
+          <Radio color="#000000" size={16} />
+          <Text style={styles.searchButtonText}>Buscar nuevas señales</Text>
         </TouchableOpacity>
       </View>
 
@@ -341,8 +481,8 @@ export default function RadarScreen() {
           onClose={() => setSelectedSignal(null)}
           onRespond={() => handleRespond(selectedSignal)}
           onViewProfile={() => handleViewProfile(selectedSignal.senderId)}
-          isUserConnected={ isUserConnected(selectedSignal.senderId) }
-          sendConnection={ () => handleConnect(selectedSignal.senderId)}
+          isUserConnected={isUserConnected(selectedSignal.senderId)}
+          sendConnection={() => handleConnect(selectedSignal.senderId)}
         />
       )}
 
@@ -504,5 +644,115 @@ const styles = StyleSheet.create({
     borderRadius: 32,
     justifyContent: "center",
     alignItems: "center",
+  },
+  searchingBadge: {
+    position: "absolute",
+    top: 120,
+    left: "50%",
+    transform: [{ translateX: -100 }],
+    backgroundColor: "rgba(0, 255, 179, 0.2)",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#00FFB3",
+    zIndex: 50,
+    width: 200,
+    alignItems: "center",
+  },
+  searchingText: {
+    color: "#00FFB3",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  countdownBadge: {
+    position: "absolute",
+    top: 120,
+    left: "50%",
+    transform: [{ translateX: -100 }],
+    backgroundColor: "rgba(26, 26, 26, 0.8)",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "rgba(0, 255, 179, 0.3)",
+    zIndex: 50,
+    width: 200,
+    alignItems: "center",
+  },
+  countdownText: {
+    color: "#FFFFFF",
+    fontSize: 11,
+    fontWeight: "500",
+  },
+  particle: {
+    position: "absolute",
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "#00FFB3",
+  },
+  newBadge: {
+    position: "absolute",
+    backgroundColor: "#00FFB3",
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    zIndex: 100,
+  },
+  newBadgeText: {
+    color: "#000000",
+    fontSize: 10,
+    fontWeight: "700",
+  },
+  refreshButton: {
+    position: "absolute",
+    bottom: 32,
+    right: 32,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#1A1A1A",
+    borderWidth: 2,
+    borderColor: "#00FFB3",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 30,
+  },
+  refreshBadge: {
+    position: "absolute",
+    top: -4,
+    right: -4,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: "#FF4FD8",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 40,
+  },
+  refreshBadgeText: {
+    color: "#FFFFFF",
+    fontSize: 10,
+    fontWeight: "700",
+  },
+  searchButton: {
+    position: "absolute",
+    top: 180,
+    left: "50%",
+    transform: [{ translateX: -100 }],
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: "#00FFB3",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 24,
+    zIndex: 30,
+  },
+  searchButtonText: {
+    color: "#000000",
+    fontSize: 13,
+    fontWeight: "600",
   },
 })

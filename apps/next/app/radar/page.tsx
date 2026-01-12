@@ -31,50 +31,99 @@ export default function RadarPage() {
     addNearbySignal,
     updateUserLocation,
   } = useRadarStore()
-  const { getLocalConnectionState, setLocalConnectionState, removeConnection, setConnections, connections } = useConnectionStore()
-
+  const { getLocalConnectionState, setLocalConnectionState, removeConnection, setConnections, connections } =
+    useConnectionStore()
 
   const [radius, setRadius] = useState(10000) // default 10km
   const [selectedUser, setSelectedUser] = useState<IRadarUser | null>(null)
   const [selectedEvent, setSelectedEvent] = useState<IEventResponse | null>(null)
   const [selectedSignal, setSelectedSignal] = useState<IRadarSignal | null>(null)
-  const [ pendingsConnections, setPendingsConnections] = useState<IConnectionResponse[]>(null)
+  const [pendingsConnections, setPendingsConnections] = useState<IConnectionResponse[]>(null)
   const [isSendSignalModalOpen, setIsSendSignalModalOpen] = useState(false)
   const [isAnimatingSignal, setIsAnimatingSignal] = useState(false)
   const socket = useSocket()
   const [showWelcomeModal, setShowWelcomeModal] = useState(false)
 
-  /*useEffect(() => {
-    // Show welcome modal if user needs onboarding
-    const needsOnboarding = !user?.displayName || user.displayName.trim() === "" || !user?.isVerified
+  const [isSearching, setIsSearching] = useState(false)
+  const [searchMessage, setSearchMessage] = useState("")
+  const [newMarkersCount, setNewMarkersCount] = useState(0)
+  const [newMarkerIds, setNewMarkerIds] = useState<Set<string>>(new Set())
+  const [countdown, setCountdown] = useState(30)
 
-    if (needsOnboarding) {
-      setShowWelcomeModal(true)
-    }
-  }, [user])*/
+  const searchMessages = [
+    "Buscando nuevas señales",
+    "Detectando señales en el Radar",
+    "Escuchando nuevas señales",
+    "Rastreando usuarios cercanos",
+    "Explorando el área",
+    "Señales en detección",
+  ]
 
   useEffect(() => {
-    const fetchNearbyData = async () => {
-      if (!currentLocation || !isVisible) return
-      try {
-        const { users, events, signals } = await radarService.getNearby(
-          currentLocation.latitude || user.lastLatitude,
-          currentLocation.longitude || user.lastLongitude,
-          radius,
-        )
-        setNearbyUsers(users)
-        setNearbyEvents(events)
-        setNearbySignals(signals)
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          fetchNearbyData()
+          return 30
+        }
+        return prev - 1
+      })
+    }, 1000)
 
-        const friends = await connectionService.getAcceptedConnections()
-        setConnections(friends)
+    return () => clearInterval(timer)
+  }, [])
 
-        const pendings = await connectionService.getMyPendingConnections()
-        setPendingsConnections(pendings);
-      } catch (error) {
-        console.error("[v0] Error fetching nearby data:", error)
-      }
+  useEffect(() => {
+    if (!isSearching) return
+
+    let index = 0
+    const messageTimer = setInterval(() => {
+      setSearchMessage(searchMessages[index])
+      index = (index + 1) % searchMessages.length
+    }, 2000)
+
+    return () => clearInterval(messageTimer)
+  }, [isSearching])
+
+  const fetchNearbyData = async () => {
+    if (!currentLocation || !isVisible) return
+
+    setIsSearching(true)
+    try {
+      const { users, events, signals } = await radarService.getNearby(
+        currentLocation.latitude || user.lastLatitude,
+        currentLocation.longitude || user.lastLongitude,
+        radius,
+      )
+
+      const previousUserIds = new Set(nearbyUsers.map((u) => u.userId))
+      const newUsers = users.filter((u) => !previousUserIds.has(u.userId))
+      const newIds = new Set(newUsers.map((u) => u.userId))
+
+      setNewMarkerIds(newIds)
+      setNewMarkersCount(newUsers.length)
+      setNearbyUsers(users)
+      setNearbyEvents(events)
+      setNearbySignals(signals)
+
+      const friends = await connectionService.getAcceptedConnections()
+      setConnections(friends)
+
+      const pendings = await connectionService.getMyPendingConnections()
+      setPendingsConnections(pendings)
+
+      setTimeout(() => {
+        setNewMarkerIds(new Set())
+        setNewMarkersCount(0)
+      }, 3000)
+    } catch (error) {
+      console.error("[v0] Error fetching nearby data:", error)
+    } finally {
+      setTimeout(() => setIsSearching(false), 2000)
     }
+  }
+
+  useEffect(() => {
     if (isVisible) {
       fetchNearbyData()
     } else {
@@ -82,7 +131,7 @@ export default function RadarPage() {
       setNearbyEvents([])
       setNearbySignals([])
     }
-  }, [currentLocation, isVisible, radius, setNearbyUsers, setNearbyEvents, setNearbySignals])
+  }, [isVisible, radius, setNearbyUsers, setNearbyEvents, setNearbySignals])
 
   const handleSendSignal = async (note?: string) => {
     try {
@@ -98,7 +147,7 @@ export default function RadarPage() {
 
   const isUserConnected = (userId: string): boolean => {
     const isConnected = connections.some((c) => c.receiverId === userId || c.senderId === userId)
-    return isConnected;
+    return isConnected
   }
 
   useSocketEvent<{ userId: string; latitude: number; longitude: number }>(
@@ -130,7 +179,7 @@ export default function RadarPage() {
   }
 
   const handleSignalClick = async (senderId: string) => {
-    const findUser = nearbyUsers.find((u) => u.userId === senderId )
+    const findUser = nearbyUsers.find((u) => u.userId === senderId)
     setSelectedUser(findUser)
 
     try {
@@ -177,7 +226,7 @@ export default function RadarPage() {
 
   const handleDeleteConnection = async (userId: string) => {
     try {
-      const conecc = connections.find((c => (c.receiverId === userId || c.senderId === userId)))
+      const conecc = connections.find((c) => c.receiverId === userId || c.senderId === userId)
       if (!conecc) return
       const { connectionId } = conecc
       await connectionService.deleteConnection(connectionId)
@@ -188,7 +237,7 @@ export default function RadarPage() {
 
   const isTheConnectionPending = (userId: string): boolean => {
     const isPending = pendingsConnections.some((c) => c.receiverId === userId)
-    return isPending;
+    return isPending
   }
 
   return (
@@ -212,7 +261,6 @@ export default function RadarPage() {
           <div className="flex items-center gap-3">
             <GhostButton onClick={toggleVisibility} isActive={!isVisible} />
           </div>
-
         </div>
 
         {/* Radius filter */}
@@ -231,8 +279,28 @@ export default function RadarPage() {
             </button>
           ))}
         </div>
-
       </header>
+
+      <AnimatePresence>
+        {isSearching && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="absolute top-32 left-1/2 -translate-x-1/2 bg-[#00FFB3]/20 backdrop-blur-sm px-6 py-3 rounded-full border border-[#00FFB3] z-50"
+          >
+            <p className="text-[#00FFB3] text-sm font-semibold">{searchMessage}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {!isSearching && (
+        <div className="absolute top-32 left-1/2 -translate-x-1/2 bg-[#1A1A1A]/80 backdrop-blur-sm px-5 py-2 rounded-full border border-[#00FFB3]/30 z-50">
+          <p className="text-white text-xs font-medium">
+            Próxima búsqueda en {Math.floor(countdown / 60)}:{(countdown % 60).toString().padStart(2, "0")}
+          </p>
+        </div>
+      )}
 
       <AnimatePresence>{!isVisible && <InvisibleBadge />}</AnimatePresence>
 
@@ -312,16 +380,34 @@ export default function RadarPage() {
                 const findSignal = nearbySignals.findLast((s) => s.senderId === nearbyUser.userId)
 
                 const position = getMarkerPosition(index, nearbyUsers.length, nearbyUser.distance, "user")
+                const isNew = newMarkerIds.has(nearbyUser.userId)
+
                 return (
-                  <UserMarker
-                    key={nearbyUser.userId}
-                    user={nearbyUser}
-                    position={position}
-                    hasSignal={hasSignal}
-                    onClick={() => handleUserClick(nearbyUser)}
-                    index={index}
-                    onSelectSignal={() => setSelectedSignal(findSignal)}
-                  />
+                  <div key={nearbyUser.userId} className="relative">
+                    {isNew && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.5 }}
+                        className="absolute bg-[#00FFB3] px-3 py-1 rounded-full z-50"
+                        style={{
+                          left: `${position.x}%`,
+                          top: `${position.y - 8}%`,
+                          transform: "translate(-50%, -100%)",
+                        }}
+                      >
+                        <p className="text-black text-[10px] font-bold">Nuevo!</p>
+                      </motion.div>
+                    )}
+                    <UserMarker
+                      user={nearbyUser}
+                      position={position}
+                      hasSignal={hasSignal}
+                      onClick={() => handleUserClick(nearbyUser)}
+                      index={index}
+                      onSelectSignal={() => setSelectedSignal(findSignal)}
+                    />
+                  </div>
                 )
               })}
 
@@ -343,21 +429,31 @@ export default function RadarPage() {
         </div>
 
         <motion.button
-          onClick={() => setIsSendSignalModalOpen(true)}
-          className="absolute bottom-20 w-16 h-16 rounded-full flex items-center justify-center shadow-2xl cursor-pointer z-20 overflow-hidden"
+          onClick={fetchNearbyData}
+          disabled={isSearching}
+          className="absolute top-44 flex items-center gap-2 bg-[#00FFB3] px-5 py-3 rounded-full shadow-lg disabled:opacity-50 z-20"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <Radio className="w-4 h-4 text-black" />
+          <span className="text-black text-sm font-semibold">Buscar nuevas señales</span>
+        </motion.button>
+
+        <motion.button
+          onClick={fetchNearbyData}
+          disabled={isSearching}
+          className="absolute bottom-20 right-8 w-14 h-14 bg-[#1A1A1A] border-2 border-[#00FFB3] rounded-full flex items-center justify-center shadow-xl disabled:opacity-50 z-20"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
-          animate={{
-            boxShadow: [
-              "0 0 20px rgba(0, 255, 179, 0.5), 0 0 40px rgba(29, 227, 242, 0.3)",
-              "0 0 40px rgba(0, 255, 179, 0.8), 0 0 60px rgba(29, 227, 242, 0.5)",
-              "0 0 20px rgba(0, 255, 179, 0.5), 0 0 40px rgba(29, 227, 242, 0.3)",
-            ],
-          }}
-          transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
+          animate={{ rotate: isSearching ? 360 : 0 }}
+          transition={{ duration: 1, repeat: isSearching ? Number.POSITIVE_INFINITY : 0, ease: "linear" }}
         >
-          <div className="absolute inset-0 bg-linear-to-br from-[#00FFB3] to-[#1DE3F2]" />
-          <Radio className="w-7 h-7 text-black relative z-10" />
+          {newMarkersCount > 0 && (
+            <div className="absolute -top-1 -right-1 w-5 h-5 bg-[#FF4FD8] rounded-full flex items-center justify-center z-10">
+              <span className="text-white text-[10px] font-bold">{newMarkersCount}</span>
+            </div>
+          )}
+          <Radio className="w-5 h-5 text-[#00FFB3]" />
         </motion.button>
       </div>
 
@@ -386,7 +482,7 @@ export default function RadarPage() {
           onMessage={() => router.push(`/chats/${selectedUser.userId}`)}
           isUserConnected={() => isUserConnected(selectedUser.userId)}
           sendConnection={() => handleConnect(selectedUser.userId)}
-          deleteConnection={() => handleDeleteConnection(selectedUser.userId)}   
+          deleteConnection={() => handleDeleteConnection(selectedUser.userId)}
           isConnectionPending={() => isTheConnectionPending(selectedUser.userId)}
         />
       )}
@@ -394,12 +490,12 @@ export default function RadarPage() {
       {selectedEvent && <EventDetailModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />}
 
       {showWelcomeModal && (
-      <WelcomeModal
-        isOpen={showWelcomeModal}
-        onClose={() => setShowWelcomeModal(false)}
-        userDisplayName={user?.displayName}
-        userEmailConfirmed={user?.isVerified}
-      />
+        <WelcomeModal
+          isOpen={showWelcomeModal}
+          onClose={() => setShowWelcomeModal(false)}
+          userDisplayName={user?.displayName}
+          userEmailConfirmed={user?.isVerified}
+        />
       )}
     </div>
   )

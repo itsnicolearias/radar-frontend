@@ -27,7 +27,9 @@ function ChatConversationPage() {
   const searchParams = useSearchParams()
   const signalId = searchParams.get("signalId")
 
-  const userMessages = messages[userId] || []
+  const [optimisticMessages, setOptimisticMessages] = useState<IMessageResponse[]>([])
+
+  const userMessages = [...(messages[userId] || []), ...optimisticMessages]
 
   useEffect(() => {
     if (!signalId) return
@@ -93,26 +95,44 @@ function ChatConversationPage() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [messages[userId]])
+  }, [messages[userId], optimisticMessages])
 
   const handleSendMessage = async () => {
     if (!message.trim()) return
 
+    const optimisticMessage: IMessageResponse = {
+      messageId: `temp-${Date.now()}`,
+      senderId: user!.userId,
+      receiverId: userId,
+      content: message,
+      createdAt: new Date(),
+      isRead: false,
+      Signal: replyingTo ? replyingTo : undefined,
+      Sender: user as any,
+      Receiver: {} as any,
+    }
+
+    setOptimisticMessages((prev) => [...prev, optimisticMessage])
+    const messageContent = message
+    setMessage("")
+    setReplyingTo(null)
+
     try {
       const messageData = {
         receiverId: userId,
-        content: message,
+        content: messageContent,
         signalId: replyingTo ? replyingTo.signalId : undefined,
       }
       const msg = await messageService.sendMessage(messageData)
       emitSocketEvent("send-message", messageData)
-      setReplyingTo(null)
-      setMessage("")
 
+      setOptimisticMessages((prev) => prev.filter((m) => m.messageId !== optimisticMessage.messageId))
       addMessage(userId, msg)
       await messageService.markAsRead([msg.messageId])
     } catch (error) {
       console.error("[v0] Error sending message:", error)
+      setOptimisticMessages((prev) => prev.filter((m) => m.messageId !== optimisticMessage.messageId))
+      alert("No se pudo enviar el mensaje")
     }
   }
 
@@ -154,20 +174,20 @@ function ChatConversationPage() {
 
   const isUserConnected = (userId: string): boolean => {
     const isConnected = connections.some((c) => c.receiverId === userId || c.senderId === userId)
-    return isConnected;
+    return isConnected
   }
 
   const handleConnect = async (receiverId: string) => {
-      try {
-        await connectionService.createConnection(receiverId!)
-      } catch (error) {
-        console.error("[v0] Error:", error)
-      }
+    try {
+      await connectionService.createConnection(receiverId!)
+    } catch (error) {
+      console.error("[v0] Error:", error)
     }
+  }
 
   const handleDeleteConnection = async (userId: string) => {
     try {
-      const conecc = connections.find((c => (c.receiverId === userId || c.senderId === userId)))
+      const conecc = connections.find((c) => c.receiverId === userId || c.senderId === userId)
       if (!conecc) return
       const { connectionId } = conecc
       await connectionService.deleteConnection(connectionId)
@@ -178,7 +198,7 @@ function ChatConversationPage() {
 
   const isTheConnectionPending = (userId: string): boolean => {
     const isPending = myPendingRequests.some((c) => c.receiverId === userId)
-    return isPending;
+    return isPending
   }
 
   return (
@@ -297,7 +317,7 @@ function ChatConversationPage() {
           }}
           isUserConnected={() => isUserConnected(profileUser.userId)}
           sendConnection={() => handleConnect(profileUser.userId)}
-          deleteConnection={() => handleDeleteConnection(profileUser.userId)}   
+          deleteConnection={() => handleDeleteConnection(profileUser.userId)}
           isConnectionPending={() => isTheConnectionPending(profileUser.userId)}
         />
       )}
