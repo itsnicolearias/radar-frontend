@@ -444,7 +444,7 @@ export default function ChatsScreen() {
       <BottomNavNative
         activeTab="chats"
         onTabChange={(tab) => router.push(tab === "chats" ? "/chats" : `/${tab}`)}
-        showNotification={pendingRequests.length > 0}
+        //showNotification={pendingRequests.length > 0}
       />
     </View>
   )

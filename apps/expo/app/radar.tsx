@@ -5,7 +5,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from "react-nati
 import { LinearGradient } from "expo-linear-gradient"
 import { useRouter } from "expo-router"
 import { MotiView } from "moti"
-import { Radio, MapPin } from "lucide-react-native"
+import { Radio, MapPin, RefreshCcw } from "lucide-react-native"
 import { useRadarStore, useAuthStore, useSocketEvent, useChatStore, useConnectionStore } from "@radar/features"
 import { connectionService, profileViewService, radarService, signalService } from "@radar/api"
 import type { IRadarUser, IRadarSignal, IEventResponse, IConnectionResponse } from "@radar/types"
@@ -19,9 +19,14 @@ import { EventMarkerNative } from "../../../packages/ui/radar/event-marker.nativ
 import { CentralUserMarkerNative } from "../../../packages/ui/radar/central-user-marker.native"
 import GhostButton from "../../../packages/ui/components/ghost-button.native"
 import InvisibleBadge from "../../../packages/ui/components/invisible-badge.native"
-import { WelcomeModalNative } from "@radar/ui/modals/welcome-modal.native"
+
+const MAX_USERS_ON_RADAR = 15
+const MAX_EVENTS_ON_RADAR = 8
 
 const { width, height } = Dimensions.get("window")
+const RADAR_SIZE = width * 0.85
+const center = RADAR_SIZE / 2
+const WAVE_SIZE = RADAR_SIZE * 0.35
 
 export default function RadarScreen() {
   const router = useRouter()
@@ -54,7 +59,13 @@ export default function RadarScreen() {
   const [searchMessage, setSearchMessage] = useState("")
   const [newMarkersCount, setNewMarkersCount] = useState(0)
   const [newMarkerIds, setNewMarkerIds] = useState<Set<string>>(new Set())
-  const [countdown, setCountdown] = useState(30)
+  const [radarLayout, setRadarLayout] = useState<{
+    x: number
+    y: number
+    width: number
+    height: number
+  } | null>(null)
+
 
   const searchMessages = [
     "Buscando nuevas señales",
@@ -111,21 +122,7 @@ export default function RadarScreen() {
       setNearbyEvents([])
       setNearbySignals([])
     }
-  }, [isVisible, radiusKm, setNearbyUsers, setNearbyEvents, setNearbySignals])
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          fetchNearbyData()
-          return 30
-        }
-        return prev - 1
-      })
-    }, 1000)
-
-    return () => clearInterval(timer)
-  }, [])
+  }, [currentLocation, isVisible, radiusKm, setNearbyUsers, setNearbyEvents, setNearbySignals])
 
   useEffect(() => {
     if (!isSearching) return
@@ -165,25 +162,21 @@ export default function RadarScreen() {
     }
   }, [currentLocation, setCurrentLocation, user])
 
-  const getMarkerPosition = (index: number, total: number, distance: number, type: "user" | "event") => {
-    const normalizedDistance = Math.min(distance / 1000 / radiusKm, 1)
-    const minRadiusPercent = type === "event" ? 0.25 : 0.3
-    const maxRadiusPercent = type === "event" ? 0.55 : 0.75
-    const radiusPercent = minRadiusPercent + normalizedDistance * (maxRadiusPercent - minRadiusPercent)
+  const getMarkerPosition = (index: number, total: number) => {
+    const center = RADAR_SIZE / 2
 
-    const angleOffset = type === "event" ? Math.PI / 4 : 0
-    const randomAngleOffset = (Math.random() - 0.5) * 0.4
-    const angle = (index / Math.max(total, 1)) * Math.PI * 2 + angleOffset + randomAngleOffset
+    const ringSteps = [0.25, 0.4, 0.55, 0.7]
+    const ring = ringSteps[index % ringSteps.length]
+    const radius = center * ring
 
-    const radarSize = width * 0.85
-    const centerX = width / 2
-    const centerY = height / 2 - 80
+    const angle = (index / Math.max(total, 1)) * Math.PI * 2
 
-    const x = centerX + radarSize * radiusPercent * Math.cos(angle)
-    const y = centerY + radarSize * radiusPercent * Math.sin(angle)
-
-    return { x, y }
+    return {
+      x: center + Math.cos(angle) * radius,
+      y: center + Math.sin(angle) * radius,
+    }
   }
+
 
   const handleRespond = (signal: IRadarSignal) => {
     setReplyingToSignal(signal)
@@ -248,6 +241,14 @@ export default function RadarScreen() {
     return isPending
   }
 
+  const usersToRender = [...nearbyUsers]
+  .filter((u) => typeof u.distance === "number")
+  .sort((a, b) => a.distance - b.distance)
+  .slice(0, MAX_USERS_ON_RADAR)
+
+  const eventsToRender = [...nearbyEvents].slice(0, MAX_EVENTS_ON_RADAR)
+
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -292,17 +293,24 @@ export default function RadarScreen() {
         </MotiView>
       )}
 
-      {!isSearching && (
-        <View style={styles.countdownBadge}>
-          <Text style={styles.countdownText}>
-            Próxima búsqueda en {Math.floor(countdown / 60)}:{(countdown % 60).toString().padStart(2, "0")}
-          </Text>
-        </View>
-      )}
-
       {!isVisible && <InvisibleBadge />}
 
-      <View style={styles.radarContainer}>
+      <View
+        style={styles.radarContainer}
+        onLayout={(e) => {
+          const { x, y, width, height } = e.nativeEvent.layout
+          setRadarLayout({ x, y, width, height })
+        }}
+      >
+
+        <View
+        style={{
+          width: RADAR_SIZE,
+          height: RADAR_SIZE,
+          position: "relative",
+        }}
+      >
+
         {[...Array(8)].map((_, i) => (
           <MotiView
             key={`particle-${i}`}
@@ -337,89 +345,137 @@ export default function RadarScreen() {
           <MotiView
             key={i}
             from={{ scale: 0.7, opacity: 0.8 }}
-            animate={{ scale: 2.5, opacity: 0 }}
+            animate={{ scale: 2, opacity: 0 }}
             transition={{
               type: "timing",
               duration: 3500,
               delay: i * 1000,
               loop: true,
             }}
-            style={[styles.scanWave, isScanning && styles.scanWaveActive]}
+             style={[
+              {
+                position: "absolute",
+                width: WAVE_SIZE,
+                height: WAVE_SIZE,
+                borderRadius: WAVE_SIZE / 2,
+                left: center - WAVE_SIZE / 2,
+                top: center - WAVE_SIZE / 2,
+                borderWidth: 3,
+                borderColor: "rgba(0,255,179,0.4)",
+              },
+              isScanning && styles.scanWaveActive,
+            ]}
           />
         ))}
 
-        {[0.35, 0.6, 0.85].map((scale, i) => (
+      {[0.35, 0.6, 0.85].map((scale, i) => {
+        const size = RADAR_SIZE * scale
+
+        return (
           <View
             key={i}
             style={[
               styles.radarCircle,
               {
-                width: width * 0.85 * scale,
-                height: width * 0.85 * scale,
+                width: size,
+                height: size,
+                left: center - size / 2,
+                top: center - size / 2,
               },
             ]}
           />
-        ))}
+        )
+      })}
 
-        <View style={styles.centralUserWrapper}>
-          <CentralUserMarkerNative
-            initial={user?.displayName?.[0]?.toUpperCase() || user?.firstName?.[0]?.toUpperCase() || "U"}
-          />
-        </View>
 
-        {isVisible &&
-          nearbyUsers.map((nearbyUser, index) => {
-            const hasSignal = nearbySignals.some((s) => s.senderId === nearbyUser.userId)
-            const findSignal = nearbySignals.find((s) => s.senderId === nearbyUser.userId)
-            const position = getMarkerPosition(index, nearbyUsers.length, nearbyUser.distance, "user")
-            const isNew = newMarkerIds.has(nearbyUser.userId)
+      <View
+        style={{
+          position: "absolute",
+          left: center,
+          top: center,
+          transform: [{ translateX: -32 }, { translateY: -32 }], // 64 / 2
+          zIndex: 20,
+        }}
+      >
+        <CentralUserMarkerNative
+          initial={user?.displayName?.[0]?.toUpperCase() || user?.firstName?.[0]?.toUpperCase() || "U"}
+        />
+      </View>
 
-            return (
-              <View key={nearbyUser.userId}>
-                {isNew && (
-                  <MotiView
-                    from={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.5 }}
-                    style={[
-                      styles.newBadge,
-                      {
-                        left: position.x - 30,
-                        top: position.y - 60,
-                      },
-                    ]}
-                  >
-                    <Text style={styles.newBadgeText}>Nuevo!</Text>
-                  </MotiView>
-                )}
-                <UserMarkerNative
-                  user={nearbyUser}
-                  position={position}
-                  hasSignal={hasSignal}
-                  onPress={() => handleSelectUser(nearbyUser)}
-                  index={index}
-                  onSelectSignal={() => setSelectedSignal(findSignal!)}
-                />
-              </View>
-            )
-          })}
+      {isVisible &&
+        usersToRender.map((nearbyUser, index) => {
+          const hasSignal = nearbySignals.some(
+            (s) => s.senderId === nearbyUser.userId,
+          )
 
-        {isVisible &&
-          nearbyEvents &&
-          nearbyEvents.map((event, index) => {
-            const position = getMarkerPosition(index, nearbyEvents.length, event.distance || 5000, "event")
-            return (
-              <EventMarkerNative
-                key={event.eventId}
-                event={event}
-                position={position}
-                onPress={() => setSelectedEvent(event)}
-                index={index}
-              />
-            )
-          })}
+          const findSignal = nearbySignals.find(
+            (s) => s.senderId === nearbyUser.userId,
+          )
 
-        <TouchableOpacity style={styles.sendSignalButton} onPress={() => setIsSendSignalModalOpen(true)}>
+          const position = getMarkerPosition(
+            index,
+            nearbyUsers.length
+          )
+
+
+    const isNew = newMarkerIds.has(nearbyUser.userId)
+
+    return (
+      <View key={nearbyUser.userId}>
+        {isNew && (
+          <MotiView
+            from={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            style={[
+              styles.newBadge,
+              {
+                left: position.x - 30,
+                top: position.y - 60,
+              },
+            ]}
+          >
+            <Text style={styles.newBadgeText}>Nuevo!</Text>
+          </MotiView>
+        )}
+
+
+        <UserMarkerNative
+          user={nearbyUser}
+          position={position}
+          hasSignal={hasSignal}
+          onPress={() => handleSelectUser(nearbyUser)}
+          index={index}
+          onSelectSignal={() => setSelectedSignal(findSignal!)}
+        />
+      </View>
+    )
+  })}
+  </View>
+
+
+     {/**  
+      {isVisible &&
+  eventsToRender.map((event, index) => {
+    const position = getMarkerPosition(
+      index,
+      eventsToRender.length,
+      event.distance || 5000,
+      "event",
+    )
+
+    return (
+      <EventMarkerNative
+        key={event.eventId}
+        event={event}
+        position={position}
+        onPress={() => setSelectedEvent(event)}
+        index={index}
+      />
+    )
+  })} **/}
+
+
+      <TouchableOpacity style={styles.sendSignalButton} onPress={() => setIsSendSignalModalOpen(true)}>
           <MotiView
             animate={{
               scale: isScanning ? 1.2 : 1,
@@ -452,13 +508,8 @@ export default function RadarScreen() {
               loop: isSearching,
             }}
           >
-            <Radio color="#00FFB3" size={20} />
+            <RefreshCcw color="#00FFB3" size={20} />
           </MotiView>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.searchButton} onPress={fetchNearbyData} disabled={isSearching}>
-          <Radio color="#000000" size={16} />
-          <Text style={styles.searchButtonText}>Buscar nuevas señales</Text>
         </TouchableOpacity>
       </View>
 
@@ -499,15 +550,6 @@ export default function RadarScreen() {
       )}
 
       {selectedEvent && <EventDetailModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />}
-
-      {showWelcomeModal && (
-        <WelcomeModalNative
-          isOpen={showWelcomeModal}
-          onClose={() => setShowWelcomeModal(false)}
-          userDisplayName={user?.displayName}
-          userEmailConfirmed={user?.isVerified}
-        />
-      )}
     </View>
   )
 }
@@ -598,13 +640,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#000000",
   },
   scanWave: {
-    position: "absolute",
-    width: width * 0.5,
-    height: width * 0.5,
-    borderRadius: (width * 0.5) / 2,
-    borderWidth: 3,
-    borderColor: "rgba(0, 255, 179, 0.4)",
-  },
+  position: "absolute",
+  width: RADAR_SIZE * 0.3,
+  height: RADAR_SIZE * 0.3,
+  borderRadius: (RADAR_SIZE * 0.3) / 2,
+  borderWidth: 3,
+  borderColor: "rgba(0, 255, 179, 0.4)",
+  left: RADAR_SIZE / 2 - (RADAR_SIZE * 0.3) / 2,
+  top: RADAR_SIZE / 2 - (RADAR_SIZE * 0.3) / 2,
+},
+
   scanWaveActive: {
     borderColor: "rgba(0, 255, 179, 0.7)",
     borderWidth: 5,
@@ -648,8 +693,7 @@ const styles = StyleSheet.create({
   searchingBadge: {
     position: "absolute",
     top: 120,
-    left: "50%",
-    transform: [{ translateX: -100 }],
+    alignSelf: "center",
     backgroundColor: "rgba(0, 255, 179, 0.2)",
     paddingHorizontal: 20,
     paddingVertical: 10,
@@ -657,33 +701,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#00FFB3",
     zIndex: 50,
-    width: 200,
-    alignItems: "center",
   },
   searchingText: {
     color: "#00FFB3",
     fontSize: 12,
     fontWeight: "600",
-  },
-  countdownBadge: {
-    position: "absolute",
-    top: 120,
-    left: "50%",
-    transform: [{ translateX: -100 }],
-    backgroundColor: "rgba(26, 26, 26, 0.8)",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "rgba(0, 255, 179, 0.3)",
-    zIndex: 50,
-    width: 200,
-    alignItems: "center",
-  },
-  countdownText: {
-    color: "#FFFFFF",
-    fontSize: 11,
-    fontWeight: "500",
   },
   particle: {
     position: "absolute",
@@ -735,24 +757,5 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 10,
     fontWeight: "700",
-  },
-  searchButton: {
-    position: "absolute",
-    top: 180,
-    left: "50%",
-    transform: [{ translateX: -100 }],
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    backgroundColor: "#00FFB3",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 24,
-    zIndex: 30,
-  },
-  searchButtonText: {
-    color: "#000000",
-    fontSize: 13,
-    fontWeight: "600",
   },
 })
