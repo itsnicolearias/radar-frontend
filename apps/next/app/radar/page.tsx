@@ -23,6 +23,7 @@ import type {
 } from "@radar/types"
 import {
   BottomNav,
+  cn,
   GhostButton,
   InvisibleBadge,
   WelcomeModal,
@@ -36,6 +37,7 @@ import { EventMarker } from "../../../../packages/ui/radar/event-marker"
 import { CentralUserMarker } from "../../../../packages/ui/radar/central-user-marker"
 import { AnimatePresence, motion } from "framer-motion"
 import { Radio, MapPin, RefreshCcw } from "lucide-react"
+import { useUIStore } from "@radar/features"
 
 /* =========================
    RADAR CONSTANTS
@@ -65,6 +67,7 @@ function getMarkerPosition(
 }
 
 export default function RadarPage() {
+  
   const router = useRouter()
   const { user, isVisible, toggleVisibility } = useAuthStore()
   const {
@@ -97,7 +100,7 @@ export default function RadarPage() {
   const [searchMessage, setSearchMessage] = useState("")
   const [newMarkersCount, setNewMarkersCount] = useState(0)
   const [newMarkerIds, setNewMarkerIds] = useState<Set<string>>(new Set())
-
+  
   const searchMessages = [
     "Buscando nuevas señales",
     "Detectando señales en el Radar",
@@ -275,8 +278,11 @@ export default function RadarPage() {
     ringBuckets[i % ringsCount].push(u)
   })
 
+  const { isModalOpen } = useUIStore()
+
   return (
-    <div className="relative w-full h-screen bg-black overflow-hidden flex flex-col">
+    <div className="relative w-full h-screen bg-black  flex flex-col">
+
       {/* HEADER */}
       <header className="z-20 bg-[#1A1A1A]/60 backdrop-blur p-6 border-b border-[#00FFB3]/20">
         <div className="flex justify-between items-center mb-4">
@@ -321,10 +327,14 @@ export default function RadarPage() {
       </AnimatePresence>
 
       {!isVisible && <InvisibleBadge />}
+       
 
       {/* RADAR */}
-      <div className="flex-1 flex items-center justify-center relative">
-        <div className="relative w-full max-w-[420px] aspect-square">
+      <div className={cn("flex-1 flex items-center justify-center relative", selectedUser && "pointer-events-none")}>
+        <motion.div
+          className="relative w-full max-w-[420px] aspect-square"
+          style={{ pointerEvents: isModalOpen ? 'none' : 'auto', filter: isModalOpen ? 'blur(2px)' : 'none' }}
+        >
 
           {/* PARTICLES */}
           {[...Array(8)].map((_, i) => (
@@ -406,7 +416,7 @@ export default function RadarPage() {
                         <motion.div
                           initial={{ opacity: 0, scale: 0.5 }}
                           animate={{ opacity: 1, scale: 1 }}
-                          className="absolute bg-[#00FFB3] px-3 py-1 rounded-full z-50"
+                          className="absolute bg-[#00FFB3] px-3 py-1 rounded-full z-30"
                           style={{
                             left: `${position.x}%`,
                             top: `${position.y - 8}%`,
@@ -440,10 +450,10 @@ export default function RadarPage() {
                     index={i}
                   />
             ))}*/}
-        </div>
+        </motion.div>
 
         {/* ACTION BUTTONS */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30">
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30" style={{ pointerEvents: isModalOpen ? 'none' : 'auto', opacity: isModalOpen ? 0 : 1 }}>
           <motion.div
             className="absolute inset-0 w-16 h-16 rounded-full bg-[#00FFB3]/30"
             animate={{ scale: isAnimatingSignal ? 1.2 : 1 }}
@@ -472,7 +482,9 @@ export default function RadarPage() {
         </motion.button>
       </div>
 
+
       <BottomNav activeTab="radar" onTabChange={(t) => router.push(`/${t}`)} />
+
 
       {/* MODALS */}
       {isSendSignalModalOpen && (

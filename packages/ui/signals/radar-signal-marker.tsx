@@ -19,10 +19,14 @@ export const RadarSignalMarker: React.FC<RadarSignalMarkerProps> = ({
   isNew,
   onClick,
 }) => {
+  const { useUIStore } = require("@radar/features")
+  const { isModalOpen } = useUIStore()
   const [isPopoverOpen, setIsPopoverOpen] = useState(false)
 
   const markerStyle = {
-    transform: `rotate(${angle}rad) translateX(${distance}px)`,
+    transform: isModalOpen ? 'none' : `rotate(${angle}rad) translateX(${distance}px)`,
+    pointerEvents: isModalOpen ? 'none' : 'auto',
+    zIndex: isModalOpen ? 0 : undefined,
   }
 
   const handleMarkerClick = (e: React.MouseEvent) => {

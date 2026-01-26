@@ -6,7 +6,8 @@ export const formatDistance = (distance?: number): string => {
 
   if (displayDistance < 1000) {
     return `A ${Math.round(displayDistance)}m de distancia`
+  } else {
+    return `A ${(displayDistance / 1000).toFixed(1)}km de distancia`
   }
 
-  return `A ${(displayDistance / 1000).toFixed(1)}km de distancia`
 }

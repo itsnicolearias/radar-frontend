@@ -18,6 +18,7 @@ export default function RootLayout({
     <html lang="es" className="dark">
       <body>
         <Providers>{children}</Providers>
+        <div id="modal-root" />
       </body>
     </html>
   )

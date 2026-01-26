@@ -20,7 +20,10 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.itsnicolearias.radar.app"
+      "bundleIdentifier": "com.itsnicolearias.radar.app",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "icon": "./assets/radar-app-icon-1024x1024.png",
