@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useEffect } from "react"
 import { useAuthStore, useNotifications, useSocket } from "@radar/features"
 import { GeolocationProvider } from "./GeolocationProvider"

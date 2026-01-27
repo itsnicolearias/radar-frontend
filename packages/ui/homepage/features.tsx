@@ -1,5 +1,4 @@
 import { RadarIcon, Users, MessageCircle, Calendar, Shield, MapPin } from "lucide-react"
-import { Card } from "../components/card"
 
 const features = [
   {
@@ -37,26 +36,29 @@ const features = [
 
 export function Features() {
   return (
-    <section id="funcionalidades" className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-white">
+    <section id="funcionalidades" className="py-24 px-6 bg-black">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-10 sm:mb-12 md:mb-16">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#1E3A5F] mb-3 sm:mb-4 text-balance">
-            Funcionalidades principales
+        <div className="text-center mb-16">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 tracking-tight">
+            Funcionalidades <span className="text-[#00FFB3]">principales</span>
           </h2>
-          <p className="text-base sm:text-lg md:text-xl text-gray-600 text-pretty">
-            Todo lo que necesitás para conectar con tu entorno
+          <p className="text-lg text-[#C5C5C5] max-w-2xl mx-auto">
+            Todo lo que necesitás para conectar con tu entorno de manera rápida y segura.
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
-            <Card key={index} className="p-5 sm:p-6 hover:shadow-lg transition-shadow border-2 border-gray-100">
-              <div className="w-11 h-11 sm:w-12 sm:h-12 bg-[#3EC8A7] rounded-full flex items-center justify-center mb-3 sm:mb-4">
-                <feature.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            <div
+              key={index}
+              className="bg-[#1A1A1A] border border-[#00FFB3]/20 rounded-2xl p-8 hover:border-[#00FFB3]/50 transition-all group"
+            >
+              <div className="w-12 h-12 bg-[#00FFB3]/10 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <feature.icon className="w-6 h-6 text-[#00FFB3]" />
               </div>
-              <h3 className="text-lg sm:text-xl font-bold text-[#1E3A5F] mb-2 sm:mb-3">{feature.title}</h3>
-              <p className="text-sm sm:text-base text-gray-600 leading-relaxed">{feature.description}</p>
-            </Card>
+              <h3 className="text-xl font-bold text-white mb-3">{feature.title}</h3>
+              <p className="text-[#C5C5C5] leading-relaxed">{feature.description}</p>
+            </div>
           ))}
         </div>
       </div>

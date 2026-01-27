@@ -23,25 +23,30 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section id="como-funciona" className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
+    <section id="como-funciona" className="py-24 px-6 bg-[#0A0E12]">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-10 sm:mb-12 md:mb-16">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#1E3A5F] mb-3 sm:mb-4 text-balance">
-            Cómo funciona
+        <div className="text-center mb-16">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 tracking-tight">
+            Cómo <span className="text-[#1DE3F2]">funciona</span>
           </h2>
-          <p className="text-base sm:text-lg md:text-xl text-gray-600 text-pretty">
+          <p className="text-lg text-[#C5C5C5]">
             Empezá a conectar en 4 simples pasos
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-12">
           {steps.map((step) => (
-            <div key={step.number} className="text-center">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-[#3EC8A7] rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 text-xl sm:text-2xl font-bold text-white">
+            <div key={step.number} className="text-center relative">
+              <div className="w-16 h-16 bg-gradient-to-br from-[#00FFB3] to-[#1DE3F2] rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold text-black shadow-lg shadow-[#00FFB3]/20">
                 {step.number}
               </div>
-              <h3 className="text-lg sm:text-xl font-bold text-[#1E3A5F] mb-2 sm:mb-3">{step.title}</h3>
-              <p className="text-sm sm:text-base text-gray-600 leading-relaxed">{step.description}</p>
+              <h3 className="text-xl font-bold text-white mb-3">{step.title}</h3>
+              <p className="text-[#C5C5C5] leading-relaxed">{step.description}</p>
+
+              {/* Optional connector for desktop */}
+              {step.number < 4 && (
+                <div className="hidden lg:block absolute top-8 left-[calc(50%+40px)] w-[calc(100%-80px)] h-px bg-gradient-to-r from-[#00FFB3]/30 to-transparent" />
+              )}
             </div>
           ))}
         </div>

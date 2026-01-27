@@ -18,6 +18,7 @@
     "@types/node": "^22",
     "@types/react": "19.2.3",
     "@types/react-dom": "19.2.3",
+    "lightningcss": "^1.31.1",
     "postcss": "8.5.6",
     "tailwindcss": "4.1.16",
     "typescript": "^5"

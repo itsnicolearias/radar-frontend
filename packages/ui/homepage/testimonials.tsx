@@ -1,6 +1,3 @@
-import { Card } from "../components/card"
-
-
 const testimonials = [
   {
     initial: "M",
@@ -25,28 +22,31 @@ const testimonials = [
 
 export function Testimonials() {
   return (
-    <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
+    <section className="py-24 px-6 bg-[#0A0E12]">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-10 sm:mb-12 md:mb-16">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#1E3A5F] mb-3 sm:mb-4 text-balance">
-            Lo que dicen nuestros usuarios
+        <div className="text-center mb-16">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 tracking-tight">
+            Lo que dicen <span className="text-[#FF005C]">nuestros usuarios</span>
           </h2>
         </div>
 
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+        <div className="grid md:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
-            <Card key={index} className="p-5 sm:p-6 bg-white">
-              <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#3EC8A7] rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
+            <div
+              key={index}
+              className="bg-[#1A1A1A] border border-[#00FFB3]/10 rounded-2xl p-8 hover:border-[#00FFB3]/30 transition-all flex flex-col h-full"
+            >
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-12 h-12 bg-gradient-to-br from-[#00FFB3] to-[#1DE3F2] rounded-full flex items-center justify-center text-black font-bold text-xl shrink-0 shadow-lg shadow-[#00FFB3]/20">
                   {testimonial.initial}
                 </div>
-                <div className="min-w-0">
-                  <h4 className="font-bold text-[#1E3A5F] text-sm sm:text-base">{testimonial.name}</h4>
-                  <p className="text-xs sm:text-sm text-gray-600">{testimonial.location}</p>
+                <div>
+                  <h4 className="font-bold text-white text-base">{testimonial.name}</h4>
+                  <p className="text-sm text-[#C5C5C5]">{testimonial.location}</p>
                 </div>
               </div>
-              <p className="text-sm sm:text-base text-gray-700 leading-relaxed">{testimonial.quote}</p>
-            </Card>
+              <p className="text-[#C5C5C5] leading-relaxed italic flex-1">"{testimonial.quote}"</p>
+            </div>
           ))}
         </div>
       </div>

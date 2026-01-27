@@ -7,9 +7,9 @@ const footerLinks = {
     { label: "Eventos", href: "#eventos" },
   ],
   legal: [
-    { label: "Privacidad", href: "#" },
-    { label: "Términos de uso", href: "#" },
-    { label: "Contacto", href: "#" },
+    { label: "Privacidad", href: "/privacy-policy" },
+    { label: "Términos de uso", href: "/terms-conditions" },
+    { label: "Contacto", href: "mailto:contacto@radar.app" },
   ],
 }
 
@@ -21,25 +21,27 @@ const socialLinks = [
 
 export function Footer() {
   return (
-    <footer className="bg-[#1E3A5F] text-white py-10 sm:py-12 px-4 sm:px-6 lg:px-8">
+    <footer className="bg-black text-white py-16 px-6 border-t border-[#00FFB3]/10">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mb-6 sm:mb-8">
-          <div className="col-span-2 sm:col-span-1">
-            <div className="flex items-center gap-2 mb-3 sm:mb-4">
-              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-[#3EC8A7] rounded-full flex items-center justify-center">
-                <RadarIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-12 mb-12">
+          <div className="col-span-2 md:col-span-1">
+            <div className="flex items-center gap-2 mb-6">
+              <div className="w-8 h-8 bg-gradient-to-br from-[#00FFB3] to-[#1DE3F2] rounded-full flex items-center justify-center">
+                <RadarIcon className="w-5 h-5 text-black" />
               </div>
-              <span className="text-lg sm:text-xl font-bold">Radar</span>
+              <span className="text-xl font-bold tracking-tight">Radar</span>
             </div>
-            <p className="text-sm sm:text-base text-white/70">Descubrí quién está cerca tuyo</p>
+            <p className="text-[#C5C5C5] leading-relaxed">
+              Conectando personas y descubriendo el entorno en tiempo real.
+            </p>
           </div>
 
           <div>
-            <h4 className="font-bold mb-3 sm:mb-4 text-sm sm:text-base">Producto</h4>
-            <ul className="space-y-2 text-white/70 text-sm sm:text-base">
+            <h4 className="font-bold mb-6 text-white tracking-wide uppercase text-sm">Producto</h4>
+            <ul className="space-y-3">
               {footerLinks.product.map((link, index) => (
                 <li key={index}>
-                  <a href={link.href} className="hover:text-[#3EC8A7] transition-colors">
+                  <a href={link.href} className="text-[#C5C5C5] hover:text-[#00FFB3] transition-colors">
                     {link.label}
                   </a>
                 </li>
@@ -48,11 +50,11 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="font-bold mb-3 sm:mb-4 text-sm sm:text-base">Legal</h4>
-            <ul className="space-y-2 text-white/70 text-sm sm:text-base">
+            <h4 className="font-bold mb-6 text-white tracking-wide uppercase text-sm">Legal</h4>
+            <ul className="space-y-3">
               {footerLinks.legal.map((link, index) => (
                 <li key={index}>
-                  <a href={link.href} className="hover:text-[#3EC8A7] transition-colors">
+                  <a href={link.href} className="text-[#C5C5C5] hover:text-[#00FFB3] transition-colors">
                     {link.label}
                   </a>
                 </li>
@@ -61,23 +63,23 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="font-bold mb-3 sm:mb-4 text-sm sm:text-base">Seguinos</h4>
-            <div className="flex gap-3 sm:gap-4">
+            <h4 className="font-bold mb-6 text-white tracking-wide uppercase text-sm">Seguinos</h4>
+            <div className="flex gap-4">
               {socialLinks.map((social, index) => (
                 <a
                   key={index}
                   href="#"
-                  className="w-9 h-9 sm:w-10 sm:h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-[#3EC8A7] transition-colors text-sm sm:text-base"
+                  className="w-10 h-10 bg-[#1A1A1A] border border-[#00FFB3]/20 rounded-full flex items-center justify-center hover:bg-[#00FFB3] hover:text-black transition-all group"
                 >
                   <span className="sr-only">{social.label}</span>
-                  {social.icon}
+                  <span className="text-xl group-hover:scale-110 transition-transform">{social.icon}</span>
                 </a>
               ))}
             </div>
           </div>
         </div>
 
-        <div className="border-t border-white/10 pt-6 sm:pt-8 text-center text-white/70 text-xs sm:text-sm">
+        <div className="border-t border-white/5 pt-8 text-center text-[#C5C5C5] text-sm">
           <p>&copy; 2026 Radar. Todos los derechos reservados.</p>
         </div>
       </div>

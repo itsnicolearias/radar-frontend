@@ -1,5 +1,4 @@
 import { Calendar, Users, MapPin, Check } from "lucide-react"
-import { Card } from "../components/card"
 
 const eventsList = [
   {
@@ -7,21 +6,21 @@ const eventsList = [
     title: "Concierto en el parque",
     distance: "2.5 km",
     interested: 156,
-    color: "bg-[#FF6F61]",
+    color: "bg-[#FF005C]",
   },
   {
     icon: Users,
     title: "Meetup de emprendedores",
     distance: "1.2 km",
     interested: 89,
-    color: "bg-[#3EC8A7]",
+    color: "bg-[#00FFB3]",
   },
   {
     icon: MapPin,
     title: "Feria gastronómica",
     distance: "3.8 km",
     interested: 234,
-    color: "bg-[#1E3A5F]",
+    color: "bg-[#1DE3F2]",
   },
 ]
 
@@ -34,45 +33,48 @@ const benefits = [
 
 export function Events() {
   return (
-    <section id="eventos" className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-white">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 md:gap-12 items-center">
+    <section id="eventos" className="py-24 px-6 bg-black relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute right-0 top-0 w-96 h-96 bg-[#1DE3F2]/5 blur-[100px] rounded-full pointer-events-none" />
+
+      <div className="max-w-7xl mx-auto relative z-10">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div className="order-2 lg:order-1">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#1E3A5F] mb-4 sm:mb-6 text-balance">
-              Eventos cerca tuyo
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6 tracking-tight">
+              Eventos <span className="text-[#00FFB3]">cerca tuyo</span>
             </h2>
-            <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 sm:mb-8 leading-relaxed text-pretty">
-              Descubrí los eventos más populares cerca tuyo y conectá con personas interesadas. Desde conciertos hasta
-              meetups, nunca te pierdas lo que está pasando en tu ciudad.
+            <p className="text-lg text-[#C5C5C5] mb-8 leading-relaxed">
+              Descubrí los eventos más populares cerca tuyo y conectá con personas interesadas. Nunca te pierdas lo que está pasando en tu ciudad.
             </p>
-            <ul className="space-y-3 sm:space-y-4">
+            <ul className="space-y-4">
               {benefits.map((benefit, index) => (
-                <li key={index} className="flex items-start gap-3">
-                  <Check className="w-5 h-5 sm:w-6 sm:h-6 text-[#3EC8A7] shrink-0 mt-0.5 sm:mt-1" />
-                  <span className="text-sm sm:text-base text-gray-700">{benefit}</span>
+                <li key={index} className="flex items-center gap-4">
+                  <div className="w-6 h-6 bg-[#00FFB3]/10 rounded-full flex items-center justify-center shrink-0">
+                    <Check className="w-4 h-4 text-[#00FFB3]" />
+                  </div>
+                  <span className="text-[#C5C5C5]">{benefit}</span>
                 </li>
               ))}
             </ul>
           </div>
           <div className="relative order-1 lg:order-2">
-            <div className="bg-linear-to-br from-[#1E3A5F] to-[#3EC8A7] rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-2xl">
-              <div className="space-y-3 sm:space-y-4">
+            <div className="bg-gradient-to-br from-[#0A0E12] to-[#0F2B33] rounded-3xl p-8 border border-[#00FFB3]/20 shadow-2xl shadow-[#00FFB3]/10">
+              <div className="space-y-4">
                 {eventsList.map((event, index) => (
-                  <Card key={index} className="p-3 sm:p-4 bg-white/95">
-                    <div className="flex items-center gap-3 sm:gap-4">
-                      <div
-                        className={`w-12 h-12 sm:w-16 sm:h-16 ${event.color} rounded-lg flex items-center justify-center shrink-0`}
-                      >
-                        <event.icon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-bold text-[#1E3A5F] text-sm sm:text-base truncate">{event.title}</h4>
-                        <p className="text-xs sm:text-sm text-gray-600">
-                          A {event.distance} • {event.interested} interesados
-                        </p>
-                      </div>
+                  <div
+                    key={index}
+                    className="p-4 bg-[#1A1A1A] border border-[#00FFB3]/10 rounded-2xl flex items-center gap-4 hover:border-[#00FFB3]/30 transition-all group"
+                  >
+                    <div className={`w-14 h-14 ${event.color} rounded-xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform`}>
+                      <event.icon className="w-7 h-7 text-black" />
                     </div>
-                  </Card>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-bold text-white text-base truncate">{event.title}</h4>
+                      <p className="text-sm text-[#C5C5C5]">
+                        A {event.distance} • {event.interested} interesados
+                      </p>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
