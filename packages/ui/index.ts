@@ -42,3 +42,19 @@ export * from "./components/plan-card"
 export * from "./components/interest-selector"
 export * from "./components/profile-field"
 export * from "./components/avatar-block"
+
+export * from "./homepage/events"
+export * from "./homepage/features"
+export * from "./homepage/footer"
+export * from "./homepage/hero"
+export * from "./homepage/how-it-works"
+export * from "./homepage/navbar"
+export * from "./homepage/radar-animation"
+export * from "./homepage/testimonials"
+export * from "./homepage/theme-provider"
+export * from "./homepage/ui/button"
+export * from "./homepage/ui/input"
+
+
+
+
