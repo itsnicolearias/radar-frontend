@@ -23,30 +23,25 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section id="como-funciona" className="py-24 px-6 bg-[#0A0E12]">
+    <section id="como-funciona" className="py-20 px-4 sm:px-6 lg:px-8 bg-black">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
             Cómo <span className="text-[#1DE3F2]">funciona</span>
           </h2>
-          <p className="text-lg text-[#C5C5C5]">
-            Empezá a conectar en 4 simples pasos
+          <p className="text-lg sm:text-xl text-white/50 max-w-2xl mx-auto">
+            Empezá a conectar con tu comunidad en pocos minutos.
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-12">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {steps.map((step) => (
-            <div key={step.number} className="text-center relative">
-              <div className="w-16 h-16 bg-gradient-to-br from-[#00FFB3] to-[#1DE3F2] rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold text-black shadow-lg shadow-[#00FFB3]/20">
+            <div key={step.number} className="text-center group">
+              <div className="w-20 h-20 bg-[#1A1A1A] border-2 border-[#1DE3F2]/20 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl font-bold text-[#1DE3F2] group-hover:border-[#1DE3F2] group-hover:shadow-[0_0_20px_rgba(29,227,242,0.2)] transition-all">
                 {step.number}
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">{step.title}</h3>
-              <p className="text-[#C5C5C5] leading-relaxed">{step.description}</p>
-
-              {/* Optional connector for desktop */}
-              {step.number < 4 && (
-                <div className="hidden lg:block absolute top-8 left-[calc(50%+40px)] w-[calc(100%-80px)] h-px bg-gradient-to-r from-[#00FFB3]/30 to-transparent" />
-              )}
+              <h3 className="text-xl font-bold text-white mb-3 group-hover:text-[#1DE3F2] transition-colors">{step.title}</h3>
+              <p className="text-white/60 leading-relaxed px-4">{step.description}</p>
             </div>
           ))}
         </div>

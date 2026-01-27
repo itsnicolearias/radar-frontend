@@ -1,4 +1,5 @@
 import { RadarIcon, Users, MessageCircle, Calendar, Shield, MapPin } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "../components/card"
 
 const features = [
   {
@@ -36,29 +37,30 @@ const features = [
 
 export function Features() {
   return (
-    <section id="funcionalidades" className="py-24 px-6 bg-black">
+    <section id="funcionalidades" className="py-20 px-4 sm:px-6 lg:px-8 bg-black/50">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
             Funcionalidades <span className="text-[#00FFB3]">principales</span>
           </h2>
-          <p className="text-lg text-[#C5C5C5] max-w-2xl mx-auto">
-            Todo lo que necesitás para conectar con tu entorno de manera rápida y segura.
+          <p className="text-lg sm:text-xl text-white/50 max-w-2xl mx-auto">
+            Todo lo que necesitás para conectar con tu entorno de manera segura y divertida.
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {features.map((feature, index) => (
-            <div
-              key={index}
-              className="bg-[#1A1A1A] border border-[#00FFB3]/20 rounded-2xl p-8 hover:border-[#00FFB3]/50 transition-all group"
-            >
-              <div className="w-12 h-12 bg-[#00FFB3]/10 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <feature.icon className="w-6 h-6 text-[#00FFB3]" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">{feature.title}</h3>
-              <p className="text-[#C5C5C5] leading-relaxed">{feature.description}</p>
-            </div>
+            <Card key={index} className="bg-[#1A1A1A] border-white/5 hover:border-[#00FFB3]/30 transition-all duration-300 group">
+              <CardHeader className="pb-2">
+                <div className="w-14 h-14 bg-[#00FFB3]/10 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-[#00FFB3]/20 transition-colors">
+                  <feature.icon className="w-7 h-7 text-[#00FFB3]" />
+                </div>
+                <CardTitle className="text-xl font-bold text-white group-hover:text-[#00FFB3] transition-colors">{feature.title}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-white/60 leading-relaxed">{feature.description}</p>
+              </CardContent>
+            </Card>
           ))}
         </div>
       </div>

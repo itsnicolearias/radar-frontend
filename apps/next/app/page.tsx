@@ -5,10 +5,9 @@ import { HowItWorks } from "@radar/ui"
 import { Events } from "@radar/ui"
 import { Testimonials } from "@radar/ui"
 
-
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-white">
+    <main className="min-h-screen">
       <Navbar />
       <Hero />
       <Features />
@@ -16,6 +15,6 @@ export default function HomePage() {
       <Events />
       <Testimonials />
       <Footer />
-    </div>
+    </main>
   )
 }
