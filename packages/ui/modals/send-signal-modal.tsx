@@ -39,6 +39,7 @@ export const SendSignalModal: React.FC<SendSignalModalProps> = ({ onClose, onSen
       style={{ transform: 'none', willChange: 'auto', position: 'fixed', pointerEvents: 'auto' }}
     >
       <motion.div
+        onClick={(e) => e.stopPropagation()}
         className="bg-[#0F2B33] rounded-3xl p-6 w-full max-w-sm border border-[#00FFB3]/30 shadow-2xl"
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
