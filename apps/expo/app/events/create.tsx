@@ -1,19 +1,23 @@
 "use client"
 
 import { useState } from "react"
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert } from "react-native"
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, Platform } from "react-native"
 import { useRouter } from "expo-router"
 import { useForm, Controller } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod";
+import DateTimePicker from "@react-native-community/datetimepicker"
 import { useEventsStore, useGeolocation } from "@radar/features"
 import { eventService } from "@radar/api"
-import { EventInput } from "../../../../packages/api/validations"
+import type { EventInput } from "../../../../packages/api/validations"
 
 export default function CreateEventScreen() {
   const router = useRouter()
   const { addEvent } = useEventsStore()
   const { latitude, longitude } = useGeolocation()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [startDate, setStartDate] = useState(new Date())
+  const [endDate, setEndDate] = useState(new Date(Date.now() + 2 * 60 * 60 * 1000)) // 2 hours later
+  const [showStartPicker, setShowStartPicker] = useState(false)
+  const [showEndPicker, setShowEndPicker] = useState(false)
 
   const {
     control,
@@ -31,12 +35,19 @@ export default function CreateEventScreen() {
   })
 
   const onSubmit = async (data: EventInput) => {
+    if (endDate <= startDate) {
+      Alert.alert("Error", "La fecha de fin debe ser posterior a la fecha de inicio")
+      return
+    }
+
     setIsSubmitting(true)
     try {
       const newEvent = await eventService.createEvent({
         ...data,
         latitude: latitude || data.latitude,
         longitude: longitude || data.longitude,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
       })
       addEvent(newEvent)
       Alert.alert("Éxito", "Evento creado correctamente", [
@@ -130,33 +141,6 @@ export default function CreateEventScreen() {
             {errors.location && <Text style={styles.errorText}>{errors.location.message}</Text>}
           </View>
 
-          {/* Category 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Categoría *</Text>
-            <Controller
-              control={control}
-              name="category"
-              render={({ field: { onChange, value } }) => (
-                <View style={styles.categoryContainer}>
-                  {["Música", "Gastronomía", "Arte", "Deportes", "Social"].map((cat) => (
-                    <TouchableOpacity
-                      key={cat}
-                      style={[styles.categoryOption, value === cat && styles.categoryOptionActive]}
-                      onPress={() => onChange(cat)}
-                    >
-                      <Text style={[styles.categoryOptionText, value === cat && styles.categoryOptionTextActive]}>
-                        {cat}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              )}
-            />
-            {errors.category && <Text style={styles.errorText}>{errors.category.message}</Text>} 
-          </View> 
-          */}
-
-
           {/* Category */}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Categoría *</Text>
@@ -165,26 +149,19 @@ export default function CreateEventScreen() {
               name="category"
               render={({ field: { onChange, value } }) => (
                 <View style={styles.categoryContainer}>
-                  {[
-                    "social",
-                    "deportes",
-                    "música",
-                    "arte",
-                    "gastronomía",
-                    "educación",
-                    "tecnología",
-                    "otro",
-                  ].map((cat) => (
-                    <TouchableOpacity
-                      key={cat}
-                      style={[styles.categoryOption, value === cat && styles.categoryOptionActive]}
-                      onPress={() => onChange(cat)}
-                    >
-                      <Text style={[styles.categoryOptionText, value === cat && styles.categoryOptionTextActive]}>
-                        {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
+                  {["social", "deportes", "música", "arte", "gastronomía", "educación", "tecnología", "otro"].map(
+                    (cat) => (
+                      <TouchableOpacity
+                        key={cat}
+                        style={[styles.categoryOption, value === cat && styles.categoryOptionActive]}
+                        onPress={() => onChange(cat)}
+                      >
+                        <Text style={[styles.categoryOptionText, value === cat && styles.categoryOptionTextActive]}>
+                          {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                        </Text>
+                      </TouchableOpacity>
+                    ),
+                  )}
                 </View>
               )}
             />
@@ -209,6 +186,56 @@ export default function CreateEventScreen() {
                 />
               )}
             />
+          </View>
+
+          {/* Start Date and Time Picker */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Fecha y hora de inicio *</Text>
+            <TouchableOpacity style={styles.input} onPress={() => setShowStartPicker(true)}>
+              <Text style={styles.dateText}>
+                {startDate.toLocaleDateString("es-AR")}{" "}
+                {startDate.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}
+              </Text>
+            </TouchableOpacity>
+            {showStartPicker && (
+              <DateTimePicker
+                value={startDate}
+                mode="datetime"
+                display={Platform.OS === "ios" ? "spinner" : "default"}
+                onChange={(event, selectedDate) => {
+                  setShowStartPicker(Platform.OS === "ios")
+                  if (selectedDate) {
+                    setStartDate(selectedDate)
+                    if (selectedDate >= endDate) {
+                      setEndDate(new Date(selectedDate.getTime() + 2 * 60 * 60 * 1000))
+                    }
+                  }
+                }}
+              />
+            )}
+          </View>
+
+          {/* End Date and Time Picker */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Fecha y hora de fin *</Text>
+            <TouchableOpacity style={styles.input} onPress={() => setShowEndPicker(true)}>
+              <Text style={styles.dateText}>
+                {endDate.toLocaleDateString("es-AR")}{" "}
+                {endDate.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}
+              </Text>
+            </TouchableOpacity>
+            {showEndPicker && (
+              <DateTimePicker
+                value={endDate}
+                mode="datetime"
+                display={Platform.OS === "ios" ? "spinner" : "default"}
+                minimumDate={startDate}
+                onChange={(event, selectedDate) => {
+                  setShowEndPicker(Platform.OS === "ios")
+                  if (selectedDate) setEndDate(selectedDate)
+                }}
+              />
+            )}
           </View>
 
           {/* Submit Button */}
@@ -332,5 +359,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
     color: "#0E2A3E",
+  },
+  dateText: {
+    fontSize: 16,
+    color: "#FFFFFF",
   },
 })

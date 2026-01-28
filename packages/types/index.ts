@@ -16,7 +16,6 @@ export interface IUser {
   Profile?: IProfile
 }
 
-
 export interface IAuthResponse {
   success: boolean
   data: {
@@ -38,9 +37,6 @@ export interface IDeleteConnectionResponse {
   message: string
 }
 
-
-
-
 export interface IConversation {
   conversationId: string
   user: Partial<IRadarUser>
@@ -55,9 +51,10 @@ export interface IMessageResponse {
   content: string
   isRead: boolean
   createdAt: Date
-  updatedAt: Date
+  updatedAt?: Date
   Sender: Partial<IRadarUser>
   Receiver: Partial<IRadarUser>
+  Signal?: IRadarSignal | null
 }
 
 export interface IMarkAsReadResponse {
@@ -136,7 +133,6 @@ export interface IDeleteProfileResponse {
   message: string
 }
 
-
 export interface IRadarSignal {
   signalId: string
   senderId: string
@@ -180,17 +176,6 @@ export interface IToggleVisibilityResponse {
   isVisible: boolean
 }
 
-export interface IResendVerificationEmailResponse {
-  message: string
-}
-
-export interface IVerifyEmailResponse {
-  message: string
-  user: IUser
-}
-
-
-
 export interface IConnectionResponse {
   connectionId: string
   senderId: string
@@ -206,7 +191,6 @@ export interface IDeleteConnectionResponse {
   message: string
 }
 
-
 export interface ILastMessage {
   content: string
   createdAt: Date
@@ -214,54 +198,9 @@ export interface ILastMessage {
   senderId: string
 }
 
-
 export interface IConversationsResponse {
   conversations: IConversation[]
   total: number
-}
-
-
-export interface IMarkAsReadResponse {
-  message: string
-}
-
-export interface IUnreadMessagesResponse {
-  count: number
-}
-
-export interface INotificationResponse {
-  notificationId: string
-  userId: string
-  type: "MESSAGE" | "CONNECTION_REQUEST" | "CONNECTION_ACCEPTED"
-  message: string
-  isRead: boolean
-  createdAt: Date
-  updatedAt: Date
-}
-
-export interface IMarkNotificationsAsReadResponse {
-  message: string
-}
-
-export interface IUnreadNotificationCountResponse {
-  count: number
-}
-
-export interface IDeleteNotificationResponse {
-  message: string
-}
-
-
-export interface IProfileResponse extends IProfile {
-  profileId: string
-  userId: string
-  createdAt: Date
-  updatedAt: Date
-  User: IUser
-}
-
-export interface IDeleteProfileResponse {
-  message: string
 }
 
 export interface IProfileViewResponse {
@@ -301,42 +240,6 @@ export interface IRadarUser {
     showAge: boolean
     showLocation: boolean
   }
-}
-
-
-
-export interface IRadarNearbyResponse {
-  users: IRadarUser[]
-  events: any[]
-  signals: IRadarSignal[]
-}
-
-
-export interface IUserResponse extends IUser {
-  Profile: IProfile
-}
-
-export interface IUpdateUserResponse {
-  userId: string
-  firstName: string
-  lastName: string
-  email: string
-  displayName: string | null
-  birthDate: Date | null
-  invisibleMode: boolean
-  isVisible: boolean
-}
-
-export interface IUpdateLocationResponse {
-  userId: string
-  latitude: number | null
-  longitude: number | null
-  lastSeenAt: Date
-}
-
-export interface IToggleVisibilityResponse {
-  userId: string
-  isVisible: boolean
 }
 
 export interface IEventResponse {

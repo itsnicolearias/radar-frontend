@@ -15,6 +15,10 @@ interface UserMarkerProps {
 }
 
 export const UserMarker: React.FC<UserMarkerProps> = ({ user, position, hasSignal, onClick, index, onSelectSignal }) => {
+  // Defer transform stacking context when modal is open
+  const { useUIStore } = require("@radar/features")
+  const { isModalOpen } = useUIStore()
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0 }}
@@ -24,8 +28,9 @@ export const UserMarker: React.FC<UserMarkerProps> = ({ user, position, hasSigna
       style={{
         left: `${position.x}%`,
         top: `${position.y}%`,
-        transform: "translate(-50%, -50%)",
-        zIndex: 5,
+        transform: isModalOpen ? "none" : "translate(-50%, -50%)",
+        zIndex: isModalOpen ? 0 : 5,
+        pointerEvents: isModalOpen ? "none" : "auto",
       }}
     >
       {/* Signal indicator icon above user */}
@@ -37,6 +42,7 @@ export const UserMarker: React.FC<UserMarkerProps> = ({ user, position, hasSigna
           }}
           transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
           onClick={onSelectSignal}
+          style={{ pointerEvents: isModalOpen ? "none" : "auto" }}
         >
           📝
         </motion.div>

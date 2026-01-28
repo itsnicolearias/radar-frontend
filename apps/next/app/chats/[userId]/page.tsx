@@ -5,8 +5,10 @@ import { useRouter, useParams, useSearchParams } from "next/navigation"
 import { ArrowLeft, X, Send } from "lucide-react"
 import { motion } from "framer-motion"
 import { useChatStore, useAuthStore, useSocketEvent } from "@radar/features"
-import { messageService, emitSocketEvent, signalService } from "@radar/api"
-import type { IMessageResponse, IRadarSignal } from "@radar/types"
+import { messageService, emitSocketEvent, signalService, connectionService } from "@radar/api"
+import type { IMessageResponse, IRadarSignal, IRadarUser } from "@radar/types"
+import { UserProfileModal } from "@radar/ui"
+import { useConnectionStore } from "@radar/features"
 
 function ChatConversationPage() {
   const router = useRouter()
@@ -15,14 +17,19 @@ function ChatConversationPage() {
 
   const { user } = useAuthStore()
   const { messages, setMessages, addMessage, resetUnreadCount } = useChatStore()
+  const { connections, pendingRequests, myPendingRequests } = useConnectionStore()
   const [isTyping, setIsTyping] = useState(false)
   const [message, setMessage] = useState("")
   const [replyingTo, setReplyingTo] = useState<IRadarSignal | null>(null)
+  const [showProfileModal, setShowProfileModal] = useState(false)
+  const [profileUser, setProfileUser] = useState<IRadarUser | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const searchParams = useSearchParams()
   const signalId = searchParams.get("signalId")
 
-  const userMessages = messages[userId] || []
+  const [optimisticMessages, setOptimisticMessages] = useState<IMessageResponse[]>([])
+
+  const userMessages = [...(messages[userId] || []), ...optimisticMessages]
 
   useEffect(() => {
     if (!signalId) return
@@ -88,27 +95,44 @@ function ChatConversationPage() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [messages[userId]])
+  }, [messages[userId], optimisticMessages])
 
   const handleSendMessage = async () => {
     if (!message.trim()) return
 
+    const optimisticMessage: IMessageResponse = {
+      messageId: `temp-${Date.now()}`,
+      senderId: user!.userId,
+      receiverId: userId,
+      content: message,
+      createdAt: new Date(),
+      isRead: false,
+      Signal: replyingTo ? replyingTo : undefined,
+      Sender: user as any,
+      Receiver: {} as any,
+    }
+
+    setOptimisticMessages((prev) => [...prev, optimisticMessage])
+    const messageContent = message
+    setMessage("")
+    setReplyingTo(null)
+
     try {
       const messageData = {
         receiverId: userId,
-        content: message,
+        content: messageContent,
         signalId: replyingTo ? replyingTo.signalId : undefined,
       }
       const msg = await messageService.sendMessage(messageData)
       emitSocketEvent("send-message", messageData)
-      setReplyingTo(null)
-      setMessage("")
 
+      setOptimisticMessages((prev) => prev.filter((m) => m.messageId !== optimisticMessage.messageId))
       addMessage(userId, msg)
       await messageService.markAsRead([msg.messageId])
-
     } catch (error) {
       console.error("[v0] Error sending message:", error)
+      setOptimisticMessages((prev) => prev.filter((m) => m.messageId !== optimisticMessage.messageId))
+      alert("No se pudo enviar el mensaje")
     }
   }
 
@@ -128,8 +152,8 @@ function ChatConversationPage() {
 
   const photoUrl = firstMsg
     ? firstMsg.senderId === userId
-      ? firstMsg.Sender.Profile.photoUrl
-      : firstMsg.Receiver.Profile.photoUrl
+      ? firstMsg.Sender.Profile?.photoUrl
+      : firstMsg.Receiver.Profile?.photoUrl
     : ""
 
   const formatDistance = (distance?: number) => {
@@ -139,10 +163,43 @@ function ChatConversationPage() {
     return `${(distance / 1000).toFixed(1)}km`
   }
 
-  const distance = firstMsg ?? firstMsg?.senderId === userId
-      ? firstMsg?.Sender?.distance
-      : firstMsg?.Receiver?.distance
+  const distance = firstMsg ? (firstMsg.senderId === userId ? firstMsg.Sender.distance : firstMsg.Receiver.distance) : 0
 
+  const handleOpenProfile = () => {
+    if (!firstMsg) return
+    const otherUser = firstMsg.senderId === userId ? firstMsg.Sender : firstMsg.Receiver
+    setProfileUser(otherUser as IRadarUser)
+    setShowProfileModal(true)
+  }
+
+  const isUserConnected = (userId: string): boolean => {
+    const isConnected = connections.some((c) => c.receiverId === userId || c.senderId === userId)
+    return isConnected
+  }
+
+  const handleConnect = async (receiverId: string) => {
+    try {
+      await connectionService.createConnection(receiverId!)
+    } catch (error) {
+      console.error("[v0] Error:", error)
+    }
+  }
+
+  const handleDeleteConnection = async (userId: string) => {
+    try {
+      const conecc = connections.find((c) => c.receiverId === userId || c.senderId === userId)
+      if (!conecc) return
+      const { connectionId } = conecc
+      await connectionService.deleteConnection(connectionId)
+    } catch (error) {
+      console.error("[v0] Error:", error)
+    }
+  }
+
+  const isTheConnectionPending = (userId: string): boolean => {
+    const isPending = myPendingRequests.some((c) => c.receiverId === userId)
+    return isPending
+  }
 
   return (
     <div className="h-screen bg-black flex flex-col relative overflow-hidden">
@@ -161,28 +218,26 @@ function ChatConversationPage() {
           <ArrowLeft className="w-5 h-5 text-[#00FFB3]" />
         </button>
 
-        <div className="flex items-center gap-3 flex-1">
+        <button onClick={handleOpenProfile} className="flex items-center gap-3 flex-1">
           <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center border-2 border-[#00FFB3]/50">
             {photoUrl && photoUrl !== "" ? (
-                          <img
-                            src={photoUrl || "/placeholder.svg"}
-                            alt={name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <span className="text-[#1A1A1A] font-semibold text-base">
-                            {name[0] || "U"}
-                          </span>
-                        )}
+              <img
+                src={photoUrl || "/placeholder.svg"}
+                alt={name}
+                className="w-full h-full object-cover rounded-full"
+              />
+            ) : (
+              <span className="text-[#1A1A1A] font-semibold text-base">{name[0] || "U"}</span>
+            )}
           </div>
           <div>
-            <h2 className="font-semibold text-white">{name}</h2>
+            <h2 className="font-semibold text-white text-left">{name}</h2>
             <div className="flex items-center gap-1">
               <div className="w-2 h-2 bg-[#1DE3F2] rounded-full" />
               <span className="text-xs text-[#1DE3F2]">{formatDistance(distance)}</span>
             </div>
           </div>
-        </div>
+        </button>
       </header>
 
       <div className="relative flex-1 overflow-y-auto px-6 py-6 flex flex-col">
@@ -199,10 +254,18 @@ function ChatConversationPage() {
               <div
                 className={`px-4 py-3 rounded-2xl ${
                   isSent
-                    ? "bg-linear-to-r from-[#00FFB3] to-[#1DE3F2] text-black shadow-lg shadow-[#00FFB3]/20"
+                    ? "bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black shadow-lg shadow-[#00FFB3]/20"
                     : "bg-[#1A1A1A] text-white border border-[#00FFB3]/30"
                 }`}
               >
+                {msg.Signal && (
+                  <div className={`mb-2 pb-2 border-b ${isSent ? "border-black/20" : "border-white/20"}`}>
+                    <p className={`text-xs ${isSent ? "text-black/60" : "text-white/60"} mb-1`}>Respuesta a señal:</p>
+                    <p className={`text-xs italic ${isSent ? "text-black/80" : "text-white/80"}`}>
+                      "{msg.Signal.note}"
+                    </p>
+                  </div>
+                )}
                 <p className="text-sm leading-relaxed">{msg.content}</p>
               </div>
               <span className="text-xs text-[#C5C5C5] mt-1 px-1">{formatTimestamp(String(msg.createdAt))}</span>
@@ -238,12 +301,26 @@ function ChatConversationPage() {
           <button
             onClick={handleSendMessage}
             disabled={!message.trim()}
-            className="w-14 h-14 bg-linear-to-r from-[#00FFB3] to-[#1DE3F2] rounded-full flex items-center justify-center shadow-lg shadow-[#00FFB3]/30 hover:scale-110 transition-transform disabled:opacity-50 disabled:hover:scale-100"
+            className="w-14 h-14 bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] rounded-full flex items-center justify-center shadow-lg shadow-[#00FFB3]/30 hover:scale-110 transition-transform disabled:opacity-50 disabled:hover:scale-100"
           >
             <Send className="w-5 h-5 text-black" />
           </button>
         </div>
       </div>
+
+      {showProfileModal && profileUser && (
+        <UserProfileModal
+          user={profileUser}
+          onClose={() => setShowProfileModal(false)}
+          onMessage={() => {
+            setShowProfileModal(false)
+          }}
+          isUserConnected={() => isUserConnected(profileUser.userId)}
+          sendConnection={() => handleConnect(profileUser.userId)}
+          deleteConnection={() => handleDeleteConnection(profileUser.userId)}
+          isConnectionPending={() => isTheConnectionPending(profileUser.userId)}
+        />
+      )}
     </div>
   )
 }

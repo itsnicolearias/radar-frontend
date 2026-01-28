@@ -4,10 +4,9 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowLeft } from "lucide-react"
 import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useEventsStore, useGeolocation } from "@radar/features"
 import { eventService } from "@radar/api"
-import { EventInput, eventSchema } from "@radar/api/validations"
+import type { EventInput } from "@radar/api/validations"
 
 export default function CreateEventPage() {
   const router = useRouter()
@@ -19,8 +18,8 @@ export default function CreateEventPage() {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm<EventInput>({
-    //resolver: zodResolver(eventSchema),
     defaultValues: {
       latitude: latitude || 0,
       longitude: longitude || 0,
@@ -30,13 +29,23 @@ export default function CreateEventPage() {
     },
   })
 
+  const startDate = watch("startDate")
+  const endDate = watch("endDate")
+
   const onSubmit = async (data: EventInput) => {
+    if (new Date(data.endDate) <= new Date(data.startDate)) {
+      alert("La fecha de fin debe ser posterior a la fecha de inicio")
+      return
+    }
+
     setIsSubmitting(true)
     try {
       const newEvent = await eventService.createEvent({
         ...data,
         latitude: latitude || data.latitude,
         longitude: longitude || data.longitude,
+        startDate: new Date(data.startDate).toISOString(),
+        endDate: new Date(data.endDate).toISOString(),
       })
       addEvent(newEvent)
       router.push("/events")
@@ -50,7 +59,6 @@ export default function CreateEventPage() {
 
   return (
     <div className="min-h-screen bg-[#0E2A3E] pb-8">
-      {/* Header */}
       <header className="bg-[#0E2A3E] px-6 py-4 pt-12 border-b border-[#00FFB3]/20">
         <div className="flex items-center gap-3">
           <button onClick={() => router.back()} className="p-2 hover:bg-white/10 rounded-full transition-colors">
@@ -60,7 +68,6 @@ export default function CreateEventPage() {
         </div>
       </header>
 
-      {/* Form */}
       <form onSubmit={handleSubmit(onSubmit)} className="px-6 py-6 space-y-4">
         <div>
           <label className="block text-white text-sm font-medium mb-2">Título *</label>
@@ -95,9 +102,9 @@ export default function CreateEventPage() {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-white text-sm font-medium mb-2">Fecha inicio *</label>
+            <label className="block text-white text-sm font-medium mb-2">Fecha y hora inicio *</label>
             <input
-              {...register("startDate")}
+              {...register("startDate", { required: "Fecha de inicio requerida" })}
               type="datetime-local"
               className="w-full px-4 py-3 bg-[#1A3A4F] text-white rounded-xl border border-[#00FFB3]/20 focus:border-[#00FFB3] outline-none"
             />
@@ -105,10 +112,11 @@ export default function CreateEventPage() {
           </div>
 
           <div>
-            <label className="block text-white text-sm font-medium mb-2">Fecha fin *</label>
+            <label className="block text-white text-sm font-medium mb-2">Fecha y hora fin *</label>
             <input
-              {...register("endDate")}
+              {...register("endDate", { required: "Fecha de fin requerida" })}
               type="datetime-local"
+              min={startDate}
               className="w-full px-4 py-3 bg-[#1A3A4F] text-white rounded-xl border border-[#00FFB3]/20 focus:border-[#00FFB3] outline-none"
             />
             {errors.endDate && <p className="text-red-400 text-sm mt-1">{errors.endDate.message}</p>}

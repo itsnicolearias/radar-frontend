@@ -5,6 +5,7 @@ import { MessageCircle, User, Heart } from "lucide-react"
 import type { IRadarSignal } from "@radar/types"
 import React from "react"
 import { formatDistance } from "../../../lib/utils/format-distance"
+import { useUIStore } from "@radar/features"
 
 interface SignalDetailModalProps {
   signal: IRadarSignal
@@ -25,6 +26,7 @@ export const SignalDetailModal: React.FC<SignalDetailModalProps> = ({
 }) => {
   const [isAnimating, setIsAnimating] = React.useState(false)
   const connected = isUserConnected ? isUserConnected : false
+  const { openModal, closeModal } = useUIStore()
 
   const handleSendConnection = () => {
     if (sendConnection) {
@@ -48,6 +50,11 @@ export const SignalDetailModal: React.FC<SignalDetailModalProps> = ({
     return `Hace ${diffDays} días`
   }
 
+  React.useEffect(() => {
+    openModal()
+    return () => closeModal()
+  }, [openModal, closeModal])
+
   return (
     <motion.div
       className="fixed inset-0 bg-black/90 backdrop-blur-sm z-[9999] flex items-center justify-center p-8"
@@ -55,6 +62,7 @@ export const SignalDetailModal: React.FC<SignalDetailModalProps> = ({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={onClose}
+      style={{ transform: 'none', willChange: 'auto', position: 'fixed', pointerEvents: 'auto' }}
     >
       <motion.div
         className="bg-[#0F2B33] rounded-3xl p-6 w-full max-w-sm border border-[#00FFB3]/30 shadow-2xl"

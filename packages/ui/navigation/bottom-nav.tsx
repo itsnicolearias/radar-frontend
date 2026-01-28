@@ -3,15 +3,17 @@
 import type React from "react"
 import { MapPin, MessageCircle, Calendar, User } from "lucide-react"
 import { cn } from "../lib/utils"
+import { useNotificationStore } from "@radar/features"
 
 interface BottomNavProps {
   activeTab: "radar" | "chats" | "events" | "profile"
   onTabChange: (tab: "radar" | "chats" | "events" | "profile") => void
   className?: string
-  showNotification?: boolean
 }
 
-export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange, className, showNotification }) => {
+export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange, className }) => {
+  const { unreadCount } = useNotificationStore()
+
   const tabs = [
     { id: "radar" as const, label: "Radar", icon: MapPin },
     { id: "chats" as const, label: "Chats", icon: MessageCircle },
@@ -37,8 +39,10 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange, cl
               onClick={() => onTabChange(tab.id)}
               className="relative flex flex-col items-center gap-1.5 p-2 transition-colors"
             >
-              {tab.id === "chats" && showNotification && (
-                <div className="absolute top-0 right-2 w-2 h-2 bg-[#FF005C] rounded-full shadow-lg shadow-[#FF005C]/50" />
+              {tab.id === "chats" && unreadCount > 0 && (
+                <div className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 bg-[#FF005C] rounded-full shadow-lg shadow-[#FF005C]/50 flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">{unreadCount > 99 ? "99+" : unreadCount}</span>
+                </div>
               )}
               <Icon className={cn("w-6 h-6 transition-colors", isActive ? "text-[#00FFB3]" : "text-[#C5C5C5]")} />
               <span

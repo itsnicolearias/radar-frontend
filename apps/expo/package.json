@@ -15,6 +15,7 @@
     "@radar/features": "*",
     "@radar/types": "*",
     "@radar/ui": "*",
+    "@react-native-community/datetimepicker": "8.4.4",
     "babel-plugin-module-resolver": "^5.0.2",
     "babel-preset-expo": "^54.0.6",
     "expo": "^54.0.21",
