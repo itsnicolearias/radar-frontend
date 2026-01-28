@@ -101,7 +101,7 @@ export default function EventsPage() {
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
               {filteredEvents.map((event) => {
-                const isInterested = event?.InterestedUsers.some((u) => u.userId === user?.userId)
+                const isInterested = event?.InterestedUsers?.some((u) => u.userId === user?.userId)
                 return (
                   <EventCard
                     key={event.eventId}
@@ -109,7 +109,7 @@ export default function EventsPage() {
                     description={event.description}
                     location={event.location}
                     startDate={event.startDate}
-                    attendeesCount={event.InterestedUsers.length}
+                    attendeesCount={event?.InterestedUsers?.length}
                     price={event.price}
                     distance={event.distance}
                     category={event.category}

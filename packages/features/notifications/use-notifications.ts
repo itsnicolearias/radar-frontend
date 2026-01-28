@@ -5,12 +5,15 @@ import { useNotificationStore } from "../notification/use-notification-store"
 import { notificationService } from "@radar/api"
 import { useSocketEvent } from "../socket/use-socket"
 import type { INotificationResponse } from "@radar/types"
+import { useAuthStore } from "../auth/use-auth-store"
 
 export const useNotifications = () => {
   const { notifications, unreadCount, setNotifications, setUnreadCount, addNotification } = useNotificationStore()
+  const { isAuthenticated } = useAuthStore()
 
-  // Fetch notifications on mount
   useEffect(() => {
+    if (!isAuthenticated) return
+
     const fetchNotifications = async () => {
       try {
         const [notifs, count] = await Promise.all([
@@ -25,7 +28,7 @@ export const useNotifications = () => {
     }
 
     fetchNotifications()
-  }, [setNotifications, setUnreadCount])
+  }, [isAuthenticated, setNotifications, setUnreadCount])
 
   // Listen for new notifications via Socket.io
   useSocketEvent<INotificationResponse>(

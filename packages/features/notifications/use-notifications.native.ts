@@ -22,8 +22,8 @@ export const useNotifications = () => {
   const { notifications, unreadCount, setNotifications, setUnreadCount, addNotification } = useNotificationStore()
   const { isAuthenticated } = useAuthStore()
 
-  const notificationListener = useRef<Notifications.Subscription>(null)
-  const responseListener = useRef<Notifications.Subscription>(null)
+  const notificationListener = useRef<Notifications.Subscription | null>(null)
+  const responseListener = useRef<Notifications.Subscription | null>(null)
 
   useEffect(() => {
     if (!isAuthenticated) return

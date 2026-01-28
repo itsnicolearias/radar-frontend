@@ -11,14 +11,16 @@ import {
   KeyboardAvoidingView,
   Platform,
   Image,
+  Alert,
 } from "react-native"
 import { useRouter, useLocalSearchParams } from "expo-router"
 import { ArrowLeft, Send, X } from "lucide-react-native"
 import { MotiView } from "moti"
-import { useChatStore, useAuthStore, useSocketEvent } from "@radar/features"
-import { messageService, emitSocketEvent } from "@radar/api"
-import type { IMessageResponse } from "@radar/types"
+import { useChatStore, useAuthStore, useSocketEvent, useConnectionStore } from "@radar/features"
+import { messageService, emitSocketEvent, connectionService } from "@radar/api"
+import type { IMessageResponse, IRadarUser } from "@radar/types"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
+import { UserProfileModalNative } from "../../../../packages/ui/profile/user-profile-modal.native"
 
 function ChatConversationPage() {
   const router = useRouter()
@@ -28,11 +30,15 @@ function ChatConversationPage() {
 
   const { user } = useAuthStore()
   const { messages, setMessages, addMessage, resetUnreadCount, replyingToSignal, setReplyingToSignal } = useChatStore()
+  const { connections, pendingRequests, removeConnection, myPendingRequests } = useConnectionStore()
   const [isTyping, setIsTyping] = useState(false)
   const [message, setMessage] = useState("")
+  const [optimisticMessages, setOptimisticMessages] = useState<IMessageResponse[]>([])
+  const [showProfileModal, setShowProfileModal] = useState(false)
+  const [profileUser, setProfileUser] = useState<IRadarUser | null>(null)
   const scrollViewRef = useRef<ScrollView>(null)
 
-  const userMessages = messages[userId] || []
+  const userMessages = [...(messages[userId] || []), ...optimisticMessages]
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -64,21 +70,39 @@ function ChatConversationPage() {
   const handleSendMessage = async () => {
     if (!message.trim()) return
 
+    const optimisticMessage: IMessageResponse = {
+      messageId: `temp-${Date.now()}`,
+      senderId: user?.userId!,
+      receiverId: userId,
+      content: message,
+      createdAt: new Date(),
+      isRead: false,
+      Signal: replyingToSignal ? replyingToSignal : undefined,
+      Sender: user as any,
+      Receiver: {} as any,
+    }
+
+    setOptimisticMessages((prev) => [...prev, optimisticMessage])
+    const messageContent = message
+    setMessage("")
+    setReplyingToSignal(null)
+
     try {
       const messageData = {
         receiverId: userId,
-        content: message,
+        content: messageContent,
         signalId: replyingToSignal ? replyingToSignal.signalId : undefined,
       }
       const msg = await messageService.sendMessage(messageData)
       emitSocketEvent("send-message", messageData)
-      setReplyingToSignal(null)
-      setMessage("")
 
+      setOptimisticMessages((prev) => prev.filter((m) => m.messageId !== optimisticMessage.messageId))
       addMessage(userId, msg)
       await messageService.markAsRead([msg.messageId])
     } catch (error) {
       console.error("[v0] Error sending message:", error)
+      setOptimisticMessages((prev) => prev.filter((m) => m.messageId !== optimisticMessage.messageId))
+      Alert.alert("Error", "No se pudo enviar el mensaje")
     }
   }
 
@@ -115,6 +139,43 @@ function ChatConversationPage() {
     return `${(distance / 1000).toFixed(1)}km`
   }
 
+  const handleOpenProfile = () => {
+    if (!firstMsg) return
+    const otherUser = firstMsg.senderId === userId ? firstMsg.Sender : firstMsg.Receiver
+    setProfileUser(otherUser as IRadarUser)
+    setShowProfileModal(true)
+  }
+
+  const isUserConnected = (userId: string): boolean => {
+    const isConnected = connections.some((c) => c.receiverId === userId || c.senderId === userId)
+    return isConnected
+  }
+
+  const handleConnect = async (receiverId: string) => {
+    try {
+      await connectionService.createConnection(receiverId!)
+    } catch (error) {
+      console.error("[v0] Error:", error)
+    }
+  }
+
+  const handleDeleteConnection = async (userId: string) => {
+    try {
+      const conecc = connections.find((c) => c.receiverId === userId || c.senderId === userId)
+      if (!conecc) return
+      const { connectionId } = conecc
+      await connectionService.deleteConnection(connectionId)
+      removeConnection(connectionId)
+    } catch (error) {
+      console.error("[v0] Error:", error)
+    }
+  }
+
+  const isTheConnectionPending = (userId: string): boolean => {
+    const isPending = myPendingRequests.some((c) => c.receiverId === userId)
+    return isPending
+  }
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -127,7 +188,7 @@ function ChatConversationPage() {
             <ArrowLeft color="#00FFB3" size={20} />
           </TouchableOpacity>
 
-          <View style={styles.headerInfo}>
+          <TouchableOpacity onPress={handleOpenProfile} style={styles.headerInfo}>
             <View style={styles.headerAvatar}>
               {photoUrl && photoUrl !== "" ? (
                 <Image source={{ uri: photoUrl }} style={styles.avatarImage} />
@@ -142,7 +203,7 @@ function ChatConversationPage() {
                 <Text style={styles.distanceText}>{formatDistance(distance)}</Text>
               </View>
             </View>
-          </View>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -162,6 +223,16 @@ function ChatConversationPage() {
               style={[styles.messageBubble, isSent ? styles.sentBubble : styles.receivedBubble]}
             >
               <View style={[styles.bubble, isSent ? styles.sentBubbleInner : styles.receivedBubbleInner]}>
+                {msg.Signal && (
+                  <View style={[styles.signalReply, isSent ? styles.signalReplySent : styles.signalReplyReceived]}>
+                    <Text style={[styles.signalReplyLabel, isSent && styles.signalReplyLabelSent]}>
+                      Respuesta a señal:
+                    </Text>
+                    <Text style={[styles.signalReplyText, isSent && styles.signalReplyTextSent]}>
+                      "{msg.Signal.note}"
+                    </Text>
+                  </View>
+                )}
                 <Text style={[styles.messageText, isSent && styles.sentMessageText]}>{msg.content}</Text>
               </View>
               <Text style={[styles.timestamp, isSent ? styles.timestampSent : styles.timestampReceived]}>
@@ -202,6 +273,20 @@ function ChatConversationPage() {
           </TouchableOpacity>
         </View>
       </View>
+
+      {showProfileModal && profileUser && (
+        <UserProfileModalNative
+          user={profileUser}
+          onClose={() => setShowProfileModal(false)}
+          onMessage={() => {
+            setShowProfileModal(false)
+          }}
+          isUserConnected={() => isUserConnected(profileUser.userId)}
+          sendConnection={() => handleConnect(profileUser.userId)}
+          deleteConnection={() => handleDeleteConnection(profileUser.userId)}
+          isConnectionPending={() => isTheConnectionPending(profileUser.userId)}
+        />
+      )}
     </KeyboardAvoidingView>
   )
 }
@@ -413,5 +498,33 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     textAlign: "center",
     marginTop: 100,
+  },
+  signalReply: {
+    marginBottom: 8,
+    paddingBottom: 8,
+  },
+  signalReplySent: {
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(0, 0, 0, 0.2)",
+  },
+  signalReplyReceived: {
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255, 255, 255, 0.2)",
+  },
+  signalReplyLabel: {
+    fontSize: 11,
+    color: "rgba(255, 255, 255, 0.6)",
+    marginBottom: 4,
+  },
+  signalReplyLabelSent: {
+    color: "rgba(0, 0, 0, 0.6)",
+  },
+  signalReplyText: {
+    fontSize: 12,
+    fontStyle: "italic",
+    color: "rgba(255, 255, 255, 0.8)",
+  },
+  signalReplyTextSent: {
+    color: "rgba(0, 0, 0, 0.8)",
   },
 })

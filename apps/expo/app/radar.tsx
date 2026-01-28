@@ -5,7 +5,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from "react-nati
 import { LinearGradient } from "expo-linear-gradient"
 import { useRouter } from "expo-router"
 import { MotiView } from "moti"
-import { Radio, MapPin } from "lucide-react-native"
+import { Radio, MapPin, RefreshCcw } from "lucide-react-native"
 import { useRadarStore, useAuthStore, useSocketEvent, useChatStore, useConnectionStore } from "@radar/features"
 import { connectionService, profileViewService, radarService, signalService } from "@radar/api"
 import type { IRadarUser, IRadarSignal, IEventResponse, IConnectionResponse } from "@radar/types"
@@ -19,9 +19,14 @@ import { EventMarkerNative } from "../../../packages/ui/radar/event-marker.nativ
 import { CentralUserMarkerNative } from "../../../packages/ui/radar/central-user-marker.native"
 import GhostButton from "../../../packages/ui/components/ghost-button.native"
 import InvisibleBadge from "../../../packages/ui/components/invisible-badge.native"
-import { WelcomeModalNative } from "@radar/ui/modals/welcome-modal.native"
+
+const MAX_USERS_ON_RADAR = 15
+const MAX_EVENTS_ON_RADAR = 8
 
 const { width, height } = Dimensions.get("window")
+const RADAR_SIZE = width * 0.85
+const center = RADAR_SIZE / 2
+const WAVE_SIZE = RADAR_SIZE * 0.35
 
 export default function RadarScreen() {
   const router = useRouter()
@@ -39,7 +44,8 @@ export default function RadarScreen() {
     updateUserLocation,
     setNearbyEvents,
   } = useRadarStore()
-  const { getLocalConnectionState, setLocalConnectionState, removeConnection, connections, setConnections } = useConnectionStore()
+  const { getLocalConnectionState, setLocalConnectionState, removeConnection, connections, setConnections } =
+    useConnectionStore()
 
   const [radiusKm, setRadiusKm] = useState(10)
   const [isSendSignalModalOpen, setIsSendSignalModalOpen] = useState(false)
@@ -49,40 +55,66 @@ export default function RadarScreen() {
   const [isScanning, setIsScanning] = useState(false)
   const [pendingsConnections, setPendingsConnections] = useState<IConnectionResponse[]>([])
   const [showWelcomeModal, setShowWelcomeModal] = useState(false)
+  const [isSearching, setIsSearching] = useState(false)
+  const [searchMessage, setSearchMessage] = useState("")
+  const [newMarkersCount, setNewMarkersCount] = useState(0)
+  const [newMarkerIds, setNewMarkerIds] = useState<Set<string>>(new Set())
+  const [radarLayout, setRadarLayout] = useState<{
+    x: number
+    y: number
+    width: number
+    height: number
+  } | null>(null)
 
-  /*useEffect(() => {
-    // Show welcome modal if user needs onboarding
-    const needsOnboarding = !user?.displayName || user.displayName.trim() === "" || !user?.isVerified
 
-    if (needsOnboarding) {
-      setShowWelcomeModal(true)
+  const searchMessages = [
+    "Buscando nuevas señales",
+    "Detectando señales en el Radar",
+    "Escuchando nuevas señales",
+    "Rastreando usuarios cercanos",
+    "Explorando el área",
+    "Señales en detección",
+  ]
+
+  const fetchNearbyData = async () => {
+    if (!currentLocation) return
+
+    setIsSearching(true)
+    try {
+      const { users, events, signals } = await radarService.getNearby(
+        currentLocation.latitude,
+        currentLocation.longitude,
+        radiusKm * 1000,
+      )
+
+      const previousUserIds = new Set(nearbyUsers.map((u) => u.userId))
+      const newUsers = users.filter((u) => !previousUserIds.has(u.userId))
+      const newIds = new Set(newUsers.map((u) => u.userId))
+
+      setNewMarkerIds(newIds)
+      setNewMarkersCount(newUsers.length)
+      setNearbyUsers(users)
+      setNearbySignals(signals)
+      setNearbyEvents(events)
+
+      const friends = await connectionService.getAcceptedConnections()
+      setConnections(friends)
+
+      const pendings = await connectionService.getMyPendingConnections()
+      setPendingsConnections(pendings)
+
+      setTimeout(() => {
+        setNewMarkerIds(new Set())
+        setNewMarkersCount(0)
+      }, 3000)
+    } catch (error) {
+      console.error("[v0] Error fetching nearby data:", error)
+    } finally {
+      setTimeout(() => setIsSearching(false), 2000)
     }
-  }, [user])*/
+  }
 
   useEffect(() => {
-    const fetchNearbyData = async () => {
-      if (!currentLocation) return
-
-      try {
-        const { users, events, signals } = await radarService.getNearby(
-          currentLocation.latitude,
-          currentLocation.longitude,
-          radiusKm * 1000,
-        )
-        setNearbyUsers(users)
-        setNearbySignals(signals)
-        setNearbyEvents(events)
-
-        const friends = await connectionService.getAcceptedConnections()
-        setConnections(friends)
-
-        const pendings = await connectionService.getMyPendingConnections()
-        setPendingsConnections(pendings)
-      } catch (error) {
-        console.error("[v0] Error fetching nearby data:", error)
-      }
-    }
-
     if (isVisible) {
       fetchNearbyData()
     } else {
@@ -91,6 +123,18 @@ export default function RadarScreen() {
       setNearbySignals([])
     }
   }, [currentLocation, isVisible, radiusKm, setNearbyUsers, setNearbyEvents, setNearbySignals])
+
+  useEffect(() => {
+    if (!isSearching) return
+
+    let index = 0
+    const messageTimer = setInterval(() => {
+      setSearchMessage(searchMessages[index])
+      index = (index + 1) % searchMessages.length
+    }, 2000)
+
+    return () => clearInterval(messageTimer)
+  }, [isSearching])
 
   const handleSendSignal = async (note?: string, quickReply?: string, availableToChat?: boolean, inPark?: boolean) => {
     try {
@@ -118,25 +162,21 @@ export default function RadarScreen() {
     }
   }, [currentLocation, setCurrentLocation, user])
 
-  const getMarkerPosition = (index: number, total: number, distance: number, type: "user" | "event") => {
-    const normalizedDistance = Math.min(distance / 1000 / radiusKm, 1)
-    const minRadiusPercent = type === "event" ? 0.25 : 0.3
-    const maxRadiusPercent = type === "event" ? 0.55 : 0.75
-    const radiusPercent = minRadiusPercent + normalizedDistance * (maxRadiusPercent - minRadiusPercent)
+  const getMarkerPosition = (index: number, total: number) => {
+    const center = RADAR_SIZE / 2
 
-    const angleOffset = type === "event" ? Math.PI / 4 : 0
-    const randomAngleOffset = (Math.random() - 0.5) * 0.4
-    const angle = (index / Math.max(total, 1)) * Math.PI * 2 + angleOffset + randomAngleOffset
+    const ringSteps = [0.25, 0.4, 0.55, 0.7]
+    const ring = ringSteps[index % ringSteps.length]
+    const radius = center * ring
 
-    const radarSize = width * 0.85
-    const centerX = width / 2
-    const centerY = height / 2 - 80
+    const angle = (index / Math.max(total, 1)) * Math.PI * 2
 
-    const x = centerX + radarSize * radiusPercent * Math.cos(angle)
-    const y = centerY + radarSize * radiusPercent * Math.sin(angle)
-
-    return { x, y }
+    return {
+      x: center + Math.cos(angle) * radius,
+      y: center + Math.sin(angle) * radius,
+    }
   }
+
 
   const handleRespond = (signal: IRadarSignal) => {
     setReplyingToSignal(signal)
@@ -186,7 +226,7 @@ export default function RadarScreen() {
 
   const handleDeleteConnection = async (userId: string) => {
     try {
-      const conecc = connections.find((c => (c.receiverId === userId || c.senderId === userId)))
+      const conecc = connections.find((c) => c.receiverId === userId || c.senderId === userId)
       if (!conecc) return
       const { connectionId } = conecc
       await connectionService.deleteConnection(connectionId)
@@ -198,8 +238,16 @@ export default function RadarScreen() {
 
   const isTheConnectionPending = (userId: string): boolean => {
     const isPending = pendingsConnections.some((c) => c.receiverId === userId)
-    return isPending;
+    return isPending
   }
+
+  const usersToRender = [...nearbyUsers]
+  .filter((u) => typeof u.distance === "number")
+  .sort((a, b) => a.distance - b.distance)
+  .slice(0, MAX_USERS_ON_RADAR)
+
+  const eventsToRender = [...nearbyEvents].slice(0, MAX_EVENTS_ON_RADAR)
+
 
   return (
     <View style={styles.container}>
@@ -216,7 +264,6 @@ export default function RadarScreen() {
         </View>
       </View>
 
-      {/* Radius filter buttons */}
       <View style={styles.radiusFilter}>
         {[2, 5, 10].map((km) => (
           <TouchableOpacity
@@ -235,80 +282,204 @@ export default function RadarScreen() {
         ))}
       </View>
 
+      {isSearching && (
+        <MotiView
+          from={{ opacity: 0, translateY: -20 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          exit={{ opacity: 0, translateY: -20 }}
+          style={styles.searchingBadge}
+        >
+          <Text style={styles.searchingText}>{searchMessage}</Text>
+        </MotiView>
+      )}
+
       {!isVisible && <InvisibleBadge />}
 
-      <View style={styles.radarContainer}>
+      <View
+        style={styles.radarContainer}
+        onLayout={(e) => {
+          const { x, y, width, height } = e.nativeEvent.layout
+          setRadarLayout({ x, y, width, height })
+        }}
+      >
+
+        <View
+        style={{
+          width: RADAR_SIZE,
+          height: RADAR_SIZE,
+          position: "relative",
+        }}
+      >
+
+        {[...Array(8)].map((_, i) => (
+          <MotiView
+            key={`particle-${i}`}
+            from={{
+              opacity: 0.2,
+              translateX: Math.random() * width - width / 2,
+              translateY: Math.random() * height - height / 2,
+            }}
+            animate={{
+              opacity: [0.2, 0.5, 0.2],
+              translateX: [
+                Math.random() * width - width / 2,
+                Math.random() * width - width / 2,
+                Math.random() * width - width / 2,
+              ],
+              translateY: [
+                Math.random() * height - height / 2,
+                Math.random() * height - height / 2,
+                Math.random() * height - height / 2,
+              ],
+            }}
+            transition={{
+              type: "timing",
+              duration: 10000 + Math.random() * 5000,
+              loop: true,
+            }}
+            style={styles.particle}
+          />
+        ))}
+
         {[0, 1, 2].map((i) => (
           <MotiView
             key={i}
             from={{ scale: 0.7, opacity: 0.8 }}
-            animate={{ scale: 2.5, opacity: 0 }}
+            animate={{ scale: 2, opacity: 0 }}
             transition={{
               type: "timing",
               duration: 3500,
               delay: i * 1000,
               loop: true,
             }}
-            style={[styles.scanWave, isScanning && styles.scanWaveActive]}
+             style={[
+              {
+                position: "absolute",
+                width: WAVE_SIZE,
+                height: WAVE_SIZE,
+                borderRadius: WAVE_SIZE / 2,
+                left: center - WAVE_SIZE / 2,
+                top: center - WAVE_SIZE / 2,
+                borderWidth: 3,
+                borderColor: "rgba(0,255,179,0.4)",
+              },
+              isScanning && styles.scanWaveActive,
+            ]}
           />
         ))}
 
-        {[0.35, 0.6, 0.85].map((scale, i) => (
+      {[0.35, 0.6, 0.85].map((scale, i) => {
+        const size = RADAR_SIZE * scale
+
+        return (
           <View
             key={i}
             style={[
               styles.radarCircle,
               {
-                width: width * 0.85 * scale,
-                height: width * 0.85 * scale,
+                width: size,
+                height: size,
+                left: center - size / 2,
+                top: center - size / 2,
               },
             ]}
           />
-        ))}
+        )
+      })}
 
-        <View style={styles.centralUserWrapper}>
-          <CentralUserMarkerNative
-            initial={user?.displayName?.[0]?.toUpperCase() || user?.firstName?.[0]?.toUpperCase() || "U"}
-          />
-        </View>
 
-        {isVisible &&
-          nearbyUsers.map((nearbyUser, index) => {
-            const hasSignal = nearbySignals.some((s) => s.senderId === nearbyUser.userId)
-            const findSignal = nearbySignals.find((s) => s.senderId === nearbyUser.userId)
-            const position = getMarkerPosition(index, nearbyUsers.length, nearbyUser.distance, "user")
-            return (
-              <UserMarkerNative
-                key={nearbyUser.userId}
-                user={nearbyUser}
-                position={position}
-                hasSignal={hasSignal}
-                onPress={() => handleSelectUser(nearbyUser)}
-                index={index}
-                onSelectSignal={() => setSelectedSignal(findSignal!)}
-              />
-            )
-          })}
+      <View
+        style={{
+          position: "absolute",
+          left: center,
+          top: center,
+          transform: [{ translateX: -32 }, { translateY: -32 }], // 64 / 2
+          zIndex: 20,
+        }}
+      >
+        <CentralUserMarkerNative
+          initial={user?.displayName?.[0]?.toUpperCase() || user?.firstName?.[0]?.toUpperCase() || "U"}
+        />
+      </View>
 
-        {isVisible &&
-          nearbyEvents &&
-          nearbyEvents.map((event, index) => {
-            const position = getMarkerPosition(index, nearbyEvents.length, event.distance || 5000, "event")
-            return (
-              <EventMarkerNative
-                key={event.eventId}
-                event={event}
-                position={position}
-                onPress={() => setSelectedEvent(event)}
-                index={index}
-              />
-            )
-          })}
+      {isVisible &&
+        usersToRender.map((nearbyUser, index) => {
+          const hasSignal = nearbySignals.some(
+            (s) => s.senderId === nearbyUser.userId,
+          )
 
-        <TouchableOpacity style={styles.sendSignalButton} onPress={() => setIsSendSignalModalOpen(true)}>
+          const findSignal = nearbySignals.find(
+            (s) => s.senderId === nearbyUser.userId,
+          )
+
+          const position = getMarkerPosition(
+            index,
+            nearbyUsers.length
+          )
+
+
+    const isNew = newMarkerIds.has(nearbyUser.userId)
+
+    return (
+      <View key={nearbyUser.userId}>
+        {isNew && (
           <MotiView
-            from={{ scale: 1 }}
-            animate={{ scale: 1.2 }}
+            from={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            style={[
+              styles.newBadge,
+              {
+                left: position.x - 30,
+                top: position.y - 60,
+              },
+            ]}
+          >
+            <Text style={styles.newBadgeText}>Nuevo!</Text>
+          </MotiView>
+        )}
+
+
+        <UserMarkerNative
+          user={nearbyUser}
+          position={position}
+          hasSignal={hasSignal}
+          onPress={() => handleSelectUser(nearbyUser)}
+          index={index}
+          onSelectSignal={() => setSelectedSignal(findSignal!)}
+        />
+      </View>
+    )
+  })}
+  </View>
+
+
+     {/**  
+      {isVisible &&
+  eventsToRender.map((event, index) => {
+    const position = getMarkerPosition(
+      index,
+      eventsToRender.length,
+      event.distance || 5000,
+      "event",
+    )
+
+    return (
+      <EventMarkerNative
+        key={event.eventId}
+        event={event}
+        position={position}
+        onPress={() => setSelectedEvent(event)}
+        index={index}
+      />
+    )
+  })} **/}
+
+
+      <TouchableOpacity style={styles.sendSignalButton} onPress={() => setIsSendSignalModalOpen(true)}>
+          <MotiView
+            animate={{
+              scale: isScanning ? 1.2 : 1,
+            }}
             transition={{
               type: "timing",
               duration: 1000,
@@ -319,6 +490,26 @@ export default function RadarScreen() {
           <LinearGradient colors={["#00FFB3", "#1DE3F2"]} style={styles.sendSignalGradient}>
             <Radio color="#000000" size={28} />
           </LinearGradient>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.refreshButton} onPress={fetchNearbyData} disabled={isSearching}>
+          {newMarkersCount > 0 && (
+            <View style={styles.refreshBadge}>
+              <Text style={styles.refreshBadgeText}>{newMarkersCount}</Text>
+            </View>
+          )}
+          <MotiView
+            animate={{
+              rotate: isSearching ? "360deg" : "0deg",
+            }}
+            transition={{
+              type: "timing",
+              duration: 1000,
+              loop: isSearching,
+            }}
+          >
+            <RefreshCcw color="#00FFB3" size={20} />
+          </MotiView>
         </TouchableOpacity>
       </View>
 
@@ -341,8 +532,8 @@ export default function RadarScreen() {
           onClose={() => setSelectedSignal(null)}
           onRespond={() => handleRespond(selectedSignal)}
           onViewProfile={() => handleViewProfile(selectedSignal.senderId)}
-          isUserConnected={ isUserConnected(selectedSignal.senderId) }
-          sendConnection={ () => handleConnect(selectedSignal.senderId)}
+          isUserConnected={isUserConnected(selectedSignal.senderId)}
+          sendConnection={() => handleConnect(selectedSignal.senderId)}
         />
       )}
 
@@ -359,15 +550,6 @@ export default function RadarScreen() {
       )}
 
       {selectedEvent && <EventDetailModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />}
-
-      {showWelcomeModal && (
-        <WelcomeModalNative
-          isOpen={showWelcomeModal}
-          onClose={() => setShowWelcomeModal(false)}
-          userDisplayName={user?.displayName}
-          userEmailConfirmed={user?.isVerified}
-        />
-      )}
     </View>
   )
 }
@@ -458,13 +640,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#000000",
   },
   scanWave: {
-    position: "absolute",
-    width: width * 0.5,
-    height: width * 0.5,
-    borderRadius: (width * 0.5) / 2,
-    borderWidth: 3,
-    borderColor: "rgba(0, 255, 179, 0.4)",
-  },
+  position: "absolute",
+  width: RADAR_SIZE * 0.3,
+  height: RADAR_SIZE * 0.3,
+  borderRadius: (RADAR_SIZE * 0.3) / 2,
+  borderWidth: 3,
+  borderColor: "rgba(0, 255, 179, 0.4)",
+  left: RADAR_SIZE / 2 - (RADAR_SIZE * 0.3) / 2,
+  top: RADAR_SIZE / 2 - (RADAR_SIZE * 0.3) / 2,
+},
+
   scanWaveActive: {
     borderColor: "rgba(0, 255, 179, 0.7)",
     borderWidth: 5,
@@ -504,5 +689,73 @@ const styles = StyleSheet.create({
     borderRadius: 32,
     justifyContent: "center",
     alignItems: "center",
+  },
+  searchingBadge: {
+    position: "absolute",
+    top: 120,
+    alignSelf: "center",
+    backgroundColor: "rgba(0, 255, 179, 0.2)",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#00FFB3",
+    zIndex: 50,
+  },
+  searchingText: {
+    color: "#00FFB3",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  particle: {
+    position: "absolute",
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "#00FFB3",
+  },
+  newBadge: {
+    position: "absolute",
+    backgroundColor: "#00FFB3",
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    zIndex: 100,
+  },
+  newBadgeText: {
+    color: "#000000",
+    fontSize: 10,
+    fontWeight: "700",
+  },
+  refreshButton: {
+    position: "absolute",
+    bottom: 32,
+    right: 32,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#1A1A1A",
+    borderWidth: 2,
+    borderColor: "#00FFB3",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 30,
+  },
+  refreshBadge: {
+    position: "absolute",
+    top: -4,
+    right: -4,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: "#FF4FD8",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 40,
+  },
+  refreshBadgeText: {
+    color: "#FFFFFF",
+    fontSize: 10,
+    fontWeight: "700",
   },
 })
