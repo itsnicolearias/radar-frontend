@@ -125,8 +125,8 @@ export default function ChatsPage() {
     setSelectedUser(null)
   }
 
-  const filteredPendingRequests = pendingRequests.filter((req) => (req.Sender?.distance || 0) < 50)
-  const filteredChats = chats.filter((chat) => (chat.user.distance || 0) < 50)
+  const filteredPendingRequests = pendingRequests.filter((req) => (formatDistance(req.Sender?.distance)))
+  const filteredChats = chats.filter((chat) => (formatDistance(chat.user?.distance)))
 
   const isTheConnectionPending = (userId: string): boolean => {
     const isPending = myPendingRequests.some((c) => c.receiverId === userId)
@@ -281,7 +281,7 @@ export default function ChatsPage() {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <span className="text-[#1A1A1A] font-bold text-lg">{request.Sender.displayName[0]}</span>
+                        <span className="text-[#1A1A1A] font-bold text-lg">{request?.Sender?.displayName[0]}</span>
                       )}
                     </div>
 
@@ -362,7 +362,7 @@ export default function ChatsPage() {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <span className="text-[#1A1A1A] font-semibold text-lg">{view.Viewer.displayName[0]}</span>
+                          <span className="text-[#1A1A1A] font-semibold text-lg">{view?.Viewer?.displayName[0]}</span>
                         )}
                       </div>
                       <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-[#1DE3F2] border-2 border-black rounded-full" />
