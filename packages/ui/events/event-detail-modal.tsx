@@ -18,7 +18,7 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({ event, onClo
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
-      <div className="bg-[#1A1A1A] rounded-3xl p-6 w-full max-w-sm border border-[#00FFB3]/30 shadow-2xl fixed">
+      <div className="bg-[#1A1A1A] rounded-3xl p-6 w-full max-w-sm border border-[#00FFB3]/30 shadow-2xl">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-white">{event.title}</h2>
           <button

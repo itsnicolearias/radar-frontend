@@ -86,6 +86,7 @@ export const useConnectionStore = create<ConnectionState>()(
         state.pendingRequests = []
         state.isLoading = false
         state.localConnectionStates = {}
+        state.myPendingRequests = []
       }),
   })),
 )
