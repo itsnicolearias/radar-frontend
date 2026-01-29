@@ -43,7 +43,6 @@ export const SendSignalModal: React.FC<SendSignalModalProps> = ({ onClose, onSen
         className="bg-[#0F2B33] rounded-3xl p-6 w-full max-w-sm border border-[#00FFB3]/30 shadow-2xl"
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-white">Enviar Señal</h2>
