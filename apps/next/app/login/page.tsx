@@ -133,11 +133,11 @@ export default function LoginPage() {
                 </Link>
               </p>
               <div className="flex items-center justify-center gap-4 text-xs text-[#C5C5C5]">
-                <Link href="/privacidad" className="hover:text-[#00FFB3] transition-colors">
+                <Link href="/privacy-policy" className="hover:text-[#00FFB3] transition-colors">
                   Privacidad
                 </Link>
                 <span>•</span>
-                <Link href="/terminos" className="hover:text-[#00FFB3] transition-colors">
+                <Link href="/terms-conditions" className="hover:text-[#00FFB3] transition-colors">
                   Términos
                 </Link>
               </div>
