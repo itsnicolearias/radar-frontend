@@ -191,13 +191,13 @@ export default function ChatsPage() {
         {/* Chats Tab */}
         {activeTab === "chats" && (
           <div className="space-y-3">
-            {filteredChats.length === 0 ? (
+            {chats.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
                 <p className="text-[#C5C5C5]">No tienes conversaciones aun</p>
                 <p className="text-sm text-white/50 mt-2">Conecta con personas cercanas para empezar a chatear</p>
               </div>
             ) : (
-              filteredChats.map((chat, index) => (
+              chats.map((chat, index) => (
                 <motion.div
                   key={chat.conversationId}
                   initial={{ opacity: 0, x: -20 }}
@@ -257,12 +257,12 @@ export default function ChatsPage() {
         {/* Solicitudes Tab */}
         {activeTab === "solicitudes" && (
           <div className="space-y-4">
-            {filteredPendingRequests.length === 0 ? (
+            {pendingRequests.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
                 <p className="text-[#C5C5C5]">No tienes solicitudes aun</p>
               </div>
             ) : (
-              filteredPendingRequests.map((request, index) => (
+              pendingRequests.map((request, index) => (
                 <motion.div
                   key={request.connectionId}
                   initial={{ opacity: 0, y: 20 }}
