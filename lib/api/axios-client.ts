@@ -11,7 +11,7 @@ try {
   SecureStore = null
 }
 
-const API_BASE_URL = "http://192.168.8.6:8000/api"
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
 
 export const axiosRequestor = axios.create({
   baseURL: API_BASE_URL,
