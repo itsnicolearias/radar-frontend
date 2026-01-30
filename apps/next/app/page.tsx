@@ -210,7 +210,7 @@ function Features() {
   ];
 
   return (
-    <section id="funcionalidades" className="relative py-24 px-4 sm:px-6 lg:px-8 bg-black">
+    <section id="funcionalidades" className="relative py-16 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8 bg-black">
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -220,34 +220,34 @@ function Features() {
       />
       <div className="max-w-7xl mx-auto relative z-10">
         <motion.div 
-          className="text-center mb-16"
+          className="text-center mb-12 sm:mb-16 md:mb-20"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4 text-balance">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 sm:mb-6 text-balance px-4">
             Funcionalidades principales
           </h2>
-          <p className="text-lg sm:text-xl text-[#C5C5C5]">
+          <p className="text-base sm:text-lg md:text-xl text-[#C5C5C5] max-w-2xl mx-auto px-4">
             Todo lo que necesitás para conectar con tu entorno
           </p>
         </motion.div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {features.map((feature, index) => (
             <motion.div
               key={index}
-              className="p-6 bg-[#1A1A1A] border border-[#00FFB3]/20 rounded-2xl hover:border-[#00FFB3]/50 transition-all hover:shadow-lg hover:shadow-[#00FFB3]/10"
+              className="p-6 sm:p-8 bg-[#1A1A1A] border border-[#00FFB3]/20 rounded-2xl hover:border-[#00FFB3]/50 transition-all hover:shadow-lg hover:shadow-[#00FFB3]/10"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
             >
-              <div className="w-12 h-12 bg-gradient-to-br from-[#00FFB3] to-[#1DE3F2] rounded-full flex items-center justify-center mb-4">
-                <feature.icon className="w-6 h-6 text-black" />
+              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-[#00FFB3] to-[#1DE3F2] rounded-full flex items-center justify-center mb-5 sm:mb-6">
+                <feature.icon className="w-7 h-7 sm:w-8 sm:h-8 text-black" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">{feature.title}</h3>
-              <p className="text-[#C5C5C5] leading-relaxed">{feature.description}</p>
+              <h3 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4">{feature.title}</h3>
+              <p className="text-sm sm:text-base text-[#C5C5C5] leading-relaxed">{feature.description}</p>
             </motion.div>
           ))}
         </div>
@@ -290,51 +290,51 @@ function Events() {
   ];
 
   return (
-    <section id="eventos" className="relative py-24 px-4 sm:px-6 lg:px-8 bg-black">
+    <section id="eventos" className="relative py-16 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8 bg-black">
       <div className="max-w-7xl mx-auto">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 sm:gap-16 lg:gap-20 items-center">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6 text-balance">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-6 sm:mb-8 text-balance">
               Eventos cerca tuyo
             </h2>
-            <p className="text-lg sm:text-xl text-[#C5C5C5] mb-8 leading-relaxed">
+            <p className="text-base sm:text-lg md:text-xl text-[#C5C5C5] mb-8 sm:mb-10 leading-relaxed">
               Descubrí los eventos más populares cerca tuyo y conectá con personas interesadas. Desde conciertos hasta
               meetups, nunca te pierdas lo que está pasando en tu ciudad.
             </p>
-            <ul className="space-y-4">
+            <ul className="space-y-4 sm:space-y-5">
               {benefits.map((benefit, index) => (
                 <motion.li 
                   key={index} 
-                  className="flex items-start gap-3"
+                  className="flex items-start gap-3 sm:gap-4"
                   initial={{ opacity: 0, x: -10 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <Check className="w-5 h-5 text-[#00FFB3] shrink-0 mt-1" />
-                  <span className="text-[#C5C5C5]">{benefit}</span>
+                  <Check className="w-5 h-5 sm:w-6 sm:h-6 text-[#00FFB3] shrink-0 mt-0.5 sm:mt-1" />
+                  <span className="text-sm sm:text-base text-[#C5C5C5]">{benefit}</span>
                 </motion.li>
               ))}
             </ul>
           </motion.div>
 
           <motion.div
-            className="bg-gradient-to-br from-[#0F2B33] to-[#1A1A1A] rounded-3xl p-6 sm:p-8 border border-[#00FFB3]/20"
+            className="bg-gradient-to-br from-[#0F2B33] to-[#1A1A1A] rounded-3xl p-6 sm:p-8 md:p-10 border border-[#00FFB3]/20"
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <div className="space-y-4">
+            <div className="space-y-4 sm:space-y-5">
               {eventsList.map((event, index) => (
                 <motion.div
                   key={index}
-                  className="p-4 bg-[#1A1A1A] border border-[#00FFB3]/20 rounded-xl flex items-center gap-4 hover:border-[#00FFB3]/50 transition-all cursor-pointer"
+                  className="p-4 sm:p-5 bg-[#1A1A1A] border border-[#00FFB3]/20 rounded-xl flex items-center gap-4 sm:gap-5 hover:border-[#00FFB3]/50 transition-all cursor-pointer"
                   initial={{ opacity: 0, y: 10 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
@@ -342,13 +342,13 @@ function Events() {
                   whileHover={{ scale: 1.02 }}
                 >
                   <div
-                    className={`w-12 h-12 ${event.color} rounded-lg flex items-center justify-center shrink-0`}
+                    className={`w-12 h-12 sm:w-14 sm:h-14 ${event.color} rounded-lg flex items-center justify-center shrink-0`}
                   >
-                    <event.icon className="w-6 h-6 text-black" />
+                    <event.icon className="w-6 h-6 sm:w-7 sm:h-7 text-black" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-bold text-white text-sm truncate">{event.title}</h4>
-                    <p className="text-xs text-[#C5C5C5]">
+                    <h4 className="font-bold text-white text-sm sm:text-base truncate mb-1">{event.title}</h4>
+                    <p className="text-xs sm:text-sm text-[#C5C5C5]">
                       A {event.distance} • {event.interested} interesados
                     </p>
                   </div>
@@ -496,21 +496,21 @@ export default function LandingPage() {
       </div>
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-20">
+      <section className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-24 sm:pt-32 pb-16 sm:pb-20">
         <div className="max-w-7xl mx-auto w-full">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 sm:gap-16 lg:gap-20 items-center">
             {/* Left side - Text content */}
             <motion.div
-              className="text-center lg:text-left"
+              className="text-center lg:text-left space-y-6 sm:space-y-8"
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
             >
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white mb-6 text-balance leading-tight">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white text-balance leading-tight">
                 Descubrí quién está cerca tuyo
               </h1>
               
-              <p className="text-lg sm:text-xl text-[#C5C5C5] mb-8 leading-relaxed max-w-xl mx-auto lg:mx-0">
+              <p className="text-base sm:text-lg md:text-xl text-[#C5C5C5] leading-relaxed max-w-xl mx-auto lg:mx-0">
                 Explorá tu entorno, conectá con personas y descubrí eventos en tiempo real.
               </p>
 
@@ -518,11 +518,11 @@ export default function LandingPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="flex justify-center lg:justify-start"
+                className="flex justify-center lg:justify-start pt-2"
               >
                 <Link
                   href="/register"
-                  className="inline-flex items-center justify-center h-14 px-10 text-lg font-semibold bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black rounded-full hover:opacity-90 hover:shadow-xl transition-all shadow-lg shadow-[#00FFB3]/30"
+                  className="inline-flex items-center justify-center h-12 sm:h-14 px-8 sm:px-10 text-base sm:text-lg font-semibold bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black rounded-full hover:opacity-90 hover:shadow-xl transition-all shadow-lg shadow-[#00FFB3]/30"
                 >
                   Unite a Radar
                 </Link>
@@ -531,7 +531,7 @@ export default function LandingPage() {
 
             {/* Right side - Radar animation */}
             <motion.div
-              className="flex items-center justify-center"
+              className="flex items-center justify-center mt-8 lg:mt-0"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
