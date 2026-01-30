@@ -4,6 +4,7 @@ import { motion, type Variants } from "framer-motion";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { RadarIcon, Users, MessageCircle, Calendar, Shield, MapPin, Check } from "lucide-react";
+import { LandingNavbar } from "@/components/landing-navbar";
 
 // Radar Animation Component
 function RadarAnimation() {
@@ -142,7 +143,7 @@ function Features() {
   ];
 
   return (
-    <section className="py-20 px-6 bg-black relative z-10">
+    <section id="funcionalidades" className="relative py-24 px-4 sm:px-6 lg:px-8 bg-black">
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -150,11 +151,20 @@ function Features() {
             "radial-gradient(circle at 50% 50%, rgba(0, 255, 179, 0.08) 0%, transparent 70%)",
         }}
       />
-      <div className="max-w-7xl mx-auto relative z-20">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-white mb-4 text-balance">Funcionalidades principales</h2>
-          <p className="text-lg text-[#C5C5C5]">Todo lo que necesitás para conectar con tu entorno</p>
-        </div>
+      <div className="max-w-7xl mx-auto relative z-10">
+        <motion.div 
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
+          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4 text-balance">
+            Funcionalidades principales
+          </h2>
+          <p className="text-lg sm:text-xl text-[#C5C5C5]">
+            Todo lo que necesitás para conectar con tu entorno
+          </p>
+        </motion.div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((feature, index) => (
@@ -163,6 +173,7 @@ function Features() {
               className="p-6 bg-[#1A1A1A] border border-[#00FFB3]/20 rounded-2xl hover:border-[#00FFB3]/50 transition-all hover:shadow-lg hover:shadow-[#00FFB3]/10"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
             >
               <div className="w-12 h-12 bg-gradient-to-br from-[#00FFB3] to-[#1DE3F2] rounded-full flex items-center justify-center mb-4">
@@ -212,38 +223,56 @@ function Events() {
   ];
 
   return (
-    <section className="py-20 px-6 bg-black relative z-10">
+    <section id="eventos" className="relative py-24 px-4 sm:px-6 lg:px-8 bg-black">
       <div className="max-w-7xl mx-auto">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
           >
-            <h2 className="text-4xl font-bold text-white mb-6 text-balance">Eventos cerca tuyo</h2>
-            <p className="text-lg text-[#C5C5C5] mb-8 leading-relaxed">
+            <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6 text-balance">
+              Eventos cerca tuyo
+            </h2>
+            <p className="text-lg sm:text-xl text-[#C5C5C5] mb-8 leading-relaxed">
               Descubrí los eventos más populares cerca tuyo y conectá con personas interesadas. Desde conciertos hasta
               meetups, nunca te pierdas lo que está pasando en tu ciudad.
             </p>
             <ul className="space-y-4">
               {benefits.map((benefit, index) => (
-                <li key={index} className="flex items-start gap-3">
+                <motion.li 
+                  key={index} 
+                  className="flex items-start gap-3"
+                  initial={{ opacity: 0, x: -10 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                >
                   <Check className="w-5 h-5 text-[#00FFB3] shrink-0 mt-1" />
                   <span className="text-[#C5C5C5]">{benefit}</span>
-                </li>
+                </motion.li>
               ))}
             </ul>
           </motion.div>
 
           <motion.div
-            className="bg-gradient-to-br from-[#0F2B33] to-[#1A1A1A] rounded-3xl p-8 border border-[#00FFB3]/20"
+            className="bg-gradient-to-br from-[#0F2B33] to-[#1A1A1A] rounded-3xl p-6 sm:p-8 border border-[#00FFB3]/20"
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
           >
             <div className="space-y-4">
               {eventsList.map((event, index) => (
-                <div
+                <motion.div
                   key={index}
-                  className="p-4 bg-[#1A1A1A] border border-[#00FFB3]/20 rounded-xl flex items-center gap-4 hover:border-[#00FFB3]/50 transition-all"
+                  className="p-4 bg-[#1A1A1A] border border-[#00FFB3]/20 rounded-xl flex items-center gap-4 hover:border-[#00FFB3]/50 transition-all cursor-pointer"
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ scale: 1.02 }}
                 >
                   <div
                     className={`w-12 h-12 ${event.color} rounded-lg flex items-center justify-center shrink-0`}
@@ -256,7 +285,7 @@ function Events() {
                       A {event.distance} • {event.interested} interesados
                     </p>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           </motion.div>
@@ -365,7 +394,10 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-black flex flex-col">
+    <div className="relative min-h-screen bg-black">
+      {/* Navbar */}
+      <LandingNavbar />
+
       {/* Background gradient */}
       <div
         className="absolute inset-0 pointer-events-none"
@@ -397,45 +429,52 @@ export default function LandingPage() {
       </div>
 
       {/* Hero Section */}
-      <section className="flex-1 flex flex-col items-center justify-center text-center px-6 relative z-20 py-20">
-        <motion.div
-          className="w-full max-w-3xl"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8 }}
-        >
-          {/* Radar */}
-          <div className="w-64 h-64 mx-auto mb-8">
-            <RadarAnimation />
+      <section className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-20">
+        <div className="max-w-7xl mx-auto w-full">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left side - Text content */}
+            <motion.div
+              className="text-center lg:text-left"
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white mb-6 text-balance leading-tight">
+                Descubrí quién está cerca tuyo
+              </h1>
+              
+              <p className="text-lg sm:text-xl text-[#C5C5C5] mb-8 leading-relaxed max-w-xl mx-auto lg:mx-0">
+                Explorá tu entorno, conectá con personas y descubrí eventos en tiempo real.
+              </p>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="flex justify-center lg:justify-start"
+              >
+                <Link
+                  href="/register"
+                  className="inline-flex items-center justify-center h-14 px-10 text-lg font-semibold bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black rounded-full hover:opacity-90 hover:shadow-xl transition-all shadow-lg shadow-[#00FFB3]/30"
+                >
+                  Unite a Radar
+                </Link>
+              </motion.div>
+            </motion.div>
+
+            {/* Right side - Radar animation */}
+            <motion.div
+              className="flex items-center justify-center"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              <div className="w-full max-w-md">
+                <RadarAnimation />
+              </div>
+            </motion.div>
           </div>
-
-          {/* Title */}
-          <motion.h1 className="text-5xl sm:text-6xl font-bold text-white mb-4 text-balance" variants={itemVariants}>
-            Descubrí quién está cerca tuyo
-          </motion.h1>
-
-          {/* Subtitle */}
-          <motion.p className="text-xl text-[#C5C5C5] max-w-2xl mx-auto mb-8 leading-relaxed" variants={itemVariants}>
-            Explorá tu entorno, conectá con personas y descubrí eventos en tiempo real.
-          </motion.p>
-
-          {/* CTA Buttons */}
-          <motion.div className="flex flex-col sm:flex-row gap-4 max-w-sm mx-auto w-full" variants={itemVariants}>
-            <Link
-              href="/register"
-              className="inline-flex items-center justify-center h-14 px-8 text-lg font-semibold bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black rounded-full hover:opacity-90 hover:shadow-lg transition-all shadow-[#00FFB3]/30 flex-1"
-            >
-              Registrarme
-            </Link>
-
-            <Link
-              href="/login"
-              className="inline-flex items-center justify-center h-14 px-8 text-lg font-semibold border-2 border-[#00FFB3] text-[#00FFB3] bg-transparent rounded-full hover:bg-[#00FFB3]/10 transition-all flex-1"
-            >
-              Iniciar sesión
-            </Link>
-          </motion.div>
-        </motion.div>
+        </div>
       </section>
 
       {/* Features Section */}
