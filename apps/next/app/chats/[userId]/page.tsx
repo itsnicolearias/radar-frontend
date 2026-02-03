@@ -16,11 +16,11 @@ function ChatConversationPage() {
   const userId = params.userId as string
 
   const { user } = useAuthStore()
-  const { messages, setMessages, addMessage, resetUnreadCount } = useChatStore()
+  const { messages, setMessages, addMessage, resetUnreadCount, replyingToSignal, setReplyingToSignal } = useChatStore()
   const { connections, pendingRequests, myPendingRequests } = useConnectionStore()
   const [isTyping, setIsTyping] = useState(false)
   const [message, setMessage] = useState("")
-  const [replyingTo, setReplyingTo] = useState<IRadarSignal | null>(null)
+  //const [replyingTo, setReplyingTo] = useState<IRadarSignal | null>(null)
   const [showProfileModal, setShowProfileModal] = useState(false)
   const [profileUser, setProfileUser] = useState<IRadarUser | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -37,7 +37,6 @@ function ChatConversationPage() {
     const fetchSignal = async () => {
       try {
         const signal = await signalService.getSignalById(signalId)
-        setReplyingTo(signal)
       } catch (error) {
         console.error("Error fetching signal:", error)
       }
@@ -107,7 +106,7 @@ function ChatConversationPage() {
       content: message,
       createdAt: new Date(),
       isRead: false,
-      Signal: replyingTo ? replyingTo : undefined,
+      Signal: replyingToSignal ? replyingToSignal : undefined,
       Sender: user as any,
       Receiver: {} as any,
     }
@@ -115,13 +114,13 @@ function ChatConversationPage() {
     setOptimisticMessages((prev) => [...prev, optimisticMessage])
     const messageContent = message
     setMessage("")
-    setReplyingTo(null)
+    setReplyingToSignal(null)
 
     try {
       const messageData = {
         receiverId: userId,
         content: messageContent,
-        signalId: replyingTo ? replyingTo.signalId : undefined,
+        signalId: replyingToSignal ? replyingToSignal.signalId : undefined,
       }
       const msg = await messageService.sendMessage(messageData)
       emitSocketEvent("send-message", messageData)
@@ -146,8 +145,8 @@ function ChatConversationPage() {
   const firstMsg = userMessages[0]
   const name = firstMsg
     ? firstMsg.senderId === userId
-      ? firstMsg.Sender.displayName
-      : firstMsg.Receiver.displayName
+      ? firstMsg?.Sender?.displayName
+      : firstMsg?.Receiver?.displayName
     : "Chat"
 
   const photoUrl = firstMsg
@@ -275,12 +274,12 @@ function ChatConversationPage() {
         <div ref={messagesEndRef} />
       </div>
 
-      {replyingTo && (
+      {replyingToSignal && (
         <div className="relative bg-[#1A1A1A] p-3 mx-6 mb-2 rounded-xl border border-[#00FFB3]/20">
           <p className="text-xs text-[#C5C5C5]">Respondiendo a la señal:</p>
-          <p className="text-sm text-white">{replyingTo.note}</p>
+          <p className="text-sm text-white">{replyingToSignal.note}</p>
           <button
-            onClick={() => setReplyingTo(null)}
+            onClick={() => setReplyingToSignal(null)}
             className="absolute top-2 right-2 p-1 bg-black/50 rounded-full hover:scale-110 transition-transform"
           >
             <X className="w-4 h-4 text-[#C5C5C5]" />

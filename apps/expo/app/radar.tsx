@@ -180,7 +180,7 @@ export default function RadarScreen() {
 
   const handleRespond = (signal: IRadarSignal) => {
     setReplyingToSignal(signal)
-    router.push(`/chats/${signal.senderId}`)
+    router.push(`/chats/${signal.senderId}?signalId=${signal.signalId}`)
     setSelectedSignal(null)
   }
 
@@ -534,6 +534,7 @@ export default function RadarScreen() {
           onViewProfile={() => handleViewProfile(selectedSignal.senderId)}
           isUserConnected={isUserConnected(selectedSignal.senderId)}
           sendConnection={() => handleConnect(selectedSignal.senderId)}
+          isConnectionPending={() => isTheConnectionPending(selectedSignal.senderId)}
         />
       )}
 

@@ -1,9 +1,10 @@
 import type React from "react"
 import { View, Text, TouchableOpacity, Modal, StyleSheet, Image } from "react-native"
-import { X, MessageCircle, User, Heart } from "lucide-react-native"
+import { X, MessageCircle, User, Heart, Clock } from "lucide-react-native"
 import { LinearGradient } from "expo-linear-gradient"
 import Animated, { useAnimatedStyle, withSpring, useSharedValue } from "react-native-reanimated"
 import type { IRadarSignal } from "@radar/types"
+import { useConnectionStore } from "@radar/features"
 
 interface SignalDetailModalNativeProps {
   signal: IRadarSignal
@@ -12,6 +13,7 @@ interface SignalDetailModalNativeProps {
   onViewProfile: () => void
   isUserConnected?: boolean
   sendConnection?: () => void
+  isConnectionPending: () =>  boolean
 }
 
 export const SignalDetailModalNative: React.FC<SignalDetailModalNativeProps> = ({
@@ -21,9 +23,14 @@ export const SignalDetailModalNative: React.FC<SignalDetailModalNativeProps> = (
   onViewProfile,
   isUserConnected,
   sendConnection,
+  isConnectionPending,
 }) => {
   const scale = useSharedValue(1)
   const connected = isUserConnected || false
+  const { getLocalConnectionState, setLocalConnectionState, removeConnection } = useConnectionStore()
+  
+  const localState = getLocalConnectionState(signal.Sender.userId)
+  const isPending = localState === "pending" || isConnectionPending()
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -35,6 +42,7 @@ export const SignalDetailModalNative: React.FC<SignalDetailModalNativeProps> = (
         scale.value = withSpring(1)
       })
       sendConnection()
+      setLocalConnectionState(signal.Sender.userId, "pending")
     }
   }
 
@@ -99,6 +107,11 @@ export const SignalDetailModalNative: React.FC<SignalDetailModalNativeProps> = (
                   <Text style={styles.respondButtonText}>Responder señal</Text>
                 </LinearGradient>
               </TouchableOpacity>
+             ) : isPending ? (
+              <View style={styles.pendingButton}>
+                <Clock color="#EAB308" size={20} />
+                <Text style={styles.pendingButtonText}>Pendiente</Text>
+              </View>
             ) : (
               <Animated.View style={animatedStyle}>
                 <TouchableOpacity style={styles.sendRequestButton} onPress={handleSendConnection}>
@@ -286,6 +299,24 @@ const styles = StyleSheet.create({
   sendRequestText: {
     color: "#FF005C",
     fontWeight: "bold",
+    fontSize: 16,
+  },
+  pendingButton: {
+    alignSelf: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderRadius: 28,
+    backgroundColor: "rgba(234, 179, 8, 0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(234, 179, 8, 0.4)",
+    marginBottom: 40,
+  },
+  pendingButtonText: {
+    color: "#EAB308",
+    fontWeight: "600",
     fontSize: 16,
   },
 })
