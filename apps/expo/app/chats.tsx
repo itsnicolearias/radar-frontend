@@ -117,6 +117,24 @@ export default function ChatsScreen() {
     }
   }
 
+    const handleViewThisProfile = (userId: string) => {
+      // Find user in profile views
+      const request = profileViews.find((p) => p.viewerId === userId)
+      if (request) {
+        setSelectedUser(request.Viewer as IRadarUser)
+      }
+    }
+  
+    const handleViewFriendProfile = (userId: string) => {
+      // Find user in friends
+      const request = connections.find((c) => c.receiverId === userId || c.senderId === userId)
+  
+      const user = request?.receiverId === userId ? request?.Receiver : request?.Sender
+      if (user) {
+        setSelectedUser(user as IRadarUser)
+      }
+    }
+
   const handleMessageUser = (userId: string) => {
       setSelectedUser(null)
       router.push(`/chats/${userId}`)
@@ -340,7 +358,7 @@ export default function ChatsScreen() {
                   >
                     <TouchableOpacity
                       style={[styles.profileView, index > 2 && styles.profileViewBlurred]}
-                      onPress={() => handleViewProfile(view.viewerId)}
+                      onPress={() => handleViewThisProfile(view.viewerId)}
                       disabled={index > 2}
                     >
                       <View style={styles.profileViewAvatarContainer}>
@@ -390,36 +408,40 @@ export default function ChatsScreen() {
                       animate={{ opacity: 1, translateX: 0 }}
                       transition={{ delay: index * 50 }}
                     >
-                      <View style={styles.connectedCard}>
-                        <View style={styles.connectedInfo}>
-                          <View style={styles.avatar}>
-                            {connectedUser?.Profile?.photoUrl ? (
-                              <Image source={{ uri: connectedUser.Profile.photoUrl }} style={styles.avatarImage} />
-                            ) : (
-                              <Text style={styles.avatarText}>{connectedUser.displayName?.[0] || "A"}</Text>
-                            )}
-                          </View>
-                          <View>
-                            <Text style={styles.connectedName}>{connectedUser.displayName}</Text>
-                            <View style={styles.distanceContainer}>
-                              <View style={styles.distanceDot} />
-                              <Text style={styles.distanceText}>{formatDistance(connectedUser.distance)}</Text>
+                      <TouchableOpacity
+                      onPress={() => handleViewFriendProfile(connectedUser.userId!)}
+                      >
+                        <View style={styles.connectedCard}>
+                          <View style={styles.connectedInfo}>
+                            <View style={styles.avatar}>
+                              {connectedUser?.Profile?.photoUrl ? (
+                                <Image source={{ uri: connectedUser.Profile.photoUrl }} style={styles.avatarImage} />
+                              ) : (
+                                <Text style={styles.avatarText}>{connectedUser.displayName?.[0] || "A"}</Text>
+                              )}
+                            </View>
+                            <View>
+                              <Text style={styles.connectedName}>{connectedUser.displayName}</Text>
+                              <View style={styles.distanceContainer}>
+                                <View style={styles.distanceDot} />
+                                <Text style={styles.distanceText}>{formatDistance(connectedUser.distance)}</Text>
+                              </View>
                             </View>
                           </View>
-                        </View>
 
-                        <TouchableOpacity
-                          style={styles.chatButton}
-                          onPress={() =>
-                            router.push(
-                              `/chats/${connection.senderId === user?.userId ? connection.receiverId : connection.senderId}`,
-                            )
-                          }
-                        >
-                          <MessageCircle size={16} color="#000" />
-                          <Text style={styles.chatButtonText}>Chat</Text>
-                        </TouchableOpacity>
-                      </View>
+                          <TouchableOpacity
+                            style={styles.chatButton}
+                            onPress={() =>
+                              router.push(
+                                `/chats/${connection.senderId === user?.userId ? connection.receiverId : connection.senderId}`,
+                              )
+                            }
+                          >
+                            <MessageCircle size={16} color="#000" />
+                            <Text style={styles.chatButtonText}>Chat</Text>
+                          </TouchableOpacity>
+                        </View>
+                      </TouchableOpacity>
                     </MotiView>
                   )
                 })

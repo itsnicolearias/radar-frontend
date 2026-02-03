@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Providers } from "./providers"
 import "./globals.css"
+import { Analytics } from "@vercel/analytics/next"
 
 export const metadata: Metadata = {
   title: "Radar - Descubrí quién está cerca",
@@ -18,6 +19,7 @@ export default function RootLayout({
     <html lang="es" className="dark">
       <body>
         <Providers>{children}</Providers>
+        <Analytics />
         <div id="modal-root" />
       </body>
     </html>

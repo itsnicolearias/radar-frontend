@@ -53,8 +53,8 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
   const handleSendConnection = () => {
     setIsAnimating(true)
-    setLocalConnectionState(user.userId, "pending")
     sendConnection()
+    setLocalConnectionState(user.userId, "pending")
     setTimeout(() => setIsAnimating(false), 600)
   }
 

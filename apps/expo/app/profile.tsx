@@ -55,12 +55,6 @@ export default function ProfileScreen() {
       const response = await fetch(asset.uri)
       const blob = await response.blob()
 
-      console.log({
-        blobType: blob.type,
-        blobSize: blob.size,
-        fileName: result.assets[0].fileName,
-        uri: result.assets[0].uri,
-      })
       const file = new Blob([blob], { type: mimeType })
       const photoUrl = await uploadService.uploadImage(file, fileName)
 
@@ -188,9 +182,9 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
 
-        <ProfileField label="Nombre visible" value={displayName} onChange={setDisplayName} />
-        <ProfileField label="Nombre" value={firstName} onChange={setFirstName} />
-        <ProfileField label="Apellido" value={lastName} onChange={setLastName} />
+        <ProfileField label="Nombre visible *" value={displayName} onChange={setDisplayName} />
+        <ProfileField label="Nombre *" value={firstName} onChange={setFirstName} />
+        <ProfileField label="Apellido *" value={lastName} onChange={setLastName} />
 
         <ProfileField
           label="Edad"

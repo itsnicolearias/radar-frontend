@@ -19,6 +19,7 @@ import { EventMarkerNative } from "../../../packages/ui/radar/event-marker.nativ
 import { CentralUserMarkerNative } from "../../../packages/ui/radar/central-user-marker.native"
 import GhostButton from "../../../packages/ui/components/ghost-button.native"
 import InvisibleBadge from "../../../packages/ui/components/invisible-badge.native"
+import { WelcomeModalNative } from "../../../packages/ui/modals/welcome-modal.native"
 
 const MAX_USERS_ON_RADAR = 15
 const MAX_EVENTS_ON_RADAR = 8
@@ -162,6 +163,12 @@ export default function RadarScreen() {
     }
   }, [currentLocation, setCurrentLocation, user])
 
+  useEffect(() => {
+    if (user && user.isVerified === false && !user.displayName && !showWelcomeModal) {
+      setShowWelcomeModal(true)
+    }
+  }, [])
+
   const getMarkerPosition = (index: number, total: number) => {
     const center = RADAR_SIZE / 2
 
@@ -180,7 +187,7 @@ export default function RadarScreen() {
 
   const handleRespond = (signal: IRadarSignal) => {
     setReplyingToSignal(signal)
-    router.push(`/chats/${signal.senderId}`)
+    router.push(`/chats/${signal.senderId}?signalId=${signal.signalId}`)
     setSelectedSignal(null)
   }
 
@@ -534,6 +541,7 @@ export default function RadarScreen() {
           onViewProfile={() => handleViewProfile(selectedSignal.senderId)}
           isUserConnected={isUserConnected(selectedSignal.senderId)}
           sendConnection={() => handleConnect(selectedSignal.senderId)}
+          isConnectionPending={() => isTheConnectionPending(selectedSignal.senderId)}
         />
       )}
 
@@ -550,6 +558,15 @@ export default function RadarScreen() {
       )}
 
       {selectedEvent && <EventDetailModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />}
+
+      {showWelcomeModal && (
+        <WelcomeModalNative
+          isOpen={showWelcomeModal}
+          onClose={() => setShowWelcomeModal(false)}
+          userDisplayName={user?.displayName}
+          userEmailConfirmed={user?.isVerified}
+        />
+      )}
     </View>
   )
 }

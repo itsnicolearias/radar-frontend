@@ -8,6 +8,7 @@ import {
   useSocketEvent,
   useConnectionStore,
   useSocket,
+  useChatStore,
 } from "@radar/features"
 import {
   connectionService,
@@ -95,7 +96,7 @@ export default function RadarPage() {
   const [isAnimatingSignal, setIsAnimatingSignal] = useState(false)
   const socket = useSocket()
   const [showWelcomeModal, setShowWelcomeModal] = useState(false)
-
+  const { setReplyingToSignal } = useChatStore()
   const [isSearching, setIsSearching] = useState(false)
   const [searchMessage, setSearchMessage] = useState("")
   const [newMarkersCount, setNewMarkersCount] = useState(0)
@@ -206,6 +207,13 @@ export default function RadarPage() {
     }
   }, [currentLocation, setCurrentLocation, user])
 
+  useEffect(() => {
+
+    if (user && user.isVerified === false && !user.displayName && !showWelcomeModal) {
+      setShowWelcomeModal(true)
+    }
+  }, [])
+
   const handleUserClick = async (nearbyUser: IRadarUser) => {
     setSelectedUser(nearbyUser)
 
@@ -232,6 +240,7 @@ export default function RadarPage() {
   }
 
   const handleRespond = (signal: IRadarSignal) => {
+    setReplyingToSignal(signal)
     router.push(`/chats/${signal.senderId}?signalId=${signal.signalId}`)
     setSelectedSignal(null)
   }
@@ -499,6 +508,7 @@ export default function RadarPage() {
           onViewProfile={() => handleSignalClick(selectedSignal.senderId)}
           isUserConnected={isUserConnected(selectedSignal.senderId)}
           sendConnection={() => handleConnect(selectedSignal.senderId)}
+          isConnectionPending={() => isTheConnectionPending(selectedSignal.senderId)}
         />
       )}
 

@@ -121,6 +121,26 @@ export default function ChatsPage() {
     }
   }
 
+  const handleViewThisProfile = (userId: string) => {
+    // Find user in profile views
+    const request = profileViews.find((p) => p.viewerId === userId)
+    if (request) {
+      setSelectedUser(request.Viewer as IRadarUser)
+    }
+  }
+
+  const handleViewFriendProfile = (userId: string) => {
+    // Find user in friends
+    const request = connections.find((c) => c.receiverId === userId || c.senderId === userId)
+
+    const user = request?.receiverId === userId ? request?.Receiver : request?.Sender
+    if (user) {
+      setSelectedUser(user as IRadarUser)
+    }
+  }
+
+
+
   const handleCloseProfile = () => {
     setSelectedUser(null)
   }
@@ -350,7 +370,7 @@ export default function ChatsPage() {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: index * 0.1 }}
                     className={`shrink-0 text-center cursor-pointer ${index > 2 ? "blur-sm opacity-30" : ""}`}
-                    onClick={() => handleViewProfile(view.viewerId)}
+                    onClick={() => handleViewThisProfile(view.viewerId)}
                     inert={index > 2}
                   >
                     <div className="relative">
@@ -367,7 +387,7 @@ export default function ChatsPage() {
                       </div>
                       <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-[#1DE3F2] border-2 border-black rounded-full" />
                     </div>
-                    <p className="text-white text-xs font-medium mt-2">{view.Viewer.displayName.split(" ")[0]}</p>
+                    <p className="text-white text-xs font-medium mt-2">{view?.Viewer?.displayName}</p>
                     <p className="text-[#1DE3F2] text-xs">{formatRelativeTime(view.createdAt)}</p>
                   </motion.div>
                 ))}
@@ -399,6 +419,7 @@ export default function ChatsPage() {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}
+                      onClick={() => handleViewFriendProfile(connectedUser.userId)}
                       className="bg-[#1A1A1A] border border-[#00FFB3]/20 rounded-2xl p-4 flex items-center justify-between"
                     >
                       <div className="flex items-center gap-3">

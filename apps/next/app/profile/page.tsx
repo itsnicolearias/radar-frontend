@@ -52,16 +52,22 @@ export default function ProfilePage() {
     setIsSaving(true)
 
     try {
+      const profilePayload: any = {
+      bio,
+      country,
+      province,
+      interests,
+      showAge,
+      showLocation,
+    }
+
+    // 👇 solo agregar age si hay valor
+    if (age !== "" && age !== undefined) {
+      profilePayload.age = Number(age)
+    }
+
       const response = await profileService.updateMyProfile({
-        Profile: {
-          bio,
-          age: Number(age),
-          country,
-          province,
-          interests,
-          showAge,
-          showLocation,
-        },
+        Profile: profilePayload,
         User: {
           displayName,
           firstName,
@@ -118,11 +124,11 @@ export default function ProfilePage() {
         <PlanCard />
 
         <div className="space-y-6 animate-slide-up">
-          <ProfileField label="Nombre visible" value={displayName} onChange={setDisplayName} />
+          <ProfileField label="Nombre visible *" value={displayName} onChange={setDisplayName} />
 
-          <ProfileField label="Nombre" value={firstName} onChange={setFirstName} />
+          <ProfileField label="Nombre *" value={firstName} onChange={setFirstName} />
 
-          <ProfileField label="Apellido" value={lastName} onChange={setLastName} />
+          <ProfileField label="Apellido *" value={lastName} onChange={setLastName} />
 
           <ProfileField
             label="Edad"

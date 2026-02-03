@@ -1,11 +1,11 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { MessageCircle, User, Heart } from "lucide-react"
+import { MessageCircle, User, Heart, Clock } from "lucide-react"
 import type { IRadarSignal } from "@radar/types"
 import React from "react"
 import { formatDistance } from "../../../lib/utils/format-distance"
-import { useUIStore } from "@radar/features"
+import { useConnectionStore, useUIStore } from "@radar/features"
 
 interface SignalDetailModalProps {
   signal: IRadarSignal
@@ -14,6 +14,7 @@ interface SignalDetailModalProps {
   onViewProfile: () => void
   isUserConnected?: boolean
   sendConnection?: () => void
+  isConnectionPending: () =>  boolean
 }
 
 export const SignalDetailModal: React.FC<SignalDetailModalProps> = ({
@@ -23,15 +24,21 @@ export const SignalDetailModal: React.FC<SignalDetailModalProps> = ({
   onViewProfile,
   isUserConnected,
   sendConnection,
+  isConnectionPending,
 }) => {
   const [isAnimating, setIsAnimating] = React.useState(false)
   const connected = isUserConnected ? isUserConnected : false
   const { openModal, closeModal } = useUIStore()
+  const { getLocalConnectionState, setLocalConnectionState, removeConnection } = useConnectionStore()
+
+  const localState = getLocalConnectionState(signal.Sender.userId)
+  const isPending = localState === "pending" || isConnectionPending()
 
   const handleSendConnection = () => {
     if (sendConnection) {
       setIsAnimating(true)
       sendConnection()
+      setLocalConnectionState(signal.Sender.userId, "pending")
       setTimeout(() => setIsAnimating(false), 600)
     }
   }
@@ -108,6 +115,14 @@ export const SignalDetailModal: React.FC<SignalDetailModalProps> = ({
             >
               <MessageCircle className="w-5 h-5" />
               Responder señal
+            </button>
+          ) : isPending ? (
+            <button
+              className="flex-1 h-14 rounded-full border border-yellow-500/30 flex items-center justify-center gap-2 bg-yellow-500/10 text-yellow-500 font-medium cursor-not-allowed"
+              disabled
+            >
+              <Clock className="w-5 h-5" />
+              Pendiente
             </button>
           ) : (
             <motion.button
