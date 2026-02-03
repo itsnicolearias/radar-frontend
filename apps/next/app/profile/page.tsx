@@ -124,11 +124,11 @@ export default function ProfilePage() {
         <PlanCard />
 
         <div className="space-y-6 animate-slide-up">
-          <ProfileField label="Nombre visible" value={displayName} onChange={setDisplayName} />
+          <ProfileField label="Nombre visible *" value={displayName} onChange={setDisplayName} />
 
-          <ProfileField label="Nombre" value={firstName} onChange={setFirstName} />
+          <ProfileField label="Nombre *" value={firstName} onChange={setFirstName} />
 
-          <ProfileField label="Apellido" value={lastName} onChange={setLastName} />
+          <ProfileField label="Apellido *" value={lastName} onChange={setLastName} />
 
           <ProfileField
             label="Edad"

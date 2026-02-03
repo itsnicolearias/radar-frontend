@@ -182,9 +182,9 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
 
-        <ProfileField label="Nombre visible" value={displayName} onChange={setDisplayName} />
-        <ProfileField label="Nombre" value={firstName} onChange={setFirstName} />
-        <ProfileField label="Apellido" value={lastName} onChange={setLastName} />
+        <ProfileField label="Nombre visible *" value={displayName} onChange={setDisplayName} />
+        <ProfileField label="Nombre *" value={firstName} onChange={setFirstName} />
+        <ProfileField label="Apellido *" value={lastName} onChange={setLastName} />
 
         <ProfileField
           label="Edad"
