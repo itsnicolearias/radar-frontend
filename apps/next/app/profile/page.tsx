@@ -52,16 +52,22 @@ export default function ProfilePage() {
     setIsSaving(true)
 
     try {
+      const profilePayload: any = {
+      bio,
+      country,
+      province,
+      interests,
+      showAge,
+      showLocation,
+    }
+
+    // 👇 solo agregar age si hay valor
+    if (age !== "" && age !== undefined) {
+      profilePayload.age = Number(age)
+    }
+
       const response = await profileService.updateMyProfile({
-        Profile: {
-          bio,
-          age: Number(age),
-          country,
-          province,
-          interests,
-          showAge,
-          showLocation,
-        },
+        Profile: profilePayload,
         User: {
           displayName,
           firstName,

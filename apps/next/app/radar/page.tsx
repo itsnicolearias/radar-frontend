@@ -207,6 +207,13 @@ export default function RadarPage() {
     }
   }, [currentLocation, setCurrentLocation, user])
 
+  useEffect(() => {
+
+    if (user && user.isVerified === false && !user.displayName && !showWelcomeModal) {
+      setShowWelcomeModal(true)
+    }
+  }, [])
+
   const handleUserClick = async (nearbyUser: IRadarUser) => {
     setSelectedUser(nearbyUser)
 
