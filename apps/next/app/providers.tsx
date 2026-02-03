@@ -13,13 +13,15 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   // Initialize socket connection
   useSocket()
+  useNotifications()
 
   // Request notification permission on mount
   useEffect(() => {
     if (isAuthenticated) {
       requestPermission()
+      
     }
-  }, [isAuthenticated, requestPermission])
+  }, [isAuthenticated])
 
   return (
     <>
