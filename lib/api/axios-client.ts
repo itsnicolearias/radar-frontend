@@ -1,6 +1,7 @@
 // src/lib/axiosClient.ts
 import axios from "axios"
 import { emitLogout } from "../../packages/common/event-bus"
+import { API_BASE_URL } from "@radar/config"
 
 // Storage helpers
 let SecureStore: any = null
@@ -10,8 +11,6 @@ try {
 } catch (e) {
   SecureStore = null
 }
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
 
 export const axiosRequestor = axios.create({
   baseURL: API_BASE_URL,

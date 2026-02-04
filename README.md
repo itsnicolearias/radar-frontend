@@ -60,6 +60,7 @@ Configura las siguientes variables en el archivo `.env.local` o en la sección *
 
 \`\`\`
 NEXT_PUBLIC_API_URL=http://localhost:8000/api
+EXPO_PUBLIC_API_URL=http://localhost:8000/api
 \`\`\`
 
 ## Desarrollo
@@ -97,23 +98,14 @@ Escanea el código QR con Expo Go para ver la app en tu dispositivo.
 
 ### Próximas Fases
 
-- [ ] Geolocalización en tiempo real
-- [ ] Descubrimiento de usuarios cercanos
-- [ ] Sistema de conexiones
-- [ ] Mensajería
+- [x] Geolocalización en tiempo real
+- [x] Descubrimiento de usuarios cercanos
+- [x] Sistema de conexiones
+- [x] Mensajería
 - [ ] Notificaciones push
 
-## Deployment
 
-Your project is live at:
 
-**[https://vercel.com/nicoles-projects-ebcd3f44/v0-radar-app-development](https://vercel.com/nicoles-projects-ebcd3f44/v0-radar-app-development)**
-
-## Build your app
-
-Continue building your app on:
-
-**[https://v0.app/chat/projects/BnrKjimly1D](https://v0.app/chat/projects/BnrKjimly1D)**
 
 ## Reglas de Codificación
 
@@ -125,7 +117,3 @@ Continue building your app on:
 - Mantener la app en modo oscuro por defecto
 - Respetar los colores y estilo visual del prototipo de Figma
 
-## Recursos
-
-- [Prototipo Figma](https://www.figma.com/make/POT1eKZTiRVluZcnTa7O3L/Prototipo-m%C3%B3vil-para-Radar)
-- [Brand Kit](https://www.figma.com/make/Vsdipxw00hSe5sQtHrSnoZ/Visual-Identity-Kit-for-Radar)
