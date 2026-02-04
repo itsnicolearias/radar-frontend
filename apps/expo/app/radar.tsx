@@ -28,6 +28,19 @@ const { width, height } = Dimensions.get("window")
 const RADAR_SIZE = width * 0.85
 const center = RADAR_SIZE / 2
 const WAVE_SIZE = RADAR_SIZE * 0.35
+const RING_STEPS = [0.25, 0.4, 0.55, 0.7]
+const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5))
+const RADIAL_JITTER = 6
+const ANGLE_JITTER = Math.PI / 36
+
+const hashToUnit = (value: string, salt = ""): number => {
+  let hash = 0
+  const input = `${value}:${salt}`
+  for (let i = 0; i < input.length; i++) {
+    hash = (hash * 31 + input.charCodeAt(i)) | 0
+  }
+  return Math.abs(hash % 1000) / 1000
+}
 
 export default function RadarScreen() {
   const router = useRouter()
@@ -169,14 +182,16 @@ export default function RadarScreen() {
     }
   }, [])
 
-  const getMarkerPosition = (index: number, total: number) => {
-    const center = RADAR_SIZE / 2
-
-    const ringSteps = [0.25, 0.4, 0.55, 0.7]
-    const ring = ringSteps[index % ringSteps.length]
-    const radius = center * ring
-
-    const angle = (index / Math.max(total, 1)) * Math.PI * 2
+  const getRingPosition = (ringIndex: number, indexInRing: number, totalInRing: number, userId: string) => {
+    const baseRadius = center * RING_STEPS[ringIndex]
+    const offset = ringIndex * (Math.PI / 6)
+    const angle =
+      indexInRing * GOLDEN_ANGLE +
+      offset +
+      (hashToUnit(userId, "a") - 0.5) * ANGLE_JITTER
+    const radius =
+      baseRadius +
+      (hashToUnit(userId, "r") - 0.5) * 2 * RADIAL_JITTER
 
     return {
       x: center + Math.cos(angle) * radius,
@@ -249,9 +264,23 @@ export default function RadarScreen() {
   }
 
   const usersToRender = [...nearbyUsers]
-  .filter((u) => typeof u.distance === "number")
-  .sort((a, b) => a.distance - b.distance)
-  .slice(0, MAX_USERS_ON_RADAR)
+    .filter((u) => typeof u.distance === "number")
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, MAX_USERS_ON_RADAR)
+
+  const ringsCount = RING_STEPS.length
+  const ringBuckets: IRadarUser[][] = Array.from({ length: ringsCount }, () => [])
+
+  const usersSortedByDistance = usersToRender.slice().sort((a, b) => {
+    if (a.distance !== b.distance) return a.distance - b.distance
+    return (a.userId || "").localeCompare(b.userId || "")
+  })
+
+  usersSortedByDistance.forEach((u, rank) => {
+    const t = usersSortedByDistance.length > 0 ? rank / usersSortedByDistance.length : 1
+    const ringIndex = Math.min(ringsCount - 1, Math.floor(t * ringsCount))
+    ringBuckets[ringIndex].push(u)
+  })
 
   const eventsToRender = [...nearbyEvents].slice(0, MAX_EVENTS_ON_RADAR)
 
@@ -410,53 +439,56 @@ export default function RadarScreen() {
       </View>
 
       {isVisible &&
-        usersToRender.map((nearbyUser, index) => {
-          const hasSignal = nearbySignals.some(
-            (s) => s.senderId === nearbyUser.userId,
-          )
+        ringBuckets.map((bucket, ringIndex) => {
+          const count = bucket.length || 1
+          return bucket.map((nearbyUser, indexInRing) => {
+            const hasSignal = nearbySignals.some(
+              (s) => s.senderId === nearbyUser.userId,
+            )
 
-          const findSignal = nearbySignals.find(
-            (s) => s.senderId === nearbyUser.userId,
-          )
+            const findSignal = nearbySignals.find(
+              (s) => s.senderId === nearbyUser.userId,
+            )
 
-          const position = getMarkerPosition(
-            index,
-            nearbyUsers.length
-          )
+            const position = getRingPosition(
+              ringIndex,
+              indexInRing,
+              count,
+              nearbyUser.userId,
+            )
 
+            const isNew = newMarkerIds.has(nearbyUser.userId)
 
-    const isNew = newMarkerIds.has(nearbyUser.userId)
+            return (
+              <View key={nearbyUser.userId}>
+                {isNew && (
+                  <MotiView
+                    from={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    style={[
+                      styles.newBadge,
+                      {
+                        left: position.x - 30,
+                        top: position.y - 60,
+                      },
+                    ]}
+                  >
+                    <Text style={styles.newBadgeText}>Nuevo!</Text>
+                  </MotiView>
+                )}
 
-    return (
-      <View key={nearbyUser.userId}>
-        {isNew && (
-          <MotiView
-            from={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            style={[
-              styles.newBadge,
-              {
-                left: position.x - 30,
-                top: position.y - 60,
-              },
-            ]}
-          >
-            <Text style={styles.newBadgeText}>Nuevo!</Text>
-          </MotiView>
-        )}
-
-
-        <UserMarkerNative
-          user={nearbyUser}
-          position={position}
-          hasSignal={hasSignal}
-          onPress={() => handleSelectUser(nearbyUser)}
-          index={index}
-          onSelectSignal={() => setSelectedSignal(findSignal!)}
-        />
-      </View>
-    )
-  })}
+                <UserMarkerNative
+                  user={nearbyUser}
+                  position={position}
+                  hasSignal={hasSignal}
+                  onPress={() => handleSelectUser(nearbyUser)}
+                  index={indexInRing}
+                  onSelectSignal={() => setSelectedSignal(findSignal!)}
+                />
+              </View>
+            )
+          })
+        })}
   </View>
 
 
