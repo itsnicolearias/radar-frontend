@@ -47,6 +47,18 @@ import { useUIStore } from "@radar/features"
 const CENTER = 50
 const USER_RADII = [12.5, 20, 27.5, 35]
 const EVENT_RADII = [30, 38, 46]
+const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5))
+const RADIAL_JITTER = 1.2
+const ANGLE_JITTER = Math.PI / 36
+
+function hashToUnit(value: string, salt = ""): number {
+  let hash = 0
+  const input = `${value}:${salt}`
+  for (let i = 0; i < input.length; i++) {
+    hash = (hash * 31 + input.charCodeAt(i)) | 0
+  }
+  return Math.abs(hash % 1000) / 1000
+}
 
 /* =========================
    MARKER POSITION (NO DISTANCE)
@@ -281,10 +293,17 @@ export default function RadarPage() {
     .slice(0, 15)
 
   const ringsCount = USER_RADII.length
-  const sortedUsers = usersToRender.slice().sort((a, b) => (a.userId || '').localeCompare(b.userId || ''))
   const ringBuckets: IRadarUser[][] = Array.from({ length: ringsCount }, () => [])
-  sortedUsers.forEach((u, i) => {
-    ringBuckets[i % ringsCount].push(u)
+
+  const usersSortedByDistance = usersToRender.slice().sort((a, b) => {
+    if (a.distance !== b.distance) return a.distance - b.distance
+    return (a.userId || "").localeCompare(b.userId || "")
+  })
+
+  usersSortedByDistance.forEach((u, rank) => {
+    const t = usersSortedByDistance.length > 0 ? rank / usersSortedByDistance.length : 1
+    const ringIndex = Math.min(ringsCount - 1, Math.floor(t * ringsCount))
+    ringBuckets[ringIndex].push(u)
   })
 
   const { isModalOpen } = useUIStore()
@@ -408,9 +427,15 @@ export default function RadarPage() {
               ringBuckets.map((bucket, ringIndex) => {
                 const count = bucket.length || 1
                 const offset = ringIndex * (Math.PI / 6)
-                const radius = USER_RADII[ringIndex]
+                const baseRadius = USER_RADII[ringIndex]
                 return bucket.map((nearbyUser, idxInRing) => {
-                  const angle = (idxInRing / count) * Math.PI * 2 + offset
+                  const angle =
+                    idxInRing * GOLDEN_ANGLE +
+                    offset +
+                    (hashToUnit(nearbyUser.userId, "a") - 0.5) * ANGLE_JITTER
+                  const radius =
+                    baseRadius +
+                    (hashToUnit(nearbyUser.userId, "r") - 0.5) * 2 * RADIAL_JITTER
                   const position = {
                     x: CENTER + radius * Math.cos(angle),
                     y: CENTER + radius * Math.sin(angle),
