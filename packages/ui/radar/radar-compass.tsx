@@ -4,26 +4,29 @@ import type React from "react"
 
 export const RadarCompass: React.FC = () => {
   return (
-    <div className="absolute top-2 right-2 z-20 w-14 h-14 flex items-center justify-center">
+    <div className="absolute top-4 right-4 z-20 w-24 h-24 flex items-center justify-center">
       {/* Outer ring */}
-      <div className="absolute w-full h-full rounded-full border border-[#00FFB3]/40" />
+      <div className="absolute w-full h-full rounded-full border-2 border-[#00FFB3]/40" />
 
       {/* Compass rose with cardinal directions */}
       <div className="relative w-full h-full flex items-center justify-center">
         {/* North */}
-        <div className="absolute top-1 text-[#00FFB3] font-bold text-xs">N</div>
+        <div className="absolute top-2 text-[#00FFB3] font-bold text-sm">N</div>
 
         {/* East */}
-        <div className="absolute right-1 text-[#00FFB3] font-bold text-xs">E</div>
+        <div className="absolute right-2 text-[#00FFB3] font-bold text-sm">E</div>
 
         {/* South */}
-        <div className="absolute bottom-1 text-[#00FFB3] font-bold text-xs">S</div>
+        <div className="absolute bottom-2 text-[#00FFB3] font-bold text-sm">S</div>
 
         {/* West */}
-        <div className="absolute left-1 text-[#00FFB3] font-bold text-xs">O</div>
+        <div className="absolute left-2 text-[#00FFB3] font-bold text-sm">O</div>
+
+        {/* Inner circle decorative line */}
+        <div className="absolute w-8 h-8 rounded-full border border-[#00FFB3]/30" />
 
         {/* Center dot */}
-        <div className="w-1 h-1 rounded-full bg-[#00FFB3]/60" />
+        <div className="w-2 h-2 rounded-full bg-[#00FFB3]/80" />
       </div>
     </div>
   )

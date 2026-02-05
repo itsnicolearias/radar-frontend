@@ -40,7 +40,9 @@ import { AnimatePresence, motion } from "framer-motion"
 import { Radio, MapPin, RefreshCcw } from "lucide-react"
 import { useUIStore } from "@radar/features"
 import { RadarCompass } from "../../../../packages/ui/radar/radar-compass"
-import { calculateBearing } from "../../../../lib/utils/calculate-bearing"
+import { calculateBearing, resolveCollision } from "../../../../lib/utils/calculate-bearing"
+import { resolveAllCollisions } from "../../../../lib/utils/collision-detection"
+import type { MarkerPosition } from "../../../../lib/utils/collision-detection"
 
 /* =========================
    RADAR CONSTANTS
@@ -459,16 +461,16 @@ export default function RadarPage() {
           />
 
           {/* USERS */}
-            {isVisible &&
-              ringBuckets.map((bucket, ringIndex) => {
-                const count = bucket.length || 1
+            {isVisible && (() => {
+              // Calcular posiciones iniciales de todos los usuarios
+              const initialPositions: Array<MarkerPosition & { user: IRadarUser; bucketIndex: number; indexInRing: number }> = []
+              
+              ringBuckets.forEach((bucket, ringIndex) => {
                 const offset = ringIndex * (Math.PI / 6)
                 const baseRadius = USER_RADII[ringIndex]
-                return bucket.map((nearbyUser, idxInRing) => {
-                  // Calcular jitter determinístico basado en userId
+                
+                bucket.forEach((nearbyUser, idxInRing) => {
                   const jitterAngle = (hashToUnit(nearbyUser.userId, "a") - 0.5) * ANGLE_JITTER
-                  
-                  // Usar bearing geográfico si tenemos coordenadas válidas
                   const hasBearingData = currentLocation && 
                     nearbyUser.lastLatitude !== null && 
                     nearbyUser.lastLongitude !== null
@@ -484,53 +486,65 @@ export default function RadarPage() {
                         jitterAngle
                       )
                     : (() => {
-                        // Fallback a posicionamiento relativo si no hay bearing
-                        const angle =
-                          idxInRing * GOLDEN_ANGLE +
-                          offset +
-                          jitterAngle
+                        const angle = idxInRing * GOLDEN_ANGLE + offset + jitterAngle
                         const radii = USER_RADII[ringIndex]
-                        const markerRadius =
-                          radii +
-                          (hashToUnit(nearbyUser.userId, "r") - 0.5) * 2 * RADIAL_JITTER
+                        const markerRadius = radii + (hashToUnit(nearbyUser.userId, "r") - 0.5) * 2 * RADIAL_JITTER
                         return {
                           x: CENTER + markerRadius * Math.cos(angle),
                           y: CENTER + markerRadius * Math.sin(angle),
                         }
                       })()
                   
-                  const hasSignal = nearbySignals.some((s) => s.senderId === nearbyUser.userId)
-                  const findSignal = nearbySignals.findLast((s) => s.senderId === nearbyUser.userId)
-                  const isNew = newMarkerIds.has(nearbyUser.userId)
-
-                  return (
-                    <div key={nearbyUser.userId}>
-                      {isNew && (
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.5 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          className="absolute bg-[#00FFB3] px-3 py-1 rounded-full z-30"
-                          style={{
-                            left: `${position.x}%`,
-                            top: `${position.y - 8}%`,
-                            transform: "translate(-50%, -100%)",
-                          }}
-                        >
-                          <p className="text-black text-[10px] font-bold">Nuevo!</p>
-                        </motion.div>
-                      )}
-                      <UserMarker
-                        user={nearbyUser}
-                        position={position}
-                        hasSignal={hasSignal}
-                        onClick={() => handleUserClick(nearbyUser)}
-                        index={idxInRing}
-                        onSelectSignal={() => setSelectedSignal(findSignal)}
-                      />
-                    </div>
-                  )
+                  initialPositions.push({
+                    userId: nearbyUser.userId,
+                    x: position.x,
+                    y: position.y,
+                    user: nearbyUser,
+                    bucketIndex: ringIndex,
+                    indexInRing: idxInRing,
+                  })
                 })
-              })}
+              })
+              
+              // Aplicar resolución de colisiones
+              const adjustedPositions = resolveAllCollisions(initialPositions)
+              const positionMap = new Map(adjustedPositions.map(p => [p.userId, { x: p.x, y: p.y }]))
+              
+              return initialPositions.map((item) => {
+                const adjustedPos = positionMap.get(item.userId)
+                const finalPosition = adjustedPos || { x: item.x, y: item.y }
+                const hasSignal = nearbySignals.some((s) => s.senderId === item.user.userId)
+                const findSignal = nearbySignals.findLast((s) => s.senderId === item.user.userId)
+                const isNew = newMarkerIds.has(item.user.userId)
+                
+                return (
+                  <div key={item.user.userId}>
+                    {isNew && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="absolute bg-[#00FFB3] px-3 py-1 rounded-full z-30"
+                        style={{
+                          left: `${finalPosition.x}%`,
+                          top: `${finalPosition.y - 8}%`,
+                          transform: "translate(-50%, -100%)",
+                        }}
+                      >
+                        <p className="text-black text-[10px] font-bold">Nuevo!</p>
+                      </motion.div>
+                    )}
+                    <UserMarker
+                      user={item.user}
+                      position={finalPosition}
+                      hasSignal={hasSignal}
+                      onClick={() => handleUserClick(item.user)}
+                      index={item.indexInRing}
+                      onSelectSignal={() => setSelectedSignal(findSignal)}
+                    />
+                  </div>
+                )
+              })
+            })()}
 
           {/* EVENTS 
           {isVisible &&

@@ -22,6 +22,8 @@ import InvisibleBadge from "../../../packages/ui/components/invisible-badge.nati
 import { WelcomeModalNative } from "../../../packages/ui/modals/welcome-modal.native"
 import { RadarCompassNative } from "../../../packages/ui/radar/radar-compass.native"
 import { calculateBearing } from "../../../lib/utils/calculate-bearing"
+import { resolveAllCollisions } from "../../../lib/utils/collision-detection"
+import type { MarkerPosition } from "../../../lib/utils/collision-detection"
 
 const MAX_USERS_ON_RADAR = 15
 const MAX_EVENTS_ON_RADAR = 8
@@ -490,18 +492,14 @@ export default function RadarScreen() {
         />
       </View>
 
-      {isVisible &&
-        ringBuckets.map((bucket, ringIndex) => {
+      {isVisible && (() => {
+        // Calcular posiciones iniciales de todos los usuarios
+        const initialPositions: Array<MarkerPosition & { user: IRadarUser; bucketIndex: number; indexInRing: number }> = []
+        
+        ringBuckets.forEach((bucket, ringIndex) => {
           const count = bucket.length || 1
-          return bucket.map((nearbyUser, indexInRing) => {
-            const hasSignal = nearbySignals.some(
-              (s) => s.senderId === nearbyUser.userId,
-            )
-
-            const findSignal = nearbySignals.find(
-              (s) => s.senderId === nearbyUser.userId,
-            )
-
+          
+          bucket.forEach((nearbyUser, indexInRing) => {
             const position = getRingPosition(
               ringIndex,
               indexInRing,
@@ -513,39 +511,59 @@ export default function RadarScreen() {
               nearbyUser.lastLongitude,
               nearbyUser.distance,
             )
-
-            const isNew = newMarkerIds.has(nearbyUser.userId)
-
-            return (
-              <View key={nearbyUser.userId}>
-                {isNew && (
-                  <MotiView
-                    from={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    style={[
-                      styles.newBadge,
-                      {
-                        left: position.x - 30,
-                        top: position.y - 60,
-                      },
-                    ]}
-                  >
-                    <Text style={styles.newBadgeText}>Nuevo!</Text>
-                  </MotiView>
-                )}
-
-                <UserMarkerNative
-                  user={nearbyUser}
-                  position={position}
-                  hasSignal={hasSignal}
-                  onPress={() => handleSelectUser(nearbyUser)}
-                  index={indexInRing}
-                  onSelectSignal={() => setSelectedSignal(findSignal!)}
-                />
-              </View>
-            )
+            
+            initialPositions.push({
+              userId: nearbyUser.userId,
+              x: position.x,
+              y: position.y,
+              user: nearbyUser,
+              bucketIndex: ringIndex,
+              indexInRing: indexInRing,
+            })
           })
-        })}
+        })
+        
+        // Aplicar resolución de colisiones
+        const adjustedPositions = resolveAllCollisions(initialPositions)
+        const positionMap = new Map(adjustedPositions.map(p => [p.userId, { x: p.x, y: p.y }]))
+        
+        return initialPositions.map((item) => {
+          const adjustedPos = positionMap.get(item.user.userId)
+          const finalPosition = adjustedPos || { x: item.x, y: item.y }
+          const hasSignal = nearbySignals.some((s) => s.senderId === item.user.userId)
+          const findSignal = nearbySignals.find((s) => s.senderId === item.user.userId)
+          const isNew = newMarkerIds.has(item.user.userId)
+          
+          return (
+            <View key={item.user.userId}>
+              {isNew && (
+                <MotiView
+                  from={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  style={[
+                    styles.newBadge,
+                    {
+                      left: finalPosition.x - 30,
+                      top: finalPosition.y - 60,
+                    },
+                  ]}
+                >
+                  <Text style={styles.newBadgeText}>Nuevo!</Text>
+                </MotiView>
+              )}
+
+              <UserMarkerNative
+                user={item.user}
+                position={finalPosition}
+                hasSignal={hasSignal}
+                onPress={() => handleSelectUser(item.user)}
+                index={item.indexInRing}
+                onSelectSignal={() => setSelectedSignal(findSignal!)}
+              />
+            </View>
+          )
+        })
+      })()}
   </View>
 
 
