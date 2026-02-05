@@ -20,6 +20,8 @@ import { CentralUserMarkerNative } from "../../../packages/ui/radar/central-user
 import GhostButton from "../../../packages/ui/components/ghost-button.native"
 import InvisibleBadge from "../../../packages/ui/components/invisible-badge.native"
 import { WelcomeModalNative } from "../../../packages/ui/modals/welcome-modal.native"
+import { RadarCompassNative } from "../../../packages/ui/radar/radar-compass.native"
+import { calculateBearing } from "../../../lib/utils/calculate-bearing"
 
 const MAX_USERS_ON_RADAR = 15
 const MAX_EVENTS_ON_RADAR = 8
@@ -40,6 +42,38 @@ const hashToUnit = (value: string, salt = ""): number => {
     hash = (hash * 31 + input.charCodeAt(i)) | 0
   }
   return Math.abs(hash % 1000) / 1000
+}
+
+function getMarkerPositionFromBearing(
+  userLat: number | undefined,
+  userLon: number | undefined,
+  targetLat: number | null,
+  targetLon: number | null,
+  distance: number,
+  maxDistance: number,
+  jitterAmount: number = 0
+) {
+  // Si no tenemos coordenadas, retornar posición default
+  if (!userLat || !userLon || targetLat === null || targetLon === null) {
+    return { x: center, y: center }
+  }
+
+  // Calcular bearing entre usuario y target
+  const bearing = calculateBearing(userLat, userLon, targetLat, targetLon)
+  
+  // Aplicar jitter determinístico
+  const angle = bearing + jitterAmount
+
+  // Normalizar distancia a radio del radar
+  const normalizedDistance = Math.min(distance / maxDistance, 1)
+  const radius = normalizedDistance * (center * 0.7) // 70% del radio disponible
+
+  // Convertir coordenadas polares a cartesianas
+  // Ajustar para que Norte (0 radianes) apunte arriba (eje Y negativo)
+  const x = center + radius * Math.sin(angle)
+  const y = center - radius * Math.cos(angle)
+
+  return { x, y }
 }
 
 export default function RadarScreen() {
@@ -182,16 +216,32 @@ export default function RadarScreen() {
     }
   }, [])
 
-  const getRingPosition = (ringIndex: number, indexInRing: number, totalInRing: number, userId: string) => {
+  const getRingPosition = (
+    ringIndex: number,
+    indexInRing: number,
+    totalInRing: number,
+    userId: string,
+    userLat?: number,
+    userLon?: number,
+    targetLat?: number | null,
+    targetLon?: number | null,
+    distance?: number
+  ) => {
+    // Calcular jitter determinístico basado en userId
+    const jitterAngle = (hashToUnit(userId, "a") - 0.5) * ANGLE_JITTER
+
+    // Usar bearing geográfico si tenemos coordenadas válidas
+    const hasBearingData = userLat && userLon && targetLat !== null && targetLon !== null
+    
+    if (hasBearingData && distance) {
+      return getMarkerPositionFromBearing(userLat, userLon, targetLat, targetLon, distance, radiusKm * 1000, jitterAngle)
+    }
+
+    // Fallback a posicionamiento relativo si no hay bearing
     const baseRadius = center * RING_STEPS[ringIndex]
     const offset = ringIndex * (Math.PI / 6)
-    const angle =
-      indexInRing * GOLDEN_ANGLE +
-      offset +
-      (hashToUnit(userId, "a") - 0.5) * ANGLE_JITTER
-    const radius =
-      baseRadius +
-      (hashToUnit(userId, "r") - 0.5) * 2 * RADIAL_JITTER
+    const angle = indexInRing * GOLDEN_ANGLE + offset + jitterAngle
+    const radius = baseRadius + (hashToUnit(userId, "r") - 0.5) * 2 * RADIAL_JITTER
 
     return {
       x: center + Math.cos(angle) * radius,
@@ -346,6 +396,8 @@ export default function RadarScreen() {
           position: "relative",
         }}
       >
+        {/* COMPASS */}
+        <RadarCompassNative />
 
         {[...Array(8)].map((_, i) => (
           <MotiView
@@ -455,6 +507,11 @@ export default function RadarScreen() {
               indexInRing,
               count,
               nearbyUser.userId,
+              currentLocation?.latitude,
+              currentLocation?.longitude,
+              nearbyUser.lastLatitude,
+              nearbyUser.lastLongitude,
+              nearbyUser.distance,
             )
 
             const isNew = newMarkerIds.has(nearbyUser.userId)

@@ -39,6 +39,8 @@ import { CentralUserMarker } from "../../../../packages/ui/radar/central-user-ma
 import { AnimatePresence, motion } from "framer-motion"
 import { Radio, MapPin, RefreshCcw } from "lucide-react"
 import { useUIStore } from "@radar/features"
+import { RadarCompass } from "../../../../packages/ui/radar/radar-compass"
+import { calculateBearing } from "../../../../lib/utils/calculate-bearing"
 
 /* =========================
    RADAR CONSTANTS
@@ -77,6 +79,38 @@ function getMarkerPosition(
     x: CENTER + radius * Math.cos(angle),
     y: CENTER + radius * Math.sin(angle),
   }
+}
+
+function getMarkerPositionFromBearing(
+  userLat: number | undefined,
+  userLon: number | undefined,
+  targetLat: number | null,
+  targetLon: number | null,
+  distance: number,
+  maxDistance: number,
+  jitterAmount: number = 0
+) {
+  // Si no tenemos coordenadas, retornar posición default
+  if (!userLat || !userLon || targetLat === null || targetLon === null) {
+    return { x: CENTER, y: CENTER }
+  }
+
+  // Calcular bearing entre usuario y target
+  const bearing = calculateBearing(userLat, userLon, targetLat, targetLon)
+  
+  // Aplicar jitter determinístico
+  const angle = bearing + jitterAmount
+
+  // Normalizar distancia a radio del radar
+  const normalizedDistance = Math.min(distance / maxDistance, 1)
+  const radius = normalizedDistance * 45 // 45% of container
+
+  // Convertir coordenadas polares a cartesianas
+  // Ajustar para que Norte (0 radianes) apunte arriba (eje Y negativo)
+  const x = CENTER + radius * Math.sin(angle)
+  const y = CENTER - radius * Math.cos(angle)
+
+  return { x, y }
 }
 
 export default function RadarPage() {
@@ -363,6 +397,8 @@ export default function RadarPage() {
           className="relative w-full max-w-[420px] aspect-square"
           style={{ pointerEvents: isModalOpen ? 'none' : 'auto', filter: isModalOpen ? 'blur(2px)' : 'none' }}
         >
+          {/* COMPASS */}
+          <RadarCompass />
 
           {/* PARTICLES */}
           {[...Array(8)].map((_, i) => (
@@ -429,17 +465,40 @@ export default function RadarPage() {
                 const offset = ringIndex * (Math.PI / 6)
                 const baseRadius = USER_RADII[ringIndex]
                 return bucket.map((nearbyUser, idxInRing) => {
-                  const angle =
-                    idxInRing * GOLDEN_ANGLE +
-                    offset +
-                    (hashToUnit(nearbyUser.userId, "a") - 0.5) * ANGLE_JITTER
-                  const radius =
-                    baseRadius +
-                    (hashToUnit(nearbyUser.userId, "r") - 0.5) * 2 * RADIAL_JITTER
-                  const position = {
-                    x: CENTER + radius * Math.cos(angle),
-                    y: CENTER + radius * Math.sin(angle),
-                  }
+                  // Calcular jitter determinístico basado en userId
+                  const jitterAngle = (hashToUnit(nearbyUser.userId, "a") - 0.5) * ANGLE_JITTER
+                  
+                  // Usar bearing geográfico si tenemos coordenadas válidas
+                  const hasBearingData = currentLocation && 
+                    nearbyUser.lastLatitude !== null && 
+                    nearbyUser.lastLongitude !== null
+                  
+                  const position = hasBearingData
+                    ? getMarkerPositionFromBearing(
+                        currentLocation?.latitude,
+                        currentLocation?.longitude,
+                        nearbyUser.lastLatitude,
+                        nearbyUser.lastLongitude,
+                        nearbyUser.distance,
+                        radius,
+                        jitterAngle
+                      )
+                    : (() => {
+                        // Fallback a posicionamiento relativo si no hay bearing
+                        const angle =
+                          idxInRing * GOLDEN_ANGLE +
+                          offset +
+                          jitterAngle
+                        const radii = USER_RADII[ringIndex]
+                        const markerRadius =
+                          radii +
+                          (hashToUnit(nearbyUser.userId, "r") - 0.5) * 2 * RADIAL_JITTER
+                        return {
+                          x: CENTER + markerRadius * Math.cos(angle),
+                          y: CENTER + markerRadius * Math.sin(angle),
+                        }
+                      })()
+                  
                   const hasSignal = nearbySignals.some((s) => s.senderId === nearbyUser.userId)
                   const findSignal = nearbySignals.findLast((s) => s.senderId === nearbyUser.userId)
                   const isNew = newMarkerIds.has(nearbyUser.userId)
