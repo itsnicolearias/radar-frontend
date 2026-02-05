@@ -22,6 +22,8 @@ interface ChatState {
   updateChatLastMessage: (conversationId: string, message: IMessageResponse) => void
   incrementUnreadCount: (conversationId: string) => void
   resetUnreadCount: (conversationId: string) => void
+  removeMessage: (conversationId: string, messageId: string) => void
+  removeConversation: (conversationId: string) => void
 
   addTypingUser: (conversationId: string) => void
   removeTypingUser: (conversationId: string) => void
@@ -91,6 +93,21 @@ export const useChatStore = create<ChatState>()(
         if (chat) {
           chat.unreadCount = 0
         }
+      }),
+
+    removeMessage: (conversationId, messageId) =>
+      set((state) => {
+        if (state.messages[conversationId]) {
+          state.messages[conversationId] = state.messages[conversationId].filter(
+            (m) => m.messageId !== messageId
+          )
+        }
+      }),
+
+    removeConversation: (conversationId) =>
+      set((state) => {
+        state.chats = state.chats.filter((c) => c.conversationId !== conversationId)
+        delete state.messages[conversationId]
       }),
 
     addTypingUser: (conversationId) =>

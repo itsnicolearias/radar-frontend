@@ -2,18 +2,22 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Plus } from "lucide-react"
+import { Plus, Edit, Trash2, X } from "lucide-react"
 import { EventCard, EventCategoryFilter, BottomNav } from "@radar/ui"
 import { useEventsStore, useAuthStore } from "@radar/features"
 import { eventService } from "@radar/api"
+import { motion, AnimatePresence } from "framer-motion"
+import type { IEventResponse } from "@radar/types"
 
 const CATEGORIES = ["Todos", "Música", "Gastronomía", "Arte", "Deportes", "Social"]
 
 export default function EventsPage() {
   const router = useRouter()
-  const { events, setEvents, toggleInterest, selectedCategory, setSelectedCategory, setLoading } = useEventsStore()
+  const { events, setEvents, toggleInterest, selectedCategory, setSelectedCategory, setLoading, removeEvent } = useEventsStore()
   const { user } = useAuthStore()
   const [showMyEvents, setShowMyEvents] = useState(false)
+  const [editingEvent, setEditingEvent] = useState<IEventResponse | null>(null)
+  const [alertMessage, setAlertMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -54,9 +58,62 @@ export default function EventsPage() {
     router.push(`/${tab === "radar" ? "radar" : tab}`)
   }
 
+  const handleDeleteEvent = async (eventId: string) => {
+    if (!confirm("¿Estás seguro que deseas eliminar el evento?")) return
+
+    try {
+      await eventService.deleteEvent(eventId)
+      removeEvent(eventId)
+      setAlertMessage({ type: "success", text: "Evento eliminado correctamente" })
+      setTimeout(() => setAlertMessage(null), 3000)
+    } catch (error) {
+      console.error("[v0] Error deleting event:", error)
+      setAlertMessage({ type: "error", text: "Error al eliminar el evento" })
+      setTimeout(() => setAlertMessage(null), 3000)
+    }
+  }
+
+  const handleEditEvent = (event: IEventResponse) => {
+    setEditingEvent(event)
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editingEvent) return
+
+    try {
+      const updated = await eventService.updateEvent(editingEvent.eventId, {
+        title: editingEvent.title,
+        description: editingEvent.description,
+        location: editingEvent.location,
+        price: editingEvent.price,
+      })
+      
+      setEvents(events.map(e => e.eventId === updated.eventId ? updated : e))
+      setEditingEvent(null)
+      setAlertMessage({ type: "success", text: "Evento actualizado correctamente" })
+      setTimeout(() => setAlertMessage(null), 3000)
+    } catch (error) {
+      console.error("[v0] Error updating event:", error)
+      setAlertMessage({ type: "error", text: "Error al actualizar el evento" })
+      setTimeout(() => setAlertMessage(null), 3000)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-black pb-24 flex flex-col">
       <div className="absolute inset-0 bg-gradient-radial from-[#00FFB3]/5 via-transparent to-transparent pointer-events-none" />
+
+      {alertMessage && (
+        <div
+          className={`fixed top-20 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-full shadow-lg backdrop-blur-lg ${
+            alertMessage.type === "success"
+              ? "bg-[#00FFB3]/20 border border-[#00FFB3] text-[#00FFB3]"
+              : "bg-[#FF005C]/20 border border-[#FF005C] text-[#FF005C]"
+          }`}
+        >
+          {alertMessage.text}
+        </div>
+      )}
 
       <header className="relative z-10 bg-black/90 backdrop-blur-lg px-6 py-4 pt-12 top-0 border-b border-[#00FFB3]/10 lg:px-12">
         <div className="max-w-7xl mx-auto">
@@ -102,28 +159,130 @@ export default function EventsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
               {filteredEvents.map((event) => {
                 const isInterested = event?.InterestedUsers?.some((u) => u.userId === user?.userId)
+                const isOwner = event.userId === user?.userId
                 return (
-                  <EventCard
-                    key={event.eventId}
-                    title={event.title}
-                    description={event.description}
-                    location={event.location}
-                    startDate={event.startDate}
-                    attendeesCount={event?.InterestedUsers?.length}
-                    price={event.price}
-                    distance={event.distance}
-                    category={event.category}
-                    isInterested={isInterested}
-                    isBoosted={false}
-                    onInterestClick={() => handleInterestClick(event.eventId, isInterested || false)}
-                    onClick={() => router.push(`/events/${event.eventId}`)}
-                  />
+                  <div key={event.eventId} className="relative group">
+                    <EventCard
+                      title={event.title}
+                      description={event.description}
+                      location={event.location}
+                      startDate={event.startDate}
+                      attendeesCount={event?.InterestedUsers?.length}
+                      price={event.price}
+                      distance={event.distance}
+                      category={event.category}
+                      isInterested={isInterested}
+                      isBoosted={false}
+                      onInterestClick={() => handleInterestClick(event.eventId, isInterested || false)}
+                      onClick={() => router.push(`/events/${event.eventId}`)}
+                    />
+                    {isOwner && (
+                      <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleEditEvent(event)
+                          }}
+                          className="p-2 bg-[#00FFB3] rounded-full hover:scale-110 transition-transform shadow-lg"
+                        >
+                          <Edit className="w-4 h-4 text-black" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleDeleteEvent(event.eventId)
+                          }}
+                          className="p-2 bg-[#FF005C] rounded-full hover:scale-110 transition-transform shadow-lg"
+                        >
+                          <Trash2 className="w-4 h-4 text-white" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 )
               })}
             </div>
           )}
         </div>
       </div>
+
+      <AnimatePresence>
+        {editingEvent && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setEditingEvent(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              className="bg-[#1A1A1A] rounded-2xl p-6 w-full max-w-md border border-[#00FFB3]/30"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-white">Editar evento</h2>
+                <button
+                  onClick={() => setEditingEvent(null)}
+                  className="w-8 h-8 bg-[#0D0D0D] rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+                >
+                  <X className="w-4 h-4 text-[#C5C5C5]" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm text-white mb-2">Título</label>
+                  <input
+                    type="text"
+                    value={editingEvent.title}
+                    onChange={(e) => setEditingEvent({ ...editingEvent, title: e.target.value })}
+                    className="w-full px-4 py-2 bg-[#0D0D0D] border border-[#00FFB3]/30 rounded-lg text-white focus:outline-none focus:border-[#00FFB3]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-white mb-2">Descripción</label>
+                  <textarea
+                    value={editingEvent.description}
+                    onChange={(e) => setEditingEvent({ ...editingEvent, description: e.target.value })}
+                    className="w-full px-4 py-2 bg-[#0D0D0D] border border-[#00FFB3]/30 rounded-lg text-white focus:outline-none focus:border-[#00FFB3] h-24 resize-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-white mb-2">Ubicación</label>
+                  <input
+                    type="text"
+                    value={editingEvent.location}
+                    onChange={(e) => setEditingEvent({ ...editingEvent, location: e.target.value })}
+                    className="w-full px-4 py-2 bg-[#0D0D0D] border border-[#00FFB3]/30 rounded-lg text-white focus:outline-none focus:border-[#00FFB3]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-white mb-2">Precio</label>
+                  <input
+                    type="number"
+                    value={editingEvent.price}
+                    onChange={(e) => setEditingEvent({ ...editingEvent, price: Number(e.target.value) })}
+                    className="w-full px-4 py-2 bg-[#0D0D0D] border border-[#00FFB3]/30 rounded-lg text-white focus:outline-none focus:border-[#00FFB3]"
+                  />
+                </div>
+
+                <button
+                  onClick={handleSaveEdit}
+                  className="w-full h-12 bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-semibold rounded-lg hover:scale-105 transition-transform"
+                >
+                  Guardar cambios
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <BottomNav activeTab="events" onTabChange={handleTabChange} />
     </div>
