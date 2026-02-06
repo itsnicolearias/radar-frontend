@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useRef, Suspense } from "react"
 import { useRouter, useParams, useSearchParams } from "next/navigation"
-import { ArrowLeft, X, Send } from "lucide-react"
-import { motion } from "framer-motion"
+import { ArrowLeft, X, Send, Trash2, MoreVertical } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 import { useChatStore, useAuthStore, useSocketEvent } from "@radar/features"
 import { messageService, emitSocketEvent, signalService, connectionService } from "@radar/api"
 import type { IMessageResponse, IRadarSignal, IRadarUser } from "@radar/types"
@@ -16,20 +16,21 @@ function ChatConversationPage() {
   const userId = params.userId as string
 
   const { user } = useAuthStore()
-  const { messages, setMessages, addMessage, resetUnreadCount, replyingToSignal, setReplyingToSignal } = useChatStore()
+  const { messages, setMessages, addMessage, resetUnreadCount, replyingToSignal, setReplyingToSignal, removeMessage, removeConversation } = useChatStore()
   const { connections, pendingRequests, myPendingRequests } = useConnectionStore()
   const [isTyping, setIsTyping] = useState(false)
   const [message, setMessage] = useState("")
-  //const [replyingTo, setReplyingTo] = useState<IRadarSignal | null>(null)
   const [showProfileModal, setShowProfileModal] = useState(false)
   const [profileUser, setProfileUser] = useState<IRadarUser | null>(null)
+  const [showOptionsMenu, setShowOptionsMenu] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const searchParams = useSearchParams()
   const signalId = searchParams.get("signalId")
 
   const [optimisticMessages, setOptimisticMessages] = useState<IMessageResponse[]>([])
 
-  const userMessages = [...(messages[userId] || []), ...optimisticMessages]
+  const allMessages = [...(messages[userId] || []), ...optimisticMessages]
+  const userMessages = allMessages.filter((msg) => !msg.deletedFor?.includes(user!.userId))
 
   useEffect(() => {
     if (!signalId) return
@@ -51,21 +52,32 @@ function ChatConversationPage() {
         const data = await messageService.getMessages(userId)
         setMessages(userId, data)
         resetUnreadCount(userId)
+
+        const unreadMessages = data.filter((msg) => !msg.isRead && msg.receiverId === user?.userId && !msg.deletedFor?.includes(user?.userId))
+        
+        if (unreadMessages.length > 0) {
+          const unreadIds = unreadMessages.map((msg) => msg.messageId)
+          await messageService.markAsRead(unreadIds)
+        }
       } catch (error) {
         console.error("[v0] Error fetching messages:", error)
       }
     }
 
     fetchMessages()
-  }, [userId, setMessages, resetUnreadCount])
+  }, [userId, setMessages, resetUnreadCount, user?.userId])
 
   useSocketEvent<IMessageResponse>(
     "new-message",
-    (message) => {
+    async (message) => {
       if (message.senderId === userId || message.receiverId === userId) {
         addMessage(userId, message)
-        if (message.senderId === userId) {
-          messageService.markAsRead([message.messageId])
+        if (message.senderId === userId && !message.isRead) {
+          try {
+            await messageService.markAsRead([message.messageId])
+          } catch (error) {
+            console.error("[v0] Error marking message as read:", error)
+          }
         }
       }
     },
@@ -127,7 +139,6 @@ function ChatConversationPage() {
 
       setOptimisticMessages((prev) => prev.filter((m) => m.messageId !== optimisticMessage.messageId))
       addMessage(userId, msg)
-      await messageService.markAsRead([msg.messageId])
     } catch (error) {
       console.error("[v0] Error sending message:", error)
       setOptimisticMessages((prev) => prev.filter((m) => m.messageId !== optimisticMessage.messageId))
@@ -200,6 +211,31 @@ function ChatConversationPage() {
     return isPending
   }
 
+  const handleDeleteMessage = async (messageId: string) => {
+    if (!confirm("¿Eliminar este mensaje?")) return
+    
+    try {
+      await messageService.deleteMessage(messageId)
+      removeMessage(userId, messageId)
+    } catch (error) {
+      console.error("[v0] Error deleting message:", error)
+      alert("No se pudo eliminar el mensaje")
+    }
+  }
+
+  const handleDeleteConversation = async () => {
+    if (!confirm("¿Eliminar toda la conversación? Esta acción no se puede deshacer.")) return
+    
+    try {
+      await messageService.deleteConversation(userId)
+      removeConversation(userId)
+      router.push("/chats")
+    } catch (error) {
+      console.error("[v0] Error deleting conversation:", error)
+      alert("No se pudo eliminar la conversación")
+    }
+  }
+
   return (
     <div className="h-screen bg-black flex flex-col relative overflow-hidden">
       <div
@@ -237,6 +273,37 @@ function ChatConversationPage() {
             </div>
           </div>
         </button>
+
+        <div className="relative">
+          <button
+            onClick={() => setShowOptionsMenu(!showOptionsMenu)}
+            className="w-10 h-10 bg-[#1A1A1A] rounded-full flex items-center justify-center transition-transform hover:scale-110 border border-[#00FFB3]/30"
+          >
+            <MoreVertical className="w-5 h-5 text-[#00FFB3]" />
+          </button>
+
+          <AnimatePresence>
+            {showOptionsMenu && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                className="absolute right-0 top-12 bg-[#1A1A1A] border border-[#00FFB3]/30 rounded-xl shadow-2xl z-50 min-w-[200px] overflow-hidden"
+              >
+                <button
+                  onClick={() => {
+                    setShowOptionsMenu(false)
+                    handleDeleteConversation()
+                  }}
+                  className="w-full px-4 py-3 text-left text-[#FF005C] hover:bg-[#FF005C]/10 transition-colors flex items-center gap-3"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Eliminar conversación
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </header>
 
       <div className="relative flex-1 overflow-y-auto px-6 py-6 flex flex-col">
@@ -248,24 +315,35 @@ function ChatConversationPage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
-              className={`flex flex-col max-w-[75%] mb-4 ${isSent ? "self-end items-end" : "self-start items-start"}`}
+              className={`flex flex-col max-w-[75%] mb-4 group ${isSent ? "self-end items-end" : "self-start items-start"}`}
             >
-              <div
-                className={`px-4 py-3 rounded-2xl ${
-                  isSent
-                    ? "bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black shadow-lg shadow-[#00FFB3]/20"
-                    : "bg-[#1A1A1A] text-white border border-[#00FFB3]/30"
-                }`}
-              >
-                {msg.Signal && (
-                  <div className={`mb-2 pb-2 border-b ${isSent ? "border-black/20" : "border-white/20"}`}>
-                    <p className={`text-xs ${isSent ? "text-black/60" : "text-white/60"} mb-1`}>Respuesta a señal:</p>
-                    <p className={`text-xs italic ${isSent ? "text-black/80" : "text-white/80"}`}>
-                      "{msg.Signal.note}"
-                    </p>
-                  </div>
+              <div className="relative">
+                <div
+                  className={`px-4 py-3 rounded-2xl ${
+                    isSent
+                      ? "bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black shadow-lg shadow-[#00FFB3]/20"
+                      : "bg-[#1A1A1A] text-white border border-[#00FFB3]/30"
+                  }`}
+                >
+                  {msg.Signal && (
+                    <div className={`mb-2 pb-2 border-b ${isSent ? "border-black/20" : "border-white/20"}`}>
+                      <p className={`text-xs ${isSent ? "text-black/60" : "text-white/60"} mb-1`}>Respuesta a señal:</p>
+                      <p className={`text-xs italic ${isSent ? "text-black/80" : "text-white/80"}`}>
+                        "{msg.Signal.note}"
+                      </p>
+                    </div>
+                  )}
+                  <p className="text-sm leading-relaxed">{msg.content}</p>
+                </div>
+                {!msg.messageId.startsWith("temp-") && (
+                  <button
+                    onClick={() => handleDeleteMessage(msg.messageId)}
+                    className="absolute -top-2 -right-2 w-6 h-6 bg-[#FF005C] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                    title="Eliminar mensaje"
+                  >
+                    <Trash2 className="w-3 h-3 text-white" />
+                  </button>
                 )}
-                <p className="text-sm leading-relaxed">{msg.content}</p>
               </div>
               <span className="text-xs text-[#C5C5C5] mt-1 px-1">{formatTimestamp(String(msg.createdAt))}</span>
             </motion.div>

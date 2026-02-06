@@ -52,6 +52,8 @@ export interface IMessageResponse {
   isRead: boolean
   createdAt: Date
   updatedAt?: Date
+  deletedFor: string[]
+  readAt?: string
   Sender: Partial<IRadarUser>
   Receiver: Partial<IRadarUser>
   Signal?: IRadarSignal | null

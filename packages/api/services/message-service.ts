@@ -40,12 +40,20 @@ export const messageService = {
 
   async markAsRead(messageIds: string[]): Promise<IMarkAsReadResponse> {
     const requestData = { messageIds: messageIds }
-    const response = await axiosRequestor.patch<IMarkAsReadResponse>("/messages/read", requestData)
+    const response = await axiosRequestor.post<IMarkAsReadResponse>("/messages/mark-as-read", requestData)
     return response.data
   },
 
   async getUnreadCount(): Promise<IUnreadMessagesResponse> {
     const response = await axiosRequestor.get<IUnreadMessagesResponse>("/messages/unread/count")
     return response.data
+  },
+
+  async deleteMessage(messageId: string): Promise<void> {
+    await axiosRequestor.delete(`/messages/${messageId}`)
+  },
+
+  async deleteConversation(otherUserId: string): Promise<void> {
+    await axiosRequestor.delete(`/conversations/${otherUserId}`)
   },
 }
