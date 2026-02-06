@@ -28,6 +28,7 @@ export default function ProfilePage() {
   const [showLocation, setShowLocation] = useState(profile?.showLocation ?? true)
 
   const [isSaving, setIsSaving] = useState(false)
+  const [alertMessage, setAlertMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
 
   const handlePhotoUpload = async (photoUrl: string) => {
     try {
@@ -50,6 +51,7 @@ export default function ProfilePage() {
 
   const handleSave = async () => {
     setIsSaving(true)
+    setAlertMessage(null)
 
     try {
       const profilePayload: any = {
@@ -81,8 +83,13 @@ export default function ProfilePage() {
       if (response?.data) {
         setProfile({ ...profile, ...response.data.Profile })
       }
+
+      setAlertMessage({ type: "success", text: "Perfil actualizado correctamente" })
+      setTimeout(() => setAlertMessage(null), 3000)
     } catch (error) {
       console.error("[v0] Error saving profile:", error)
+      setAlertMessage({ type: "error", text: "Error al guardar el perfil" })
+      setTimeout(() => setAlertMessage(null), 3000)
     } finally {
       setIsSaving(false)
     }
@@ -96,6 +103,18 @@ export default function ProfilePage() {
           background: "radial-gradient(circle at 50% 0%, rgba(0,255,179,0.06) 0%, transparent 60%)",
         }}
       />
+
+      {alertMessage && (
+        <div
+          className={`fixed top-20 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-full shadow-lg backdrop-blur-lg ${
+            alertMessage.type === "success"
+              ? "bg-[#00FFB3]/20 border border-[#00FFB3] text-[#00FFB3]"
+              : "bg-[#FF005C]/20 border border-[#FF005C] text-[#FF005C]"
+          }`}
+        >
+          {alertMessage.text}
+        </div>
+      )}
 
       <div className="bg-[#1A1A1A]/40 backdrop-blur-xl p-6 pb-8 border-b border-[#00FFB3]/20 relative z-10">
         <div className="flex items-center justify-between">

@@ -12,10 +12,11 @@ import {
   Platform,
   Image,
   Alert,
+  Modal,
 } from "react-native"
 import { useRouter, useLocalSearchParams } from "expo-router"
-import { ArrowLeft, Send, X } from "lucide-react-native"
-import { MotiView } from "moti"
+import { ArrowLeft, Send, X, Trash2, MoreVertical } from "lucide-react-native"
+import { MotiView, AnimatePresence } from "moti"
 import { useChatStore, useAuthStore, useSocketEvent, useConnectionStore } from "@radar/features"
 import { messageService, emitSocketEvent, connectionService } from "@radar/api"
 import type { IMessageResponse, IRadarUser } from "@radar/types"
@@ -29,16 +30,18 @@ function ChatConversationPage() {
   const insets = useSafeAreaInsets()
 
   const { user } = useAuthStore()
-  const { messages, setMessages, addMessage, resetUnreadCount, replyingToSignal, setReplyingToSignal } = useChatStore()
+  const { messages, setMessages, addMessage, resetUnreadCount, replyingToSignal, setReplyingToSignal, removeMessage, removeConversation } = useChatStore()
   const { connections, pendingRequests, removeConnection, myPendingRequests } = useConnectionStore()
   const [isTyping, setIsTyping] = useState(false)
   const [message, setMessage] = useState("")
   const [optimisticMessages, setOptimisticMessages] = useState<IMessageResponse[]>([])
   const [showProfileModal, setShowProfileModal] = useState(false)
   const [profileUser, setProfileUser] = useState<IRadarUser | null>(null)
+  const [showOptionsMenu, setShowOptionsMenu] = useState(false)
   const scrollViewRef = useRef<ScrollView>(null)
 
-  const userMessages = [...(messages[userId] || []), ...optimisticMessages]
+  const allMessages = [...(messages[userId] || []), ...optimisticMessages]
+  const userMessages = allMessages.filter((msg) => !msg.deletedFor?.includes(user!.userId))
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -46,21 +49,32 @@ function ChatConversationPage() {
         const data = await messageService.getMessages(userId)
         setMessages(userId, data)
         resetUnreadCount(userId)
+
+        const unreadMessages = data.filter((msg) => !msg.isRead && msg.receiverId === user?.userId && !msg.deletedFor?.includes(user?.userId))
+        
+        if (unreadMessages.length > 0) {
+          const unreadIds = unreadMessages.map((msg) => msg.messageId)
+          await messageService.markAsRead(unreadIds)
+        }
       } catch (error) {
         console.error("[v0] Error fetching messages:", error)
       }
     }
 
     fetchMessages()
-  }, [userId, setMessages, resetUnreadCount])
+  }, [userId, setMessages, resetUnreadCount, user?.userId])
 
   useSocketEvent<IMessageResponse>(
     "new-message",
-    (message) => {
+    async (message) => {
       if (message.senderId === userId || message.receiverId === userId) {
         addMessage(userId, message)
-        if (message.senderId === userId) {
-          messageService.markAsRead([message.messageId])
+        if (message.senderId === userId && !message.isRead) {
+          try {
+            await messageService.markAsRead([message.messageId])
+          } catch (error) {
+            console.error("[v0] Error marking message as read:", error)
+          }
         }
       }
     },
@@ -98,7 +112,6 @@ function ChatConversationPage() {
 
       setOptimisticMessages((prev) => prev.filter((m) => m.messageId !== optimisticMessage.messageId))
       addMessage(userId, msg)
-      await messageService.markAsRead([msg.messageId])
     } catch (error) {
       console.error("[v0] Error sending message:", error)
       setOptimisticMessages((prev) => prev.filter((m) => m.messageId !== optimisticMessage.messageId))
@@ -176,6 +189,53 @@ function ChatConversationPage() {
     return isPending
   }
 
+  const handleDeleteMessage = async (messageId: string) => {
+    Alert.alert(
+      "Eliminar mensaje",
+      "¿Eliminar este mensaje?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Eliminar",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await messageService.deleteMessage(messageId)
+              removeMessage(userId, messageId)
+            } catch (error) {
+              console.error("[v0] Error deleting message:", error)
+              Alert.alert("Error", "No se pudo eliminar el mensaje")
+            }
+          },
+        },
+      ]
+    )
+  }
+
+  const handleDeleteConversation = async () => {
+    Alert.alert(
+      "Eliminar conversación",
+      "¿Eliminar toda la conversación? Esta acción no se puede deshacer.",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Eliminar",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await messageService.deleteConversation(userId)
+              removeConversation(userId)
+              router.push("/chats")
+            } catch (error) {
+              console.error("[v0] Error deleting conversation:", error)
+              Alert.alert("Error", "No se pudo eliminar la conversación")
+            }
+          },
+        },
+      ]
+    )
+  }
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -204,6 +264,10 @@ function ChatConversationPage() {
               </View>
             </View>
           </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => setShowOptionsMenu(true)} style={styles.optionsButton}>
+            <MoreVertical color="#00FFB3" size={20} />
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -222,18 +286,28 @@ function ChatConversationPage() {
               transition={{ delay: index * 50 }}
               style={[styles.messageBubble, isSent ? styles.sentBubble : styles.receivedBubble]}
             >
-              <View style={[styles.bubble, isSent ? styles.sentBubbleInner : styles.receivedBubbleInner]}>
-                {msg.Signal && (
-                  <View style={[styles.signalReply, isSent ? styles.signalReplySent : styles.signalReplyReceived]}>
-                    <Text style={[styles.signalReplyLabel, isSent && styles.signalReplyLabelSent]}>
-                      Respuesta a señal:
-                    </Text>
-                    <Text style={[styles.signalReplyText, isSent && styles.signalReplyTextSent]}>
-                      "{msg.Signal.note}"
-                    </Text>
-                  </View>
+              <View style={styles.messageContainer}>
+                <View style={[styles.bubble, isSent ? styles.sentBubbleInner : styles.receivedBubbleInner]}>
+                  {msg.Signal && (
+                    <View style={[styles.signalReply, isSent ? styles.signalReplySent : styles.signalReplyReceived]}>
+                      <Text style={[styles.signalReplyLabel, isSent && styles.signalReplyLabelSent]}>
+                        Respuesta a señal:
+                      </Text>
+                      <Text style={[styles.signalReplyText, isSent && styles.signalReplyTextSent]}>
+                        "{msg.Signal.note}"
+                      </Text>
+                    </View>
+                  )}
+                  <Text style={[styles.messageText, isSent && styles.sentMessageText]}>{msg.content}</Text>
+                </View>
+                {!msg.messageId.startsWith("temp-") && (
+                  <TouchableOpacity
+                    onPress={() => handleDeleteMessage(msg.messageId)}
+                    style={styles.deleteMessageButton}
+                  >
+                    <Trash2 color="#FFFFFF" size={12} />
+                  </TouchableOpacity>
                 )}
-                <Text style={[styles.messageText, isSent && styles.sentMessageText]}>{msg.content}</Text>
               </View>
               <Text style={[styles.timestamp, isSent ? styles.timestampSent : styles.timestampReceived]}>
                 {formatTimestamp(String(msg.createdAt))}
@@ -273,6 +347,32 @@ function ChatConversationPage() {
           </TouchableOpacity>
         </View>
       </View>
+
+      <Modal
+        visible={showOptionsMenu}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowOptionsMenu(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowOptionsMenu(false)}
+        >
+          <View style={styles.optionsModal}>
+            <TouchableOpacity
+              style={styles.optionItem}
+              onPress={() => {
+                setShowOptionsMenu(false)
+                handleDeleteConversation()
+              }}
+            >
+              <Trash2 color="#FF005C" size={20} />
+              <Text style={styles.optionText}>Eliminar conversación</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
 
       {showProfileModal && profileUser && (
         <UserProfileModalNative
@@ -526,5 +626,62 @@ const styles = StyleSheet.create({
   },
   signalReplyTextSent: {
     color: "rgba(0, 0, 0, 0.8)",
+  },
+  optionsButton: {
+    width: 40,
+    height: 40,
+    backgroundColor: "#1A1A1A",
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(0, 255, 179, 0.3)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  messageContainer: {
+    position: "relative",
+  },
+  deleteMessageButton: {
+    position: "absolute",
+    top: -8,
+    right: -8,
+    width: 24,
+    height: 24,
+    backgroundColor: "#FF005C",
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  optionsModal: {
+    backgroundColor: "#1A1A1A",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "rgba(0, 255, 179, 0.3)",
+    minWidth: 250,
+    overflow: "hidden",
+  },
+  optionItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255, 255, 255, 0.1)",
+  },
+  optionText: {
+    fontSize: 16,
+    color: "#FF005C",
+    fontWeight: "500",
   },
 })
