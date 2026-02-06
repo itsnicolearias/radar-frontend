@@ -39,6 +39,10 @@ import { CentralUserMarker } from "../../../../packages/ui/radar/central-user-ma
 import { AnimatePresence, motion } from "framer-motion"
 import { Radio, MapPin, RefreshCcw } from "lucide-react"
 import { useUIStore } from "@radar/features"
+import { RadarCompass } from "../../../../packages/ui/radar/radar-compass"
+import { calculateBearing } from "../../../../lib/utils/calculate-bearing"
+import { resolveAllCollisions } from "../../../../lib/utils/collision-detection"
+import type { MarkerPosition } from "../../../../lib/utils/collision-detection"
 
 /* =========================
    RADAR CONSTANTS
@@ -77,6 +81,38 @@ function getMarkerPosition(
     x: CENTER + radius * Math.cos(angle),
     y: CENTER + radius * Math.sin(angle),
   }
+}
+
+function getMarkerPositionFromBearing(
+  userLat: number | undefined,
+  userLon: number | undefined,
+  targetLat: number | null,
+  targetLon: number | null,
+  distance: number,
+  maxDistance: number,
+  jitterAmount: number = 0
+) {
+  // Si no tenemos coordenadas, retornar posición default
+  if (!userLat || !userLon || targetLat === null || targetLon === null) {
+    return { x: CENTER, y: CENTER }
+  }
+
+  // Calcular bearing entre usuario y target
+  const bearing = calculateBearing(userLat, userLon, targetLat, targetLon)
+  
+  // Aplicar jitter determinístico
+  const angle = bearing + jitterAmount
+
+  // Normalizar distancia a radio del radar
+  const normalizedDistance = Math.min(distance / maxDistance, 1)
+  const radius = normalizedDistance * 45 // 45% of container
+
+  // Convertir coordenadas polares a cartesianas
+  // Ajustar para que Norte (0 radianes) apunte arriba (eje Y negativo)
+  const x = CENTER + radius * Math.sin(angle)
+  const y = CENTER - radius * Math.cos(angle)
+
+  return { x, y }
 }
 
 export default function RadarPage() {
@@ -363,6 +399,8 @@ export default function RadarPage() {
           className="relative w-full max-w-[420px] aspect-square"
           style={{ pointerEvents: isModalOpen ? 'none' : 'auto', filter: isModalOpen ? 'blur(2px)' : 'none' }}
         >
+          {/* COMPASS */}
+          <RadarCompass />
 
           {/* PARTICLES */}
           {[...Array(8)].map((_, i) => (
@@ -423,55 +461,93 @@ export default function RadarPage() {
           />
 
           {/* USERS */}
-            {isVisible &&
-              ringBuckets.map((bucket, ringIndex) => {
-                const count = bucket.length || 1
+            {isVisible && (() => {
+              // Calcular posiciones iniciales de todos los usuarios
+              const initialPositions: Array<MarkerPosition & { user: IRadarUser; bucketIndex: number; indexInRing: number }> = []
+              
+              ringBuckets.forEach((bucket, ringIndex) => {
                 const offset = ringIndex * (Math.PI / 6)
                 const baseRadius = USER_RADII[ringIndex]
-                return bucket.map((nearbyUser, idxInRing) => {
-                  const angle =
-                    idxInRing * GOLDEN_ANGLE +
-                    offset +
-                    (hashToUnit(nearbyUser.userId, "a") - 0.5) * ANGLE_JITTER
-                  const radius =
-                    baseRadius +
-                    (hashToUnit(nearbyUser.userId, "r") - 0.5) * 2 * RADIAL_JITTER
-                  const position = {
-                    x: CENTER + radius * Math.cos(angle),
-                    y: CENTER + radius * Math.sin(angle),
-                  }
-                  const hasSignal = nearbySignals.some((s) => s.senderId === nearbyUser.userId)
-                  const findSignal = nearbySignals.findLast((s) => s.senderId === nearbyUser.userId)
-                  const isNew = newMarkerIds.has(nearbyUser.userId)
-
-                  return (
-                    <div key={nearbyUser.userId}>
-                      {isNew && (
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.5 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          className="absolute bg-[#00FFB3] px-3 py-1 rounded-full z-30"
-                          style={{
-                            left: `${position.x}%`,
-                            top: `${position.y - 8}%`,
-                            transform: "translate(-50%, -100%)",
-                          }}
-                        >
-                          <p className="text-black text-[10px] font-bold">Nuevo!</p>
-                        </motion.div>
-                      )}
-                      <UserMarker
-                        user={nearbyUser}
-                        position={position}
-                        hasSignal={hasSignal}
-                        onClick={() => handleUserClick(nearbyUser)}
-                        index={idxInRing}
-                        onSelectSignal={() => setSelectedSignal(findSignal)}
-                      />
-                    </div>
-                  )
+                
+                bucket.forEach((nearbyUser, idxInRing) => {
+                  const jitterAngle = (hashToUnit(nearbyUser.userId, "a") - 0.5) * ANGLE_JITTER
+                  const hasBearingData = currentLocation && 
+                    nearbyUser.lastLatitude !== null && 
+                    nearbyUser.lastLongitude !== null
+                  
+                  const position = hasBearingData
+                    ? getMarkerPositionFromBearing(
+                        currentLocation?.latitude,
+                        currentLocation?.longitude,
+                        nearbyUser.lastLatitude,
+                        nearbyUser.lastLongitude,
+                        nearbyUser.distance,
+                        radius,
+                        jitterAngle
+                      )
+                    : (() => {
+                        const angle = idxInRing * GOLDEN_ANGLE + offset + jitterAngle
+                        const radii = USER_RADII[ringIndex]
+                        const markerRadius = radii + (hashToUnit(nearbyUser.userId, "r") - 0.5) * 2 * RADIAL_JITTER
+                        return {
+                          x: CENTER + markerRadius * Math.cos(angle),
+                          y: CENTER + markerRadius * Math.sin(angle),
+                        }
+                      })()
+                  
+                  initialPositions.push({
+                    userId: nearbyUser.userId,
+                    x: position.x,
+                    y: position.y,
+                    user: nearbyUser,
+                    bucketIndex: ringIndex,
+                    indexInRing: idxInRing,
+                  })
                 })
-              })}
+              })
+              
+              // Aplicar resolución de colisiones
+              const adjustedPositions = resolveAllCollisions(initialPositions, 3, {
+                markerDiameter: 12,
+                maxDisplacement: 10,
+              })
+              const positionMap = new Map(adjustedPositions.map(p => [p.userId, { x: p.x, y: p.y }]))
+              
+              return initialPositions.map((item) => {
+                const adjustedPos = positionMap.get(item.userId)
+                const finalPosition = adjustedPos || { x: item.x, y: item.y }
+                const hasSignal = nearbySignals.some((s) => s.senderId === item.user.userId)
+                const findSignal = nearbySignals.findLast((s) => s.senderId === item.user.userId)
+                const isNew = newMarkerIds.has(item.user.userId)
+                
+                return (
+                  <div key={item.user.userId}>
+                    {isNew && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="absolute bg-[#00FFB3] px-3 py-1 rounded-full z-30"
+                        style={{
+                          left: `${finalPosition.x}%`,
+                          top: `${finalPosition.y - 8}%`,
+                          transform: "translate(-50%, -100%)",
+                        }}
+                      >
+                        <p className="text-black text-[10px] font-bold">Nuevo!</p>
+                      </motion.div>
+                    )}
+                    <UserMarker
+                      user={item.user}
+                      position={finalPosition}
+                      hasSignal={hasSignal}
+                      onClick={() => handleUserClick(item.user)}
+                      index={item.indexInRing}
+                      onSelectSignal={() => setSelectedSignal(findSignal)}
+                    />
+                  </div>
+                )
+              })
+            })()}
 
           {/* EVENTS 
           {isVisible &&
