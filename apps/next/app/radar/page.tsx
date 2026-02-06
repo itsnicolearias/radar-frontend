@@ -40,7 +40,7 @@ import { AnimatePresence, motion } from "framer-motion"
 import { Radio, MapPin, RefreshCcw } from "lucide-react"
 import { useUIStore } from "@radar/features"
 import { RadarCompass } from "../../../../packages/ui/radar/radar-compass"
-import { calculateBearing, resolveCollision } from "../../../../lib/utils/calculate-bearing"
+import { calculateBearing } from "../../../../lib/utils/calculate-bearing"
 import { resolveAllCollisions } from "../../../../lib/utils/collision-detection"
 import type { MarkerPosition } from "../../../../lib/utils/collision-detection"
 
@@ -507,7 +507,10 @@ export default function RadarPage() {
               })
               
               // Aplicar resolución de colisiones
-              const adjustedPositions = resolveAllCollisions(initialPositions)
+              const adjustedPositions = resolveAllCollisions(initialPositions, 3, {
+                markerDiameter: 12,
+                maxDisplacement: 10,
+              })
               const positionMap = new Map(adjustedPositions.map(p => [p.userId, { x: p.x, y: p.y }]))
               
               return initialPositions.map((item) => {

@@ -16,7 +16,12 @@ export interface CollisionResolution {
 }
 
 // Diámetro visual del marcador en porcentaje
-const MARKER_DIAMETER = 5 // ~48px en contenedor de 420px
+const DEFAULT_MARKER_DIAMETER = 12 // ~48px en contenedor de 420px
+
+export interface CollisionOptions {
+  markerDiameter?: number
+  maxDisplacement?: number
+}
 
 /**
  * Calcula la distancia euclideana entre dos puntos
@@ -30,10 +35,14 @@ function calculateDistance(x1: number, y1: number, x2: number, y2: number): numb
 /**
  * Detecta si dos marcadores colisionan
  */
-export function hasCollision(pos1: MarkerPosition, pos2: MarkerPosition): boolean {
+export function hasCollision(
+  pos1: MarkerPosition,
+  pos2: MarkerPosition,
+  markerDiameter: number = DEFAULT_MARKER_DIAMETER
+): boolean {
   const distance = calculateDistance(pos1.x, pos1.y, pos2.x, pos2.y)
   // Margen de separación: 1.5x el diámetro del marcador
-  const minDistance = MARKER_DIAMETER * 1.5
+  const minDistance = markerDiameter * 1.5
   return distance < minDistance
 }
 
@@ -44,10 +53,14 @@ export function hasCollision(pos1: MarkerPosition, pos2: MarkerPosition): boolea
 export function resolveCollision(
   position: MarkerPosition,
   collidingWith: MarkerPosition[],
-  maxDisplacement: number = 8
+  options: CollisionOptions = {}
 ): CollisionResolution {
+  const markerDiameter = options.markerDiameter ?? DEFAULT_MARKER_DIAMETER
+  const maxDisplacement = options.maxDisplacement ?? markerDiameter * 2
   // Detectar colisiones
-  const activeCollisions = collidingWith.filter((other) => hasCollision(position, other))
+  const activeCollisions = collidingWith.filter((other) =>
+    hasCollision(position, other, markerDiameter)
+  )
 
   if (activeCollisions.length === 0) {
     return {
@@ -71,7 +84,7 @@ export function resolveCollision(
   // Aplicar desplazamiento iterativo para cada colisión
   let newX = position.x
   let newY = position.y
-  let displacementMagnitude = MARKER_DIAMETER
+  let displacementMagnitude = markerDiameter
 
   for (let i = 0; i < activeCollisions.length; i++) {
     const collision = activeCollisions[i]
@@ -119,7 +132,8 @@ export function resolveCollision(
  */
 export function resolveAllCollisions(
   markers: MarkerPosition[],
-  maxIterations: number = 3
+  maxIterations: number = 3,
+  options: CollisionOptions = {}
 ): MarkerPosition[] {
   let positions = markers.map((m) => ({ ...m }))
 
@@ -129,7 +143,7 @@ export function resolveAllCollisions(
 
     positions = positions.map((marker, index) => {
       const otherMarkers = positions.filter((_, i) => i !== index)
-      const resolution = resolveCollision(marker, otherMarkers)
+      const resolution = resolveCollision(marker, otherMarkers, options)
 
       if (resolution.hasCollision) {
         anyCollisionResolved = true

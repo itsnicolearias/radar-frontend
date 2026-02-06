@@ -22,8 +22,8 @@ export const RadarCompassNative: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     position: "absolute",
-    top: 16,
-    right: 16,
+    top: -140,
+    right: -5,
     width: 96,
     height: 96,
     justifyContent: "center",

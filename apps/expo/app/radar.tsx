@@ -36,6 +36,10 @@ const RING_STEPS = [0.25, 0.4, 0.55, 0.7]
 const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5))
 const RADIAL_JITTER = 6
 const ANGLE_JITTER = Math.PI / 36
+const CENTRAL_MARKER_RADIUS = 32
+const USER_MARKER_RADIUS = 24
+const CENTER_PADDING = 6
+const MIN_CENTER_DISTANCE = CENTRAL_MARKER_RADIUS + USER_MARKER_RADIUS + CENTER_PADDING
 
 const hashToUnit = (value: string, salt = ""): number => {
   let hash = 0
@@ -49,19 +53,19 @@ const hashToUnit = (value: string, salt = ""): number => {
 function getMarkerPositionFromBearing(
   userLat: number | undefined,
   userLon: number | undefined,
-  targetLat: number | null,
-  targetLon: number | null,
+  targetLat: number | undefined,
+  targetLon: number | undefined,
   distance: number,
   maxDistance: number,
   jitterAmount: number = 0
 ) {
   // Si no tenemos coordenadas, retornar posición default
-  if (!userLat || !userLon || targetLat === null || targetLon === null) {
+  if (userLat == null || userLon == null || targetLat == null || targetLon == null) {
     return { x: center, y: center }
   }
 
   // Calcular bearing entre usuario y target
-  const bearing = calculateBearing(userLat, userLon, targetLat, targetLon)
+  const bearing = calculateBearing(userLat, userLon, targetLat!, targetLon!)
   
   // Aplicar jitter determinístico
   const angle = bearing + jitterAmount
@@ -76,6 +80,26 @@ function getMarkerPositionFromBearing(
   const y = center - radius * Math.cos(angle)
 
   return { x, y }
+}
+
+function clampAwayFromCenter(position: { x: number; y: number }) {
+  const dx = position.x - center
+  const dy = position.y - center
+  const distance = Math.sqrt(dx * dx + dy * dy)
+
+  if (distance >= MIN_CENTER_DISTANCE) {
+    return position
+  }
+
+  if (distance === 0) {
+    return { x: center + MIN_CENTER_DISTANCE, y: center }
+  }
+
+  const factor = MIN_CENTER_DISTANCE / distance
+  return {
+    x: center + dx * factor,
+    y: center + dy * factor,
+  }
 }
 
 export default function RadarScreen() {
@@ -233,9 +257,9 @@ export default function RadarScreen() {
     const jitterAngle = (hashToUnit(userId, "a") - 0.5) * ANGLE_JITTER
 
     // Usar bearing geográfico si tenemos coordenadas válidas
-    const hasBearingData = userLat && userLon && targetLat !== null && targetLon !== null
+    const hasBearingData = userLat != null && userLon != null && targetLat != null && targetLon != null
     
-    if (hasBearingData && distance) {
+    if (hasBearingData && distance != null) {
       return getMarkerPositionFromBearing(userLat, userLon, targetLat, targetLon, distance, radiusKm * 1000, jitterAngle)
     }
 
@@ -524,12 +548,15 @@ export default function RadarScreen() {
         })
         
         // Aplicar resolución de colisiones
-        const adjustedPositions = resolveAllCollisions(initialPositions)
+        const adjustedPositions = resolveAllCollisions(initialPositions, 3, {
+          markerDiameter: 48,
+          maxDisplacement: 64,
+        })
         const positionMap = new Map(adjustedPositions.map(p => [p.userId, { x: p.x, y: p.y }]))
         
         return initialPositions.map((item) => {
           const adjustedPos = positionMap.get(item.user.userId)
-          const finalPosition = adjustedPos || { x: item.x, y: item.y }
+          const finalPosition = clampAwayFromCenter(adjustedPos || { x: item.x, y: item.y })
           const hasSignal = nearbySignals.some((s) => s.senderId === item.user.userId)
           const findSignal = nearbySignals.find((s) => s.senderId === item.user.userId)
           const isNew = newMarkerIds.has(item.user.userId)
