@@ -20,6 +20,10 @@ import { CentralUserMarkerNative } from "../../../packages/ui/radar/central-user
 import GhostButton from "../../../packages/ui/components/ghost-button.native"
 import InvisibleBadge from "../../../packages/ui/components/invisible-badge.native"
 import { WelcomeModalNative } from "../../../packages/ui/modals/welcome-modal.native"
+import { RadarCompassNative } from "../../../packages/ui/radar/radar-compass.native"
+import { calculateBearing } from "../../../lib/utils/calculate-bearing"
+import { resolveAllCollisions } from "../../../lib/utils/collision-detection"
+import type { MarkerPosition } from "../../../lib/utils/collision-detection"
 
 const MAX_USERS_ON_RADAR = 15
 const MAX_EVENTS_ON_RADAR = 8
@@ -32,6 +36,10 @@ const RING_STEPS = [0.25, 0.4, 0.55, 0.7]
 const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5))
 const RADIAL_JITTER = 6
 const ANGLE_JITTER = Math.PI / 36
+const CENTRAL_MARKER_RADIUS = 32
+const USER_MARKER_RADIUS = 24
+const CENTER_PADDING = 6
+const MIN_CENTER_DISTANCE = CENTRAL_MARKER_RADIUS + USER_MARKER_RADIUS + CENTER_PADDING
 
 const hashToUnit = (value: string, salt = ""): number => {
   let hash = 0
@@ -40,6 +48,58 @@ const hashToUnit = (value: string, salt = ""): number => {
     hash = (hash * 31 + input.charCodeAt(i)) | 0
   }
   return Math.abs(hash % 1000) / 1000
+}
+
+function getMarkerPositionFromBearing(
+  userLat: number | undefined,
+  userLon: number | undefined,
+  targetLat: number | undefined,
+  targetLon: number | undefined,
+  distance: number,
+  maxDistance: number,
+  jitterAmount: number = 0
+) {
+  // Si no tenemos coordenadas, retornar posición default
+  if (userLat == null || userLon == null || targetLat == null || targetLon == null) {
+    return { x: center, y: center }
+  }
+
+  // Calcular bearing entre usuario y target
+  const bearing = calculateBearing(userLat, userLon, targetLat!, targetLon!)
+  
+  // Aplicar jitter determinístico
+  const angle = bearing + jitterAmount
+
+  // Normalizar distancia a radio del radar
+  const normalizedDistance = Math.min(distance / maxDistance, 1)
+  const radius = normalizedDistance * (center * 0.7) // 70% del radio disponible
+
+  // Convertir coordenadas polares a cartesianas
+  // Ajustar para que Norte (0 radianes) apunte arriba (eje Y negativo)
+  const x = center + radius * Math.sin(angle)
+  const y = center - radius * Math.cos(angle)
+
+  return { x, y }
+}
+
+function clampAwayFromCenter(position: { x: number; y: number }) {
+  const dx = position.x - center
+  const dy = position.y - center
+  const distance = Math.sqrt(dx * dx + dy * dy)
+
+  if (distance >= MIN_CENTER_DISTANCE) {
+    return position
+  }
+
+  if (distance === 0) {
+    return { x: center + MIN_CENTER_DISTANCE, y: center }
+  }
+
+  const factor = MIN_CENTER_DISTANCE / distance
+  return {
+    x: center + dx * factor,
+    y: center + dy * factor,
+  }
 }
 
 export default function RadarScreen() {
@@ -182,16 +242,32 @@ export default function RadarScreen() {
     }
   }, [])
 
-  const getRingPosition = (ringIndex: number, indexInRing: number, totalInRing: number, userId: string) => {
+  const getRingPosition = (
+    ringIndex: number,
+    indexInRing: number,
+    totalInRing: number,
+    userId: string,
+    userLat?: number,
+    userLon?: number,
+    targetLat?: number | null,
+    targetLon?: number | null,
+    distance?: number
+  ) => {
+    // Calcular jitter determinístico basado en userId
+    const jitterAngle = (hashToUnit(userId, "a") - 0.5) * ANGLE_JITTER
+
+    // Usar bearing geográfico si tenemos coordenadas válidas
+    const hasBearingData = userLat != null && userLon != null && targetLat != null && targetLon != null
+    
+    if (hasBearingData && distance != null) {
+      return getMarkerPositionFromBearing(userLat, userLon, targetLat, targetLon, distance, radiusKm * 1000, jitterAngle)
+    }
+
+    // Fallback a posicionamiento relativo si no hay bearing
     const baseRadius = center * RING_STEPS[ringIndex]
     const offset = ringIndex * (Math.PI / 6)
-    const angle =
-      indexInRing * GOLDEN_ANGLE +
-      offset +
-      (hashToUnit(userId, "a") - 0.5) * ANGLE_JITTER
-    const radius =
-      baseRadius +
-      (hashToUnit(userId, "r") - 0.5) * 2 * RADIAL_JITTER
+    const angle = indexInRing * GOLDEN_ANGLE + offset + jitterAngle
+    const radius = baseRadius + (hashToUnit(userId, "r") - 0.5) * 2 * RADIAL_JITTER
 
     return {
       x: center + Math.cos(angle) * radius,
@@ -346,6 +422,8 @@ export default function RadarScreen() {
           position: "relative",
         }}
       >
+        {/* COMPASS */}
+        <RadarCompassNative />
 
         {[...Array(8)].map((_, i) => (
           <MotiView
@@ -438,57 +516,81 @@ export default function RadarScreen() {
         />
       </View>
 
-      {isVisible &&
-        ringBuckets.map((bucket, ringIndex) => {
+      {isVisible && (() => {
+        // Calcular posiciones iniciales de todos los usuarios
+        const initialPositions: Array<MarkerPosition & { user: IRadarUser; bucketIndex: number; indexInRing: number }> = []
+        
+        ringBuckets.forEach((bucket, ringIndex) => {
           const count = bucket.length || 1
-          return bucket.map((nearbyUser, indexInRing) => {
-            const hasSignal = nearbySignals.some(
-              (s) => s.senderId === nearbyUser.userId,
-            )
-
-            const findSignal = nearbySignals.find(
-              (s) => s.senderId === nearbyUser.userId,
-            )
-
+          
+          bucket.forEach((nearbyUser, indexInRing) => {
             const position = getRingPosition(
               ringIndex,
               indexInRing,
               count,
               nearbyUser.userId,
+              currentLocation?.latitude,
+              currentLocation?.longitude,
+              nearbyUser.lastLatitude,
+              nearbyUser.lastLongitude,
+              nearbyUser.distance,
             )
-
-            const isNew = newMarkerIds.has(nearbyUser.userId)
-
-            return (
-              <View key={nearbyUser.userId}>
-                {isNew && (
-                  <MotiView
-                    from={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    style={[
-                      styles.newBadge,
-                      {
-                        left: position.x - 30,
-                        top: position.y - 60,
-                      },
-                    ]}
-                  >
-                    <Text style={styles.newBadgeText}>Nuevo!</Text>
-                  </MotiView>
-                )}
-
-                <UserMarkerNative
-                  user={nearbyUser}
-                  position={position}
-                  hasSignal={hasSignal}
-                  onPress={() => handleSelectUser(nearbyUser)}
-                  index={indexInRing}
-                  onSelectSignal={() => setSelectedSignal(findSignal!)}
-                />
-              </View>
-            )
+            
+            initialPositions.push({
+              userId: nearbyUser.userId,
+              x: position.x,
+              y: position.y,
+              user: nearbyUser,
+              bucketIndex: ringIndex,
+              indexInRing: indexInRing,
+            })
           })
-        })}
+        })
+        
+        // Aplicar resolución de colisiones
+        const adjustedPositions = resolveAllCollisions(initialPositions, 3, {
+          markerDiameter: 48,
+          maxDisplacement: 64,
+        })
+        const positionMap = new Map(adjustedPositions.map(p => [p.userId, { x: p.x, y: p.y }]))
+        
+        return initialPositions.map((item) => {
+          const adjustedPos = positionMap.get(item.user.userId)
+          const finalPosition = clampAwayFromCenter(adjustedPos || { x: item.x, y: item.y })
+          const hasSignal = nearbySignals.some((s) => s.senderId === item.user.userId)
+          const findSignal = nearbySignals.find((s) => s.senderId === item.user.userId)
+          const isNew = newMarkerIds.has(item.user.userId)
+          
+          return (
+            <View key={item.user.userId}>
+              {isNew && (
+                <MotiView
+                  from={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  style={[
+                    styles.newBadge,
+                    {
+                      left: finalPosition.x - 30,
+                      top: finalPosition.y - 60,
+                    },
+                  ]}
+                >
+                  <Text style={styles.newBadgeText}>Nuevo!</Text>
+                </MotiView>
+              )}
+
+              <UserMarkerNative
+                user={item.user}
+                position={finalPosition}
+                hasSignal={hasSignal}
+                onPress={() => handleSelectUser(item.user)}
+                index={item.indexInRing}
+                onSelectSignal={() => setSelectedSignal(findSignal!)}
+              />
+            </View>
+          )
+        })
+      })()}
   </View>
 
 
