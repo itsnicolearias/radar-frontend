@@ -226,7 +226,7 @@ function ChatConversationPage() {
                 className="w-full h-full object-cover rounded-full"
               />
             ) : (
-              <span className="text-[#1A1A1A] font-semibold text-base">{name[0] || "U"}</span>
+              <span className="text-[#1A1A1A] font-semibold text-base">{name?.[0] || "U"}</span>
             )}
           </div>
           <div>
