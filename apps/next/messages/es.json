@@ -1,0 +1,93 @@
+{
+  "metadata": {
+    "title": "Radar - Descubrí quién está cerca tuyo, en tiempo real.",
+    "description": "Explorá tu entorno, conectá con personas cercanas y descubrí eventos locales sin esperar."
+  },
+  "landing": {
+    "brand": "Radar",
+    "nav": {
+      "features": "Funcionalidades",
+      "events": "Eventos",
+      "login": "Iniciar sesión",
+      "register": "Registrarse"
+    },
+    "hero": {
+      "title": "Descubrí quién está cerca tuyo, en tiempo real.",
+      "subtitle": "Explorá tu entorno, conectá con personas cercanas y descubrí eventos locales sin esperar. Todo sucede ahora, a un toque de distancia.",
+      "cta": "Unite a Radar ahora"
+    },
+    "about": {
+      "title": "Qué es Radar",
+      "text": "Radar te muestra personas que están físicamente cerca tuyo en tiempo real — sin swipe ni algoritmos misteriosos. Explora tu entorno, descubre quién está cerca, chateá y encuentra planes en tu ciudad de forma espontánea y directa."
+    },
+    "features": {
+      "title": "Funcionalidades principales",
+      "items": {
+        "realTime": {
+          "title": "Radar en tiempo real",
+          "description": "Ve quién está cerca y dónde está en este instante."
+        },
+        "profiles": {
+          "title": "Perfiles completos",
+          "description": "Mirá fotos, edad e intereses. Decidí con quién querés conversar."
+        },
+        "chats": {
+          "title": "Chats instantáneos",
+          "description": "Conectá con personas del entorno sin pasos complicados."
+        },
+        "nearbyEvents": {
+          "title": "Eventos cercanos",
+          "description": "Descubrí conciertos, meetups y actividades que están pasando cerca."
+        },
+        "privacy": {
+          "title": "Privacidad total",
+          "description": "Compartí solo lo que vos elegís. Modo invisible cuando lo necesites."
+        },
+        "geolocation": {
+          "title": "Geolocalización útil",
+          "description": "Radar muestra presencia real sin exponer tu ubicación exacta públicamente."
+        }
+      }
+    },
+    "events": {
+      "title": "Eventos cerca tuyo",
+      "heading": "Planes que están pasando ahora",
+      "text": "Conectate con eventos populares cerca tuyo. Filtrá por categorías y distancia, y empezá conversaciones con gente interesada antes de llegar.",
+      "benefits": {
+        "one": "Filtrá por categorías y distancia",
+        "two": "Mirá cuántas personas están interesadas",
+        "three": "Empezá conversaciones antes de llegar",
+        "four": "Descubrí planes activos en este momento"
+      },
+      "cards": {
+        "concert": "Concierto en el parque",
+        "meetup": "Meetup de emprendedores",
+        "fair": "Feria gastronómica",
+        "distanceKm": "{distance} km",
+        "away": "A {distance}",
+        "interested": "{count} interesados"
+      }
+    },
+    "ui": {
+      "markers": {
+        "one": "A",
+        "two": "B",
+        "three": "C"
+      },
+      "social": {
+        "instagram": "IG",
+        "x": "X",
+        "facebook": "FB"
+      }
+    },
+    "footer": {
+      "tagline": "Descubrí quién está cerca tuyo",
+      "product": "Producto",
+      "legal": "Legal",
+      "follow": "Seguinos",
+      "privacy": "Privacidad",
+      "terms": "Términos",
+      "copyright": "© 2025 Radar. Todos los derechos reservados."
+    }
+  }
+}
