@@ -1,0 +1,93 @@
+{
+  "metadata": {
+    "title": "Radar - See who’s nearby, in real time.",
+    "description": "Explore your surroundings, connect with nearby people, and discover local events happening right now."
+  },
+  "landing": {
+    "brand": "Radar",
+    "nav": {
+      "features": "Features",
+      "events": "Events",
+      "login": "Log in",
+      "register": "Sign up"
+    },
+    "hero": {
+      "title": "See who’s nearby, in real time.",
+      "subtitle": "Explore your surroundings, connect with nearby people, and discover local events — all happening right now.",
+      "cta": "Join Radar now"
+    },
+    "about": {
+      "title": "What is Radar",
+      "text": "Radar shows you people who are physically near you in real time — no swipes, no hidden algorithms. Explore your surroundings, find people close by, chat instantly, and discover local activities with ease."
+    },
+    "features": {
+      "title": "Key features",
+      "items": {
+        "realTime": {
+          "title": "Real-Time Radar",
+          "description": "See who’s nearby and where they are right now."
+        },
+        "profiles": {
+          "title": "Complete Profiles",
+          "description": "View photos, age, and interests — decide who you want to talk to."
+        },
+        "chats": {
+          "title": "Instant Chats",
+          "description": "Connect with nearby people without unnecessary steps."
+        },
+        "nearbyEvents": {
+          "title": "Nearby Events",
+          "description": "Discover concerts, meetups, and activities happening close to you."
+        },
+        "privacy": {
+          "title": "Total Privacy",
+          "description": "Share only what you choose. Invisible mode when you need it."
+        },
+        "geolocation": {
+          "title": "Useful Geolocation",
+          "description": "Radar shows real presence without publicly exposing exact coordinates."
+        }
+      }
+    },
+    "events": {
+      "title": "Events near you",
+      "heading": "Activities happening around you now",
+      "text": "See popular local events. Filter by category and distance, and start conversations with attendees before you arrive.",
+      "benefits": {
+        "one": "Filter by category and distance",
+        "two": "See how many people are interested",
+        "three": "Start conversations before you arrive",
+        "four": "Discover active plans happening right now"
+      },
+      "cards": {
+        "concert": "Concert in the park",
+        "meetup": "Founders meetup",
+        "fair": "Food fair",
+        "distanceKm": "{distance} km",
+        "away": "{distance} away",
+        "interested": "{count} interested"
+      }
+    },
+    "ui": {
+      "markers": {
+        "one": "A",
+        "two": "B",
+        "three": "C"
+      },
+      "social": {
+        "instagram": "IG",
+        "x": "X",
+        "facebook": "FB"
+      }
+    },
+    "footer": {
+      "tagline": "See who’s nearby",
+      "product": "Product",
+      "legal": "Legal",
+      "follow": "Follow us",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "copyright": "© 2025 Radar. All rights reserved."
+    }
+  }
+}
