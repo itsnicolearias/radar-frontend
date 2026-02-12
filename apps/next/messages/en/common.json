@@ -1,0 +1,296 @@
+{
+  "metadata": {
+    "title": "Radar - See who is nearby, in real time.",
+    "description": "Explore your surroundings, connect with nearby people, and discover local events happening right now."
+  },
+  "landing": {
+    "brand": "Radar",
+    "nav": {
+      "features": "Features",
+      "events": "Events",
+      "login": "Log in",
+      "register": "Sign up"
+    },
+    "hero": {
+      "title": "See who is nearby, in real time.",
+      "subtitle": "Explore your surroundings, connect with nearby people, and discover local events, all happening right now.",
+      "cta": "Join Radar now"
+    },
+    "about": {
+      "title": "What is Radar",
+      "text": "Radar shows you people who are physically near you in real time, no swipes, no hidden algorithms. Explore your surroundings, find people close by, chat instantly, and discover local activities with ease."
+    },
+    "features": {
+      "title": "Key features",
+      "items": {
+        "realTime": {
+          "title": "Real-Time Radar",
+          "description": "See who is nearby and where they are right now."
+        },
+        "profiles": {
+          "title": "Complete Profiles",
+          "description": "View photos, age, and interests, decide who you want to talk to."
+        },
+        "chats": {
+          "title": "Instant Chats",
+          "description": "Connect with nearby people without unnecessary steps."
+        },
+        "nearbyEvents": {
+          "title": "Nearby Events",
+          "description": "Discover concerts, meetups, and activities happening close to you."
+        },
+        "privacy": {
+          "title": "Total Privacy",
+          "description": "Share only what you choose. Invisible mode when you need it."
+        },
+        "geolocation": {
+          "title": "Useful Geolocation",
+          "description": "Radar shows real presence without publicly exposing exact coordinates."
+        }
+      }
+    },
+    "events": {
+      "title": "Events near you",
+      "heading": "Activities happening around you now",
+      "text": "See popular local events. Filter by category and distance, and start conversations with attendees before you arrive.",
+      "benefits": {
+        "one": "Filter by category and distance",
+        "two": "See how many people are interested",
+        "three": "Start conversations before you arrive",
+        "four": "Discover active plans happening right now"
+      },
+      "cards": {
+        "concert": "Concert in the park",
+        "meetup": "Founders meetup",
+        "fair": "Food fair",
+        "distanceKm": "{distance} km",
+        "away": "{distance} away",
+        "interested": "{count} interested"
+      }
+    },
+    "ui": {
+      "markers": {
+        "one": "A",
+        "two": "B",
+        "three": "C"
+      },
+      "social": {
+        "instagram": "IG",
+        "x": "X",
+        "facebook": "FB"
+      }
+    },
+    "footer": {
+      "tagline": "See who is nearby",
+      "product": "Product",
+      "legal": "Legal",
+      "follow": "Follow us",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "copyright": "© 2025 Radar. All rights reserved."
+    }
+  },
+  "auth": {
+    "common": {
+      "back": "Back",
+      "email": "Email",
+      "emailPlaceholder": "you@email.com",
+      "password": "Password",
+      "passwordPlaceholder": "********",
+      "confirmPassword": "Confirm password",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "firstName": "First name",
+      "firstNamePlaceholder": "John",
+      "lastName": "Last name",
+      "lastNamePlaceholder": "Doe",
+      "privacy": "Privacy",
+      "privacyLong": "Privacy Policy",
+      "terms": "Terms",
+      "termsLong": "Terms and Conditions"
+    },
+    "login": {
+      "title": "Log in",
+      "subtitle": "Sign in to your Radar account",
+      "submit": "Log in",
+      "submitting": "Logging in...",
+      "noAccount": "No account yet?",
+      "goRegister": "Sign up",
+      "errors": {
+        "default": "Error while logging in"
+      }
+    },
+    "register": {
+      "title": "Create account",
+      "subtitle": "Join Radar and start connecting",
+      "submit": "Create account",
+      "submitting": "Creating account...",
+      "haveAccount": "Already have an account?",
+      "goLogin": "Log in",
+      "termsPrefix": "By creating an account, I confirm that I am over 18 and I accept Radar",
+      "termsAnd": "and",
+      "termsSuffix": ".",
+      "errors": {
+        "default": "Error while registering",
+        "terms": "You must accept the terms and conditions to continue"
+      }
+    }
+  },
+  "legal": {
+    "terms": {
+      "title": "Terms and Conditions",
+      "updatedAt": "Last update: December 2025",
+      "backHome": "Back to home",
+      "contact": {
+        "title": "10. Contact",
+        "prefix": "For questions or claims:",
+        "email": "contacto@radar.app"
+      },
+      "sections": [
+        {
+          "title": "1. Introduction",
+          "paragraphs": [
+            "Radar is a social app in development stage (MVP / beta) that lets people discover, connect, and communicate with nearby users and events through geolocation.",
+            "By creating an account and using Radar, you accept these Terms and Conditions. If you do not agree, you should not use the app."
+          ]
+        },
+        {
+          "title": "2. Usage requirements",
+          "paragraphs": ["To use Radar you must:"],
+          "bullets": [
+            "Be at least 18 years old (or the minimum legal age in your country).",
+            "Provide truthful information when registering.",
+            "Use the app legally and responsibly."
+          ],
+          "note": "Radar may suspend or remove accounts that violate these terms."
+        },
+        {
+          "title": "3. Service operation",
+          "paragraphs": [
+            "Radar uses approximate user location to show nearby people and events. Exact locations are never shown and distances under 50 meters are not displayed.",
+            "The service may change features, contain errors, or be interrupted temporarily or permanently.",
+            "As this is a development version, continuous availability and error-free behavior are not guaranteed."
+          ]
+        },
+        {
+          "title": "4. Privacy and information control",
+          "paragraphs": ["Radar does not require users to share personal information."],
+          "bullets": [
+            "Each user decides what information is public.",
+            "Real names are never visible to other users.",
+            "Only display names (nicknames) are shown.",
+            "You can edit or stop sharing information at any time.",
+            "Radar offers Invisible Mode so you can avoid being detected by other users."
+          ]
+        },
+        {
+          "title": "5. Connections and messages",
+          "paragraphs": [
+            "Only users you decide to connect with can message you.",
+            "Radar does not actively monitor private messages, but it may act in response to reports or misuse."
+          ]
+        },
+        {
+          "title": "6. User behavior",
+          "paragraphs": ["The following is prohibited:"],
+          "bullets": [
+            "Using Radar for illegal activities.",
+            "Posting offensive, violent, or discriminatory content.",
+            "Trying to access Radar systems or data without authorization.",
+            "Using the app to harass or harm other users."
+          ],
+          "note": "Violations may result in account suspension or removal."
+        },
+        {
+          "title": "7. User-generated content",
+          "paragraphs": ["Each user is responsible for the content they post. Radar is not responsible for third-party content."]
+        },
+        {
+          "title": "8. Limitation of liability",
+          "paragraphs": [
+            "Radar is provided as is. We do not guarantee that the service will be secure, uninterrupted, or error-free.",
+            "Radar will not be liable for data loss, indirect damages, or service interruptions."
+          ]
+        },
+        {
+          "title": "9. Changes to terms",
+          "paragraphs": ["Radar may update these Terms and Conditions. Changes will be communicated in the app or through other reasonable channels."]
+        }
+      ]
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "updatedAt": "Last update: December 2025",
+      "backHome": "Back to home",
+      "contact": {
+        "title": "10. Contact",
+        "prefix": "For privacy questions:",
+        "email": "contacto@radar.app"
+      },
+      "sections": [
+        {
+          "title": "1. Introduction",
+          "paragraphs": ["At Radar, we value your privacy. This Policy explains what data we collect, how we use it, and what control you have over it."]
+        },
+        {
+          "title": "2. Data we collect",
+          "paragraphs": ["Radar may securely store the following data:"],
+          "bullets": [
+            "First and last name",
+            "Display name (nickname)",
+            "Age",
+            "City and state/province",
+            "Geolocation (exact coordinates, used internally)",
+            "Interests",
+            "Profile picture",
+            "Email"
+          ]
+        },
+        {
+          "title": "3. Geolocation usage",
+          "paragraphs": ["Radar uses your location to show nearby users and events."],
+          "bullets": [
+            "Your exact location is never shared with other users.",
+            "Locations are not displayed with precision under 50 meters.",
+            "You can disable visibility or enable Invisible Mode at any time."
+          ]
+        },
+        {
+          "title": "4. Data usage",
+          "paragraphs": ["Data is used only for:"],
+          "bullets": ["App operation", "Authentication and security", "Communication between users", "Service improvement"],
+          "note": "Radar does not sell or commercialize personal data."
+        },
+        {
+          "title": "5. Data sharing",
+          "paragraphs": [
+            "Radar does not sell personal data.",
+            "Radar does not share information with third parties, except technical providers required to run the service or legal obligations."
+          ]
+        },
+        {
+          "title": "6. User control",
+          "paragraphs": ["As a user, you can:"],
+          "bullets": [
+            "Edit your information",
+            "Choose which data is public",
+            "Stop sharing information at any time",
+            "Request deletion of your account and data"
+          ]
+        },
+        {
+          "title": "7. Security",
+          "paragraphs": ["Radar applies reasonable technical and organizational measures to protect your data. Even so, no system is completely secure."]
+        },
+        {
+          "title": "8. Experimental nature",
+          "paragraphs": ["Radar is in development stage. Some features may change, fail, or be removed."]
+        },
+        {
+          "title": "9. Changes to this policy",
+          "paragraphs": ["Radar may update this Privacy Policy. Changes will be communicated inside the app."]
+        }
+      ]
+    }
+  }
+}

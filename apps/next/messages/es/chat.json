@@ -1,0 +1,54 @@
+{
+  "chatPage": {
+    "tabs": {
+      "chats": "Chats",
+      "requests": "Solicitudes",
+      "connected": "Conectados"
+    },
+    "emptyChats": {
+      "title": "No tienes conversaciones aun",
+      "subtitle": "Conecta con personas cercanas para empezar a chatear"
+    },
+    "emptyRequests": {
+      "title": "No tienes solicitudes pendientes"
+    },
+    "emptyConnected": {
+      "title": "Aun no tienes conexiones"
+    },
+    "profileViews": {
+      "title": "Vistas de perfil"
+    },
+    "premium": {
+      "title": "Premium",
+      "unlockProfileViews": "Desbloquea todas las visitas de perfil con Premium.",
+      "close": "Cerrar",
+      "cta": "Ver planes"
+    },
+    "distance": {
+      "near": "Cerca",
+      "now": "Ahora",
+      "agoMinutes": "Hace {count}m",
+      "agoHours": "Hace {count}h",
+      "yesterday": "Ayer",
+      "agoDays": "Hace {count} dias"
+    },
+    "conversation": {
+      "titleFallback": "Chat",
+      "deleteConversation": "Eliminar conversacion",
+      "deleteMessage": "Eliminar mensaje",
+      "replyingSignal": "Respondiendo a la senal:",
+      "signalReply": "Respuesta a senal:",
+      "messagePlaceholder": "Escribi un mensaje...",
+      "loading": "Cargando...",
+      "errors": {
+        "sendMessage": "No se pudo enviar el mensaje",
+        "deleteMessage": "No se pudo eliminar el mensaje",
+        "deleteConversation": "No se pudo eliminar la conversacion"
+      },
+      "confirm": {
+        "deleteMessage": "Eliminar este mensaje?",
+        "deleteConversation": "Eliminar toda la conversacion? Esta accion no se puede deshacer."
+      }
+    }
+  }
+}

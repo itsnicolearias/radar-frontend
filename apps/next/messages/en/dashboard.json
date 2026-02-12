@@ -1,0 +1,57 @@
+{
+  "dashboard": {
+    "bottomNav": {
+      "radar": "Radar",
+      "chats": "Chats",
+      "events": "Events",
+      "profile": "Profile"
+    },
+    "radar": {
+      "title": "RADAR",
+      "newBadge": "New",
+      "searchMessages": {
+        "one": "Looking for new signals",
+        "two": "Detecting signals on Radar",
+        "three": "Listening for new signals",
+        "four": "Tracking nearby users",
+        "five": "Scanning the area",
+        "six": "Signals being detected"
+      },
+      "close": "Close",
+      "respondSignal": "Reply to signal",
+      "viewProfile": "View profile",
+      "sendRequest": "Send request",
+      "pending": "Pending",
+      "invisibleBadge": "Invisible mode enabled",
+      "selfLabel": "You",
+      "eventDetail": {
+        "location": "Location:",
+        "date": "Date:",
+        "dateLocale": "en-US"
+      },
+      "welcome": {
+        "title": "Welcome to RADAR",
+        "description": "To appear on the radar and connect with nearby people, complete these steps:",
+        "emailTitle": "Confirm your email",
+        "emailDescription": "Check your inbox and click the confirmation link",
+        "nicknameTitle": "Choose your nickname",
+        "nicknameDescription": "Go to your profile and set the display name others will see",
+        "confirmButton": "Got it"
+      },
+      "sendSignal": {
+        "title": "Send signal",
+        "placeholder": "Write your temporary message...",
+        "send": "Send signal (1/day)",
+        "quickOne": "Anyone else around?",
+        "quickTwo": "Available to chat",
+        "quickThree": "At the park"
+      }
+    },
+    "verified": {
+      "title": "Congrats",
+      "subtitle": "Your account is now verified and visible to all Radar users.",
+      "register": "Sign up",
+      "login": "Log in"
+    }
+  }
+}

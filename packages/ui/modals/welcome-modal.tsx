@@ -27,15 +27,38 @@ interface WelcomeModalProps {
   onClose: () => void
   userDisplayName?: string | null
   userEmailConfirmed?: boolean
+  labels?: {
+    title: string
+    description: string
+    emailTitle: string
+    emailDescription: string
+    nicknameTitle: string
+    nicknameDescription: string
+    confirmButton: string
+  }
 }
 
-export const WelcomeModal: React.FC<WelcomeModalProps> = ({ isOpen, onClose, userDisplayName, userEmailConfirmed }) => {
+export const WelcomeModal: React.FC<WelcomeModalProps> = ({
+  isOpen,
+  onClose,
+  userDisplayName,
+  userEmailConfirmed,
+  labels,
+}) => {
   if (!isOpen) return null
 
   const { openModal, closeModal } = useUIStore()
-
   const needsDisplayName = !userDisplayName || userDisplayName.trim() === ""
   const needsEmailConfirmation = !userEmailConfirmed
+  const copy = {
+    title: labels?.title ?? "",
+    description: labels?.description ?? "",
+    emailTitle: labels?.emailTitle ?? "",
+    emailDescription: labels?.emailDescription ?? "",
+    nicknameTitle: labels?.nicknameTitle ?? "",
+    nicknameDescription: labels?.nicknameDescription ?? "",
+    confirmButton: labels?.confirmButton ?? "",
+  }
 
   useEffect(() => {
     document.body.style.overflow = "hidden"
@@ -80,11 +103,9 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({ isOpen, onClose, use
               <Sparkles className="w-10 h-10 text-black" />
             </div>
 
-            <h2 className="text-2xl font-bold text-white mb-4">¡Bienvenido a RADAR!</h2>
+            <h2 className="text-2xl font-bold text-white mb-4">{copy.title}</h2>
 
-            <p className="text-[#C5C5C5] mb-8 leading-relaxed">
-              Para ser visible en el radar y conectar con personas cercanas, necesitas completar estos pasos:
-            </p>
+            <p className="text-[#C5C5C5] mb-8 leading-relaxed">{copy.description}</p>
 
             <div className="w-full space-y-4 mb-8">
               {needsEmailConfirmation && (
@@ -93,10 +114,8 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({ isOpen, onClose, use
                     <Mail className="w-5 h-5 text-[#00FFB3]" />
                   </div>
                   <div className="flex-1 text-left">
-                    <h3 className="text-white font-semibold mb-1">Confirma tu email</h3>
-                    <p className="text-sm text-[#C5C5C5]">
-                      Revisa tu bandeja de entrada y haz clic en el enlace de confirmacion
-                    </p>
+                    <h3 className="text-white font-semibold mb-1">{copy.emailTitle}</h3>
+                    <p className="text-sm text-[#C5C5C5]">{copy.emailDescription}</p>
                   </div>
                 </div>
               )}
@@ -107,10 +126,8 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({ isOpen, onClose, use
                     <User className="w-5 h-5 text-[#00FFB3]" />
                   </div>
                   <div className="flex-1 text-left">
-                    <h3 className="text-white font-semibold mb-1">Elige tu apodo</h3>
-                    <p className="text-sm text-[#C5C5C5]">
-                      Ve a tu perfil y configura el nombre visible que veran otros usuarios
-                    </p>
+                    <h3 className="text-white font-semibold mb-1">{copy.nicknameTitle}</h3>
+                    <p className="text-sm text-[#C5C5C5]">{copy.nicknameDescription}</p>
                   </div>
                 </div>
               )}
@@ -120,7 +137,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({ isOpen, onClose, use
               onClick={onClose}
               className="w-full h-14 rounded-full bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-bold hover:shadow-lg transition-all duration-300 shadow-[#00FFB3]/30"
             >
-              Entendido
+              {copy.confirmButton}
             </button>
           </div>
         </motion.div>

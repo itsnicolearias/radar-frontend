@@ -1,0 +1,57 @@
+{
+  "dashboard": {
+    "bottomNav": {
+      "radar": "Radar",
+      "chats": "Chats",
+      "events": "Eventos",
+      "profile": "Perfil"
+    },
+    "verified": {
+      "title": "Felicitaciones",
+      "subtitle": "Has verificado tu cuenta, ahora podras ser visible para todos los usuarios de Radar.",
+      "register": "Registrarse",
+      "login": "Iniciar sesion"
+    },
+    "radar": {
+      "title": "RADAR",
+      "newBadge": "Nuevo",
+      "searchMessages": {
+        "one": "Buscando nuevas senales",
+        "two": "Detectando senales en el radar",
+        "three": "Escuchando nuevas senales",
+        "four": "Rastreando usuarios cercanos",
+        "five": "Explorando el area",
+        "six": "Senales en deteccion"
+      },
+      "close": "Cerrar",
+      "respondSignal": "Responder senal",
+      "viewProfile": "Ver perfil",
+      "sendRequest": "Enviar solicitud",
+      "pending": "Pendiente",
+      "invisibleBadge": "Modo invisible activado",
+      "selfLabel": "Tu",
+      "eventDetail": {
+        "location": "Ubicacion:",
+        "date": "Fecha:",
+        "dateLocale": "es-AR"
+      },
+      "welcome": {
+        "title": "Bienvenido a RADAR",
+        "description": "Para ser visible en el radar y conectar con personas cercanas, necesitas completar estos pasos:",
+        "emailTitle": "Confirma tu email",
+        "emailDescription": "Revisa tu bandeja de entrada y haz clic en el enlace de confirmacion",
+        "nicknameTitle": "Elige tu apodo",
+        "nicknameDescription": "Ve a tu perfil y configura el nombre visible que veran otros usuarios",
+        "confirmButton": "Entendido"
+      },
+      "sendSignal": {
+        "title": "Enviar senal",
+        "placeholder": "Escribe tu mensaje temporal...",
+        "send": "Enviar senal (1/dia)",
+        "quickOne": "Alguien mas por aca?",
+        "quickTwo": "Disponible para charlar",
+        "quickThree": "En el parque"
+      }
+    }
+  }
+}

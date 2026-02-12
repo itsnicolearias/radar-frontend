@@ -20,6 +20,14 @@ interface EventCardProps {
   onInterestClick?: () => void
   onClick?: () => void
   className?: string
+  locale?: string
+  labels?: {
+    today: string
+    tomorrow: string
+    interested: string
+    notInterested: string
+    boosted: string
+  }
 }
 
 export const EventCard: React.FC<EventCardProps> = ({
@@ -37,22 +45,32 @@ export const EventCard: React.FC<EventCardProps> = ({
   onInterestClick,
   onClick,
   className,
+  locale = "es-AR",
+  labels,
 }) => {
+  const text = labels ?? {
+    today: "Hoy",
+    tomorrow: "Manana",
+    interested: "No me interesa",
+    notInterested: "Me interesa",
+    boosted: "BOOSTED",
+  }
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     const today = new Date()
     const tomorrow = new Date(today)
     tomorrow.setDate(tomorrow.getDate() + 1)
 
-    const timeStr = date.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })
+    const timeStr = date.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" })
 
     if (date.toDateString() === today.toDateString()) {
-      return `Hoy, ${timeStr}`
-    } else if (date.toDateString() === tomorrow.toDateString()) {
-      return `Mañana, ${timeStr}`
-    } else {
-      return date.toLocaleDateString("es-AR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })
+      return `${text.today}, ${timeStr}`
     }
+    if (date.toDateString() === tomorrow.toDateString()) {
+      return `${text.tomorrow}, ${timeStr}`
+    }
+    return date.toLocaleDateString(locale, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })
   }
 
   const initial = title.charAt(0).toUpperCase()
@@ -66,12 +84,11 @@ export const EventCard: React.FC<EventCardProps> = ({
       )}
       onClick={onClick}
     >
-      {/* Badge */}
       {(isBoosted || category) && (
         <div className="px-4 pt-3 flex gap-2">
           {isBoosted && (
             <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[#00FFB3] text-black shadow-lg shadow-[#00FFB3]/30">
-              💎 BOOSTED
+              {text.boosted}
             </span>
           )}
           {category && (
@@ -82,7 +99,6 @@ export const EventCard: React.FC<EventCardProps> = ({
         </div>
       )}
 
-      {/* Image */}
       <div className="p-4">
         <div className="w-full aspect-video bg-linear-to-br from-[#00FFB3]/20 to-[#1DE3F2]/20 rounded-xl flex items-center justify-center overflow-hidden border border-[#1DE3F2]/20">
           {photoUrl ? (
@@ -93,18 +109,16 @@ export const EventCard: React.FC<EventCardProps> = ({
         </div>
       </div>
 
-      {/* Content */}
       <div className="px-4 pb-4 space-y-3">
         <h3 className="text-white font-bold text-lg">{title}</h3>
 
         {description && <p className="text-[#C5C5C5] text-sm line-clamp-2">{description}</p>}
 
-        {/* Info row */}
         <div className="flex items-center gap-4 text-sm text-[#8B8B8B]">
           <div className="flex items-center gap-1">
             <MapPin className="w-4 h-4 text-[#00FFB3]" />
             <span>{location}</span>
-            {distance !== undefined && <span className="text-[#00FFB3]">• {formatDistance(distance)}</span>}
+            {distance !== undefined && <span className="text-[#00FFB3]">- {formatDistance(distance)}</span>}
           </div>
         </div>
 
@@ -119,7 +133,6 @@ export const EventCard: React.FC<EventCardProps> = ({
           </div>
         </div>
 
-        {/* Action button */}
         <button
           onClick={(e) => {
             e.stopPropagation()
@@ -133,7 +146,7 @@ export const EventCard: React.FC<EventCardProps> = ({
           )}
         >
           <Heart className={cn("w-4 h-4", isInterested && "fill-current")} />
-          {isInterested ? "No me interesa" : "Me interesa ❤️"}
+          {isInterested ? text.notInterested : text.interested}
         </button>
 
         {price > 0 && (
@@ -146,3 +159,4 @@ export const EventCard: React.FC<EventCardProps> = ({
     </div>
   )
 }
+

@@ -1,33 +1,37 @@
 import { SimpleBadge } from "./prototype/SimpleBadge";
 
-const ALL = [
-  "Música",
-  "Café",
+const DEFAULT_INTERESTS = [
+  "Musica",
+  "Cafe",
   "Arte",
   "Running",
-  "Fotografía",
+  "Fotografia",
   "Viajes",
   "Gaming",
   "Cine",
   "Lectura",
   "Deportes",
   "Cocina",
-  "Tecnología",
+  "Tecnologia",
 ];
 
 export default function InterestsSelector({
   selected,
   onToggle,
+  label = "Intereses",
+  options = DEFAULT_INTERESTS,
 }: {
   selected: string[];
   onToggle: (name: string) => void;
+  label?: string;
+  options?: string[];
 }) {
   return (
     <div className="animate-slide-up-delay-2">
-      <label className="block text-white mb-3">Intereses</label>
+      <label className="block text-white mb-3">{label}</label>
 
       <div className="flex flex-wrap gap-2">
-        {ALL.map((interest) => {
+        {options.map((interest) => {
           const active = selected.includes(interest);
           return (
             <SimpleBadge

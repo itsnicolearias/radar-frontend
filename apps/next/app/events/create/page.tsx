@@ -1,18 +1,20 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { ArrowLeft } from "lucide-react"
-import { useForm } from "react-hook-form"
-import { useEventsStore, useGeolocation } from "@radar/features"
-import { eventService } from "@radar/api"
-import type { EventInput } from "@radar/api/validations"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { ArrowLeft } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { useEventsStore, useGeolocation } from "@radar/features";
+import { eventService } from "@radar/api";
+import type { EventInput } from "@radar/api/validations";
 
 export default function CreateEventPage() {
-  const router = useRouter()
-  const { addEvent } = useEventsStore()
-  const { latitude, longitude } = useGeolocation()
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const t = useTranslations("eventsPage.create");
+  const router = useRouter();
+  const { addEvent } = useEventsStore();
+  const { latitude, longitude } = useGeolocation();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
@@ -27,18 +29,17 @@ export default function CreateEventPage() {
       maxAttendees: 50,
       price: 0,
     },
-  })
+  });
 
-  const startDate = watch("startDate")
-  const endDate = watch("endDate")
+  const startDate = watch("startDate");
 
   const onSubmit = async (data: EventInput) => {
     if (new Date(data.endDate) <= new Date(data.startDate)) {
-      alert("La fecha de fin debe ser posterior a la fecha de inicio")
-      return
+      alert(t("validationEndDate"));
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     try {
       const newEvent = await eventService.createEvent({
         ...data,
@@ -46,16 +47,16 @@ export default function CreateEventPage() {
         longitude: longitude || data.longitude,
         startDate: new Date(data.startDate).toISOString(),
         endDate: new Date(data.endDate).toISOString(),
-      })
-      addEvent(newEvent)
-      router.push("/events")
+      });
+      addEvent(newEvent);
+      router.push("/events");
     } catch (error) {
-      console.error("[v0] Error creating event:", error)
-      alert("Error al crear evento")
+      console.error("[events-create] Error creating event:", error);
+      alert(t("errorCreate"));
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-[#0E2A3E] pb-8">
@@ -64,47 +65,47 @@ export default function CreateEventPage() {
           <button onClick={() => router.back()} className="p-2 hover:bg-white/10 rounded-full transition-colors">
             <ArrowLeft className="w-6 h-6 text-white" />
           </button>
-          <h1 className="text-2xl font-bold text-white">Crear Evento</h1>
+          <h1 className="text-2xl font-bold text-white">{t("title")}</h1>
         </div>
       </header>
 
       <form onSubmit={handleSubmit(onSubmit)} className="px-6 py-6 space-y-4">
         <div>
-          <label className="block text-white text-sm font-medium mb-2">Título *</label>
+          <label className="block text-white text-sm font-medium mb-2">{t("fields.title")}</label>
           <input
             {...register("title")}
             className="w-full px-4 py-3 bg-[#1A3A4F] text-white rounded-xl border border-[#00FFB3]/20 focus:border-[#00FFB3] outline-none"
-            placeholder="Nombre del evento"
+            placeholder={t("placeholders.title")}
           />
           {errors.title && <p className="text-red-400 text-sm mt-1">{errors.title.message}</p>}
         </div>
 
         <div>
-          <label className="block text-white text-sm font-medium mb-2">Descripción *</label>
+          <label className="block text-white text-sm font-medium mb-2">{t("fields.description")}</label>
           <textarea
             {...register("description")}
             rows={4}
             className="w-full px-4 py-3 bg-[#1A3A4F] text-white rounded-xl border border-[#00FFB3]/20 focus:border-[#00FFB3] outline-none resize-none"
-            placeholder="Describe tu evento..."
+            placeholder={t("placeholders.description")}
           />
           {errors.description && <p className="text-red-400 text-sm mt-1">{errors.description.message}</p>}
         </div>
 
         <div>
-          <label className="block text-white text-sm font-medium mb-2">Ubicación *</label>
+          <label className="block text-white text-sm font-medium mb-2">{t("fields.location")}</label>
           <input
             {...register("location")}
             className="w-full px-4 py-3 bg-[#1A3A4F] text-white rounded-xl border border-[#00FFB3]/20 focus:border-[#00FFB3] outline-none"
-            placeholder="Dirección o lugar"
+            placeholder={t("placeholders.location")}
           />
           {errors.location && <p className="text-red-400 text-sm mt-1">{errors.location.message}</p>}
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-white text-sm font-medium mb-2">Fecha y hora inicio *</label>
+            <label className="block text-white text-sm font-medium mb-2">{t("fields.startDate")}</label>
             <input
-              {...register("startDate", { required: "Fecha de inicio requerida" })}
+              {...register("startDate", { required: t("errors.startDateRequired") })}
               type="datetime-local"
               className="w-full px-4 py-3 bg-[#1A3A4F] text-white rounded-xl border border-[#00FFB3]/20 focus:border-[#00FFB3] outline-none"
             />
@@ -112,9 +113,9 @@ export default function CreateEventPage() {
           </div>
 
           <div>
-            <label className="block text-white text-sm font-medium mb-2">Fecha y hora fin *</label>
+            <label className="block text-white text-sm font-medium mb-2">{t("fields.endDate")}</label>
             <input
-              {...register("endDate", { required: "Fecha de fin requerida" })}
+              {...register("endDate", { required: t("errors.endDateRequired") })}
               type="datetime-local"
               min={startDate}
               className="w-full px-4 py-3 bg-[#1A3A4F] text-white rounded-xl border border-[#00FFB3]/20 focus:border-[#00FFB3] outline-none"
@@ -125,7 +126,7 @@ export default function CreateEventPage() {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-white text-sm font-medium mb-2">Asistentes máx.</label>
+            <label className="block text-white text-sm font-medium mb-2">{t("fields.maxAttendees")}</label>
             <input
               {...register("maxAttendees", { valueAsNumber: true })}
               type="number"
@@ -136,7 +137,7 @@ export default function CreateEventPage() {
           </div>
 
           <div>
-            <label className="block text-white text-sm font-medium mb-2">Precio ($)</label>
+            <label className="block text-white text-sm font-medium mb-2">{t("fields.price")}</label>
             <input
               {...register("price", { valueAsNumber: true })}
               type="number"
@@ -150,7 +151,7 @@ export default function CreateEventPage() {
         <div className="flex items-center gap-3">
           <input {...register("isPublic")} type="checkbox" id="isPublic" className="w-5 h-5" />
           <label htmlFor="isPublic" className="text-white text-sm">
-            Evento público
+            {t("fields.isPublic")}
           </label>
         </div>
 
@@ -159,9 +160,9 @@ export default function CreateEventPage() {
           disabled={isSubmitting}
           className="w-full py-4 bg-[#00FFB3] text-[#0E2A3E] rounded-full font-semibold hover:bg-[#00FFB3]/90 transition-colors disabled:opacity-50"
         >
-          {isSubmitting ? "Creando..." : "Crear Evento"}
+          {isSubmitting ? t("submitting") : t("submit")}
         </button>
       </form>
     </div>
-  )
+  );
 }

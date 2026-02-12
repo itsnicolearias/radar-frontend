@@ -8,9 +8,20 @@ import type { IEventResponse } from "@radar/types"
 interface EventDetailModalProps {
   event: IEventResponse
   onClose: () => void
+  labels?: {
+    location: string
+    date: string
+    dateLocale?: string
+  }
 }
 
-export const EventDetailModal: React.FC<EventDetailModalProps> = ({ event, onClose }) => {
+export const EventDetailModal: React.FC<EventDetailModalProps> = ({ event, onClose, labels }) => {
+  const copy = {
+    location: labels?.location ?? "",
+    date: labels?.date ?? "",
+    dateLocale: labels?.dateLocale,
+  }
+
   return (
     <motion.div
       className="fixed inset-0 bg-black/90 backdrop-blur-sm z-[9999] flex items-center justify-center p-8"
@@ -31,10 +42,10 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({ event, onClo
         <p className="text-[#C5C5C5] text-base leading-relaxed">{event.description}</p>
         <div className="mt-6">
           <p className="text-sm text-white">
-            <strong>Ubicación:</strong> {event.location}
+            <strong>{copy.location}</strong> {event.location}
           </p>
           <p className="text-sm text-white">
-            <strong>Fecha:</strong> {new Date(event.startDate).toLocaleDateString("es-AR")}
+            <strong>{copy.date}</strong> {new Date(event.startDate).toLocaleDateString(copy.dateLocale)}
           </p>
         </div>
       </div>
