@@ -53,7 +53,15 @@ export default function RegisterPage() {
 
     setIsLoading(true);
     try {
-      const response = await authService.register(formData);
+      const allowedLanguages = ["es", "en"] as const;
+      const safeLocale = (allowedLanguages as readonly string[]).includes(locale) ? (locale as "es" | "en") : "es";
+      const response = await authService.register({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        language: safeLocale,
+      });
       setAuth(response.data.user, null, response.data.token);
       router.push("/radar");
     } catch (error: any) {
