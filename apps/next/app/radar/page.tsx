@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import {
   useRadarStore,
   useAuthStore,
@@ -116,7 +117,10 @@ function getMarkerPositionFromBearing(
 }
 
 export default function RadarPage() {
-  
+  const t = useTranslations("dashboard.radar")
+  const nav = useTranslations("dashboard.bottomNav")
+  const chatDistanceT = useTranslations("chatPage.distance")
+  const profileT = useTranslations("profilePage.userProfile")
   const router = useRouter()
   const { user, isVisible, toggleVisibility } = useAuthStore()
   const {
@@ -151,14 +155,13 @@ export default function RadarPage() {
   const [newMarkerIds, setNewMarkerIds] = useState<Set<string>>(new Set())
   
   const searchMessages = [
-    "Buscando nuevas señales",
-    "Detectando señales en el Radar",
-    "Escuchando nuevas señales",
-    "Rastreando usuarios cercanos",
-    "Explorando el área",
-    "Señales en detección",
+    t("searchMessages.one"),
+    t("searchMessages.two"),
+    t("searchMessages.three"),
+    t("searchMessages.four"),
+    t("searchMessages.five"),
+    t("searchMessages.six"),
   ]
-
   /* =========================
      SOCKET
   ========================= */
@@ -322,6 +325,12 @@ export default function RadarPage() {
     const isPending = pendingsConnections.some((c) => c.receiverId === userId)
     return isPending
   }
+  const formatProfileDistance = (distance?: number) => {
+    if (distance == null) return profileT("near")
+    const displayDistance = distance < 50 ? 50 : distance
+    if (displayDistance < 1000) return profileT("distanceMeters", { count: Math.round(displayDistance) })
+    return profileT("distanceKm", { count: (displayDistance / 1000).toFixed(1) })
+  }
 
   const usersToRender = [...nearbyUsers]
     .filter((u) => typeof u.distance === "number")
@@ -354,7 +363,7 @@ export default function RadarPage() {
             <MapPin className="w-4 h-4 text-[#00FFB3]" />
             <span className="text-[#00FFB3]">{radius / 1000} km</span>
           </div>
-          <h1 className="text-white font-bold">RADAR</h1>
+          <h1 className="text-white font-bold">{t("title")}</h1>
           <GhostButton onClick={toggleVisibility} isActive={!isVisible} />
         </div>
 
@@ -390,7 +399,7 @@ export default function RadarPage() {
         )}
       </AnimatePresence>
 
-      {!isVisible && <InvisibleBadge />}
+      {!isVisible && <InvisibleBadge label={t("invisibleBadge")} />}
        
 
       {/* RADAR */}
@@ -458,6 +467,7 @@ export default function RadarPage() {
           {/* CENTER */}
           <CentralUserMarker
             initial={user?.displayName?.[0]?.toUpperCase() || "U"}
+            label={t("selfLabel")}
           />
 
           {/* USERS */}
@@ -533,7 +543,7 @@ export default function RadarPage() {
                           transform: "translate(-50%, -100%)",
                         }}
                       >
-                        <p className="text-black text-[10px] font-bold">Nuevo!</p>
+                        <p className="text-black text-[10px] font-bold">{t("newBadge")}</p>
                       </motion.div>
                     )}
                     <UserMarker
@@ -593,12 +603,30 @@ export default function RadarPage() {
       </div>
 
 
-      <BottomNav activeTab="radar" onTabChange={(t) => router.push(`/${t}`)} />
+      <BottomNav
+        activeTab="radar"
+        onTabChange={(tab) => router.push(`/${tab}`)}
+        labels={{
+          radar: nav("radar"),
+          chats: nav("chats"),
+          events: nav("events"),
+          profile: nav("profile"),
+        }}
+      />
 
 
       {/* MODALS */}
       {isSendSignalModalOpen && (
-        <SendSignalModal onClose={() => setIsSendSignalModalOpen(false)} onSend={handleSendSignal} />
+        <SendSignalModal
+          onClose={() => setIsSendSignalModalOpen(false)}
+          onSend={handleSendSignal}
+          labels={{
+            title: t("sendSignal.title"),
+            placeholder: t("sendSignal.placeholder"),
+            send: t("sendSignal.send"),
+            quickReplies: [t("sendSignal.quickOne"), t("sendSignal.quickTwo"), t("sendSignal.quickThree")],
+          }}
+        />
       )}
 
       {selectedSignal && (
@@ -610,6 +638,18 @@ export default function RadarPage() {
           isUserConnected={isUserConnected(selectedSignal.senderId)}
           sendConnection={() => handleConnect(selectedSignal.senderId)}
           isConnectionPending={() => isTheConnectionPending(selectedSignal.senderId)}
+          labels={{
+            now: chatDistanceT("now"),
+            agoMinutes: (count) => chatDistanceT("agoMinutes", { count }),
+            agoHours: (count) => chatDistanceT("agoHours", { count }),
+            yesterday: chatDistanceT("yesterday"),
+            agoDays: (count) => chatDistanceT("agoDays", { count }),
+            respondSignal: t("respondSignal"),
+            pending: t("pending"),
+            sendRequest: t("sendRequest"),
+            viewProfile: t("viewProfile"),
+            close: t("close"),
+          }}
         />
       )}
 
@@ -622,10 +662,32 @@ export default function RadarPage() {
           sendConnection={() => handleConnect(selectedUser.userId)}
           deleteConnection={() => handleDeleteConnection(selectedUser.userId)}
           isConnectionPending={() => isTheConnectionPending(selectedUser.userId)}
+          labels={{
+            near: profileT("near"),
+            distanceMeters: (count) => profileT("distanceMeters", { count }),
+            distanceKm: (count) => profileT("distanceKm", { count }),
+            distanceLabel: (distance) => formatProfileDistance(distance),
+            interests: profileT("interests"),
+            about: profileT("about"),
+            message: profileT("message"),
+            removeFriend: profileT("removeFriend"),
+            pending: t("pending"),
+            sendRequest: t("sendRequest"),
+          }}
         />
       )}
 
-      {selectedEvent && <EventDetailModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />}
+      {selectedEvent && (
+        <EventDetailModal
+          event={selectedEvent}
+          onClose={() => setSelectedEvent(null)}
+          labels={{
+            location: t("eventDetail.location"),
+            date: t("eventDetail.date"),
+            dateLocale: t("eventDetail.dateLocale"),
+          }}
+        />
+      )}
 
       {showWelcomeModal && (
         <WelcomeModal
@@ -633,8 +695,18 @@ export default function RadarPage() {
           onClose={() => setShowWelcomeModal(false)}
           userDisplayName={user?.displayName}
           userEmailConfirmed={user?.isVerified}
+          labels={{
+            title: t("welcome.title"),
+            description: t("welcome.description"),
+            emailTitle: t("welcome.emailTitle"),
+            emailDescription: t("welcome.emailDescription"),
+            nicknameTitle: t("welcome.nicknameTitle"),
+            nicknameDescription: t("welcome.nicknameDescription"),
+            confirmButton: t("welcome.confirmButton"),
+          }}
         />
       )}
     </div>
   )
 }
+

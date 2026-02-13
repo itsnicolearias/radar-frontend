@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { redirect } from "next/navigation";
 import { defaultLocale, locales, type AppLocale } from "../../i18n/config";
+import { getLocaleMessages } from "../../i18n/messages";
 
 const baseUrl = "https://use-radar.vercel.app";
 
@@ -23,7 +24,7 @@ export async function generateMetadata({ params }: Omit<LocaleLayoutProps, "chil
   const { locale } = await params;
   const resolvedLocale = isLocale(locale) ? locale : defaultLocale;
 
-  const messages = (await import(`../../messages/${resolvedLocale}.json`)).default;
+  const messages = await getLocaleMessages(resolvedLocale);
 
   return {
     title: messages.metadata.title,
@@ -49,7 +50,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
     redirect(`/${defaultLocale}`);
   }
 
-  const messages = (await import(`../../messages/${locale}.json`)).default;
+  const messages = await getLocaleMessages(locale);
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>

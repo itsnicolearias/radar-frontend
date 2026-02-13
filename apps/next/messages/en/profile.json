@@ -1,0 +1,64 @@
+{
+  "profilePage": {
+    "title": "My profile",
+    "save": "Save changes",
+    "saving": "Saving...",
+    "logout": "Log out",
+    "alerts": {
+      "saved": "Profile updated successfully",
+      "saveError": "Error saving profile"
+    },
+    "fields": {
+      "displayName": "Display name *",
+      "firstName": "First name *",
+      "lastName": "Last name *",
+      "age": "Age",
+      "country": "Country",
+      "province": "State/Province",
+      "bio": "Bio",
+      "interests": "Interests"
+    },
+    "privacy": {
+      "visible": "Visible",
+      "hidden": "Hidden"
+    },
+    "plan": {
+      "title": "Free Plan",
+      "radarRange": "Radar range:",
+      "radarRangeValue": "10 km",
+      "signals": "Signals:",
+      "signalsValue": "1 every 24h",
+      "visitors": "See last 3 visitors"
+    },
+    "interestOptions": [
+      "Music",
+      "Coffee",
+      "Art",
+      "Running",
+      "Photography",
+      "Travel",
+      "Gaming",
+      "Movies",
+      "Reading",
+      "Sports",
+      "Cooking",
+      "Technology"
+    ],
+    "userProfile": {
+      "title": "Profile",
+      "loading": "Loading profile...",
+      "near": "Nearby",
+      "distanceMeters": "{count}m away",
+      "distanceKm": "{count}km away",
+      "interests": "Interests",
+      "about": "About me",
+      "message": "Send message",
+      "removeFriend": "Remove friend",
+      "sendRequest": "Send request",
+      "pending": "Pending",
+      "close": "Close",
+      "connect": "Connect",
+      "remove": "Remove"
+    }
+  }
+}

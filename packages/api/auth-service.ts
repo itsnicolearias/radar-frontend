@@ -11,6 +11,7 @@ export interface RegisterInput {
   lastName?: string
   email?: string
   password?: string
+  language?: "es" | "en"
 }
 
 export const authService = {

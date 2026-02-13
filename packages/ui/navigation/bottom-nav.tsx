@@ -9,16 +9,28 @@ interface BottomNavProps {
   activeTab: "radar" | "chats" | "events" | "profile"
   onTabChange: (tab: "radar" | "chats" | "events" | "profile") => void
   className?: string
+  labels?: {
+    radar: string
+    chats: string
+    events: string
+    profile: string
+  }
 }
 
-export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange, className }) => {
+export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange, className, labels }) => {
   const { unreadCount } = useNotificationStore()
+  const text = labels ?? {
+    radar: "Radar",
+    chats: "Chats",
+    events: "Eventos",
+    profile: "Perfil",
+  }
 
   const tabs = [
-    { id: "radar" as const, label: "Radar", icon: MapPin },
-    { id: "chats" as const, label: "Chats", icon: MessageCircle },
-    { id: "events" as const, label: "Eventos", icon: Calendar },
-    { id: "profile" as const, label: "Perfil", icon: User },
+    { id: "radar" as const, label: text.radar, icon: MapPin },
+    { id: "chats" as const, label: text.chats, icon: MessageCircle },
+    { id: "events" as const, label: text.events, icon: Calendar },
+    { id: "profile" as const, label: text.profile, icon: User },
   ]
 
   return (

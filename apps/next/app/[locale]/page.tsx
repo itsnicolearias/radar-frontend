@@ -48,11 +48,11 @@ function LandingNavbar() {
           </div>
 
           <div className="flex items-center gap-3">
-            <Link href="/login" className="text-sm text-gray-300 hover:text-white transition-colors px-4 py-2">
+            <Link href={`/${locale}/login`} className="text-sm text-gray-300 hover:text-white transition-colors px-4 py-2">
               {t("nav.login")}
             </Link>
             <Link
-              href="/register"
+              href={`/${locale}/register`}
               className="text-sm font-medium text-black bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] hover:opacity-90 transition-opacity px-6 py-2 rounded-full"
             >
               {t("nav.register")}
@@ -356,6 +356,7 @@ function Events() {
 
 function Footer() {
   const t = useTranslations("landing");
+  const locale = useLocale();
 
   return (
     <footer className="bg-[#0A0E12] border-t border-[#00FFB3]/20 text-white py-12 px-6">
@@ -391,12 +392,12 @@ function Footer() {
             <h4 className="font-bold mb-4 text-sm">{t("footer.legal")}</h4>
             <ul className="space-y-2 text-[#C5C5C5] text-sm">
               <li>
-                <a href="#" className="hover:text-[#00FFB3] transition-colors">
+                <a href={`/${locale}/privacy-policy`} className="hover:text-[#00FFB3] transition-colors">
                   {t("footer.privacy")}
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-[#00FFB3] transition-colors">
+                <a href={`/${locale}/terms-conditions`} className="hover:text-[#00FFB3] transition-colors">
                   {t("footer.terms")}
                 </a>
               </li>
@@ -432,6 +433,7 @@ export default function LandingPage() {
     { id: number; x: number; y: number; duration: number; delay: number }[]
   >([]);
   const t = useTranslations("landing");
+  const locale = useLocale();
 
   useEffect(() => {
     const generated = Array.from({ length: 12 }).map((_, i) => ({
@@ -511,7 +513,7 @@ export default function LandingPage() {
                 className="flex justify-center lg:justify-start pt-2"
               >
                 <Link
-                  href="/register"
+                  href={`/${locale}/register`}
                   className="inline-flex items-center justify-center h-12 sm:h-14 px-8 sm:px-10 text-base sm:text-lg font-semibold bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black rounded-full hover:opacity-90 hover:shadow-xl transition-all shadow-lg shadow-[#00FFB3]/30"
                 >
                   {t("hero.cta")}

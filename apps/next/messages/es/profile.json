@@ -1,0 +1,64 @@
+{
+  "profilePage": {
+    "title": "Mi perfil",
+    "save": "Guardar cambios",
+    "saving": "Guardando...",
+    "logout": "Cerrar sesion",
+    "alerts": {
+      "saved": "Perfil actualizado correctamente",
+      "saveError": "Error al guardar el perfil"
+    },
+    "fields": {
+      "displayName": "Nombre visible *",
+      "firstName": "Nombre *",
+      "lastName": "Apellido *",
+      "age": "Edad",
+      "country": "Pais",
+      "province": "Provincia",
+      "bio": "Biografia",
+      "interests": "Intereses"
+    },
+    "privacy": {
+      "visible": "Visible",
+      "hidden": "Oculto"
+    },
+    "plan": {
+      "title": "Plan Free",
+      "radarRange": "Radio del radar:",
+      "radarRangeValue": "10 km",
+      "signals": "Senales:",
+      "signalsValue": "1 cada 24h",
+      "visitors": "Ver ultimos 3 visitantes"
+    },
+    "interestOptions": [
+      "Musica",
+      "Cafe",
+      "Arte",
+      "Running",
+      "Fotografia",
+      "Viajes",
+      "Gaming",
+      "Cine",
+      "Lectura",
+      "Deportes",
+      "Cocina",
+      "Tecnologia"
+    ],
+    "userProfile": {
+      "title": "Perfil",
+      "loading": "Cargando perfil...",
+      "near": "Cerca",
+      "distanceMeters": "A {count}m de distancia",
+      "distanceKm": "A {count}km de distancia",
+      "interests": "Intereses",
+      "about": "Sobre mi",
+      "message": "Enviar mensaje",
+      "removeFriend": "Eliminar amigo",
+      "sendRequest": "Enviar solicitud",
+      "pending": "Pendiente",
+      "close": "Cerrar",
+      "connect": "Conectar",
+      "remove": "Eliminar"
+    }
+  }
+}

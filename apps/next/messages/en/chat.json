@@ -1,0 +1,54 @@
+{
+  "chatPage": {
+    "tabs": {
+      "chats": "Chats",
+      "requests": "Requests",
+      "connected": "Connected"
+    },
+    "emptyChats": {
+      "title": "You have no conversations yet",
+      "subtitle": "Connect with nearby people to start chatting"
+    },
+    "emptyRequests": {
+      "title": "You have no pending requests"
+    },
+    "emptyConnected": {
+      "title": "You have no connections yet"
+    },
+    "profileViews": {
+      "title": "Profile views"
+    },
+    "": {
+      "title": "Premium",
+      "unlockProfileViews": "Unlock all profile views with Premium.",
+      "close": "Close",
+      "cta": "See plans"
+    },
+    "distance": {
+      "near": "Nearby",
+      "now": "Now",
+      "agoMinutes": "{count}m ago",
+      "agoHours": "{count}h ago",
+      "yesterday": "Yesterday",
+      "agoDays": "{count} days ago"
+    },
+    "conversation": {
+      "titleFallback": "Chat",
+      "deleteConversation": "Delete conversation",
+      "deleteMessage": "Delete message",
+      "replyingSignal": "Replying to signal:",
+      "signalReply": "Reply to signal:",
+      "messagePlaceholder": "Write a message...",
+      "loading": "Loading...",
+      "errors": {
+        "sendMessage": "Could not send message",
+        "deleteMessage": "Could not delete message",
+        "deleteConversation": "Could not delete conversation"
+      },
+      "confirm": {
+        "deleteMessage": "Delete this message?",
+        "deleteConversation": "Delete the entire conversation? This action cannot be undone."
+      }
+    }
+  }
+}
