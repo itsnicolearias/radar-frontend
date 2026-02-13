@@ -1,37 +1,48 @@
-"use client"
+"use client";
 
-import type { IRadarUser } from "@radar/types"
-import { motion } from "framer-motion"
-import { X, MapPin, MessageCircle, Heart, HeartOff, Clock } from "lucide-react"
-import { formatDistance } from "../../../lib/utils/format-distance"
-import type React from "react"
-import { useEffect, useState } from "react"
-import { createPortal } from "react-dom"
-import { useConnectionStore, useUIStore } from "@radar/features"
+import type { IRadarUser } from "@radar/types";
+import { motion } from "framer-motion";
+import { X, MapPin, MessageCircle, Heart, HeartOff, Clock } from "lucide-react";
+import type React from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import { useConnectionStore, useUIStore } from "@radar/features";
 
 export function ModalPortal({ children }: { children: React.ReactNode }) {
-  const [mounted, setMounted] = useState(false)
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
-  if (!mounted) return null
+  if (!mounted) return null;
 
-  const modalRoot = typeof document !== "undefined" ? document.getElementById("modal-root") : null
-  if (!modalRoot) return null
+  const modalRoot = typeof document !== "undefined" ? document.getElementById("modal-root") : null;
+  if (!modalRoot) return null;
 
-  return createPortal(children, modalRoot)
+  return createPortal(children, modalRoot);
 }
 
 interface UserProfileModalProps {
-  user: IRadarUser
-  onClose: () => void
-  onMessage: () => void
-  isUserConnected: () => boolean
-  sendConnection: () => void
-  deleteConnection: () => void
-  isConnectionPending: () =>  boolean
+  user: IRadarUser;
+  onClose: () => void;
+  onMessage: () => void;
+  isUserConnected: () => boolean;
+  sendConnection: () => void;
+  deleteConnection: () => void;
+  isConnectionPending: () => boolean;
+  labels?: {
+    near: string;
+    distanceMeters?: (count: number) => string;
+    distanceKm?: (count: string) => string;
+    distanceLabel?: (distance?: number) => string;
+    interests: string;
+    about: string;
+    message: string;
+    removeFriend: string;
+    pending: string;
+    sendRequest: string;
+  };
 }
 
 export const UserProfileModal: React.FC<UserProfileModalProps> = ({
@@ -42,37 +53,55 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   sendConnection,
   deleteConnection,
   isConnectionPending,
+  labels,
 }) => {
-  const { getLocalConnectionState, setLocalConnectionState, removeConnection } = useConnectionStore()
-  const { openModal, closeModal } = useUIStore()
-  const [isAnimating, setIsAnimating] = useState(false)
+  const { getLocalConnectionState, setLocalConnectionState } = useConnectionStore();
+  const { openModal, closeModal } = useUIStore();
+  const [isAnimating, setIsAnimating] = useState(false);
 
-  const localState = getLocalConnectionState(user.userId)
-  const connectionMade = localState === "connected" || isUserConnected()
-  const isPending = localState === "pending" || isConnectionPending()
+  const t = labels ?? {
+    near: "Cerca",
+    distanceMeters: (count: number) => `A ${count}m de distancia`,
+    distanceKm: (count: string) => `A ${count}km de distancia`,
+    interests: "Intereses",
+    about: "Sobre mi",
+    message: "Enviar mensaje",
+    removeFriend: "Eliminar amigo",
+    pending: "Pendiente",
+    sendRequest: "Enviar solicitud",
+  };
+  const distanceText = (() => {
+    if (t.distanceLabel) return t.distanceLabel(user.distance);
+    if (user.distance == null) return t.near;
+    const displayDistance = user.distance < 50 ? 50 : user.distance;
+    if (displayDistance < 1000) return (t.distanceMeters ?? ((count) => `${count}m`))(Math.round(displayDistance));
+    return (t.distanceKm ?? ((count) => `${count}km`))((displayDistance / 1000).toFixed(1));
+  })();
+
+  const localState = getLocalConnectionState(user.userId);
+  const connectionMade = localState === "connected" || isUserConnected();
+  const isPending = localState === "pending" || isConnectionPending();
 
   const handleSendConnection = () => {
-    setIsAnimating(true)
-    sendConnection()
-    setLocalConnectionState(user.userId, "pending")
-    setTimeout(() => setIsAnimating(false), 600)
-  }
+    setIsAnimating(true);
+    sendConnection();
+    setLocalConnectionState(user.userId, "pending");
+    setTimeout(() => setIsAnimating(false), 600);
+  };
 
   const handleDeleteConnection = () => {
-    setLocalConnectionState(user.userId, null)
-    //removeConnection(user.userId)
-    deleteConnection()
-  }
+    setLocalConnectionState(user.userId, null);
+    deleteConnection();
+  };
 
   useEffect(() => {
-  document.body.style.overflow = "hidden"
-  openModal()
-  return () => {
-    document.body.style.overflow = ""
-    closeModal()
-  }
-}, [openModal, closeModal])
-
+    document.body.style.overflow = "hidden";
+    openModal();
+    return () => {
+      document.body.style.overflow = "";
+      closeModal();
+    };
+  }, [openModal, closeModal]);
 
   return (
     <ModalPortal>
@@ -82,12 +111,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        style={{
-    transform: "none",
-    willChange: "auto",
-    position: "fixed",
-    pointerEvents: "auto",
-  }}
+        style={{ transform: "none", willChange: "auto", position: "fixed", pointerEvents: "auto" }}
       >
         <motion.div
           className="bg-[#0A0E12] rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto"
@@ -95,9 +119,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
           onClick={(e) => e.stopPropagation()}
-
         >
-          {/* Header with gradient background */}
           <div className="relative bg-linear-to-b from-[#197387] to-[#0F2B33] p-8 pb-16">
             <button
               onClick={onClose}
@@ -109,25 +131,19 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
             <div className="flex flex-col items-center">
               <div className="w-24 h-24 rounded-full bg-white flex items-center justify-center text-black font-bold text-4xl mb-4 border-2 border-[#00FFB3] overflow-hidden">
                 {user.Profile?.photoUrl ? (
-                  <img
-                    src={user.Profile.photoUrl || "/placeholder.svg"}
-                    alt={user.displayName || "U"}
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={user.Profile.photoUrl || "/placeholder.svg"} alt={user.displayName || "U"} className="w-full h-full object-cover" />
                 ) : (
                   <span>{user.displayName?.[0]?.toUpperCase()}</span>
                 )}
               </div>
               <div className="flex items-center gap-2 text-white/90">
                 <MapPin className="w-4 h-4 text-[#1DE3F2]" />
-                <span>{formatDistance(user.distance)}</span>
+                <span>{distanceText}</span>
               </div>
             </div>
           </div>
 
-          {/* Content */}
           <div className="p-6 space-y-6">
-            {/* Name and location */}
             <div>
               <h2 className="text-white font-bold text-2xl">
                 {user.Profile.showAge && user.Profile.age ? `${user.displayName}, ${user.Profile.age}` : user.displayName}
@@ -135,15 +151,14 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               {user.Profile.showLocation && (
                 <p className="text-[#1DE3F2] flex items-center gap-1 mt-1">
                   <MapPin className="w-4 h-4" />
-                  {user.Profile.province || "Cerca"}
+                  {user.Profile.province || t.near}
                 </p>
               )}
             </div>
 
-            {/* Interests */}
             {user.Profile.interests && user.Profile.interests.length > 0 && (
               <div>
-                <h3 className="text-white font-semibold mb-3">Intereses</h3>
+                <h3 className="text-white font-semibold mb-3">{t.interests}</h3>
                 <div className="flex flex-wrap gap-2">
                   {user.Profile.interests.map((interest) => (
                     <span key={interest} className="px-4 py-2 bg-white rounded-full text-black text-sm font-medium">
@@ -154,15 +169,13 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               </div>
             )}
 
-            {/* Bio */}
             {user.Profile.bio && (
               <div>
-                <h3 className="text-white font-semibold mb-2">Sobre mí</h3>
+                <h3 className="text-white font-semibold mb-2">{t.about}</h3>
                 <p className="text-[#C5C5C5] leading-relaxed">{user.Profile.bio}</p>
               </div>
             )}
 
-            {/* Action buttons */}
             <div className="flex gap-3 pt-4">
               {connectionMade ? (
                 <>
@@ -171,14 +184,14 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     className="flex-1 h-14 rounded-full bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-semibold hover:shadow-lg transition-all duration-300 shadow-[#00FFB3]/30 flex items-center justify-center gap-2"
                   >
                     <MessageCircle className="w-5 h-5" />
-                    Enviar mensaje
+                    {t.message}
                   </button>
                   <button
                     className="h-14 px-6 rounded-full border border-[#FF005C]/30 flex items-center justify-center gap-2 hover:bg-[#FF005C]/10 transition-colors bg-[#1A1A1A] text-[#FF005C] font-medium"
                     onClick={handleDeleteConnection}
                   >
                     <HeartOff className="w-5 h-5" />
-                    Eliminar amigo
+                    {t.removeFriend}
                   </button>
                 </>
               ) : isPending ? (
@@ -187,7 +200,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   disabled
                 >
                   <Clock className="w-5 h-5" />
-                  Pendiente
+                  {t.pending}
                 </button>
               ) : (
                 <motion.button
@@ -197,7 +210,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   transition={{ duration: 0.3 }}
                 >
                   <Heart className="w-5 h-5" />
-                  Enviar solicitud
+                  {t.sendRequest}
                 </motion.button>
               )}
             </div>
@@ -205,5 +218,5 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
         </motion.div>
       </motion.div>
     </ModalPortal>
-  )
-}
+  );
+};

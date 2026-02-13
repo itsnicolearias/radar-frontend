@@ -6,6 +6,10 @@ interface Props {
   onChange: (v: string) => void;
   multiline?: boolean;
   type?: "text" | "number";
+  privacyLabels?: {
+    visible: string;
+    hidden: string;
+  };
   privacy?: {
     visible: boolean;
     onToggle: () => void;
@@ -18,8 +22,11 @@ export default function ProfileField({
   onChange,
   type = "text",
   multiline = false,
+  privacyLabels,
   privacy,
 }: Props) {
+  const labels = privacyLabels ?? { visible: "Visible", hidden: "Oculto" };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
@@ -35,7 +42,7 @@ export default function ProfileField({
             ) : (
               <EyeOff className="w-4 h-4" />
             )}
-            {privacy.visible ? "Visible" : "Oculto"}
+            {privacy.visible ? labels.visible : labels.hidden}
           </button>
         )}
       </div>

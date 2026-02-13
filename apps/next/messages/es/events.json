@@ -1,0 +1,67 @@
+{
+  "eventsPage": {
+    "title": "Eventos cercanos",
+    "myEvents": "Mis eventos",
+    "showingMyEvents": "Mostrando mis eventos",
+    "emptyTitle": "No hay eventos disponibles",
+    "emptySubtitle": "Crea el primer evento de tu zona",
+    "confirmDelete": "Estas seguro que deseas eliminar el evento?",
+    "alerts": {
+      "deleted": "Evento eliminado correctamente",
+      "deleteError": "Error al eliminar el evento",
+      "updated": "Evento actualizado correctamente",
+      "updateError": "Error al actualizar el evento"
+    },
+    "categories": {
+      "all": "Todos",
+      "music": "Musica",
+      "food": "Gastronomia",
+      "art": "Arte",
+      "sports": "Deportes",
+      "social": "Social"
+    },
+    "card": {
+      "today": "Hoy",
+      "tomorrow": "Manana",
+      "interested": "Me interesa",
+      "notInterested": "No me interesa",
+      "boosted": "BOOSTED"
+    },
+    "edit": {
+      "title": "Editar evento",
+      "fields": {
+        "title": "Titulo",
+        "description": "Descripcion",
+        "location": "Ubicacion",
+        "price": "Precio"
+      },
+      "saveChanges": "Guardar cambios"
+    },
+    "create": {
+      "title": "Crear evento",
+      "submit": "Crear evento",
+      "submitting": "Creando...",
+      "validationEndDate": "La fecha de fin debe ser posterior a la fecha de inicio",
+      "errorCreate": "Error al crear evento",
+      "fields": {
+        "title": "Titulo *",
+        "description": "Descripcion *",
+        "location": "Ubicacion *",
+        "startDate": "Fecha y hora inicio *",
+        "endDate": "Fecha y hora fin *",
+        "maxAttendees": "Asistentes max.",
+        "price": "Precio ($)",
+        "isPublic": "Evento publico"
+      },
+      "placeholders": {
+        "title": "Nombre del evento",
+        "description": "Describe tu evento...",
+        "location": "Direccion o lugar"
+      },
+      "errors": {
+        "startDateRequired": "Fecha de inicio requerida",
+        "endDateRequired": "Fecha de fin requerida"
+      }
+    }
+  }
+}
