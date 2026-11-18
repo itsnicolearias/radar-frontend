@@ -287,6 +287,7 @@ function Events() {
       <div className="max-w-7xl mx-auto relative">
         <div className="grid grid-cols-1 lg:grid-cols-[0.92fr_1.08fr] gap-12 sm:gap-16 lg:gap-20 items-start">
           <motion.div
+            className="order-last lg:order-first"
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
@@ -299,11 +300,11 @@ function Events() {
               {t("events.heading")}
             </h3>
             <p className="text-sm sm:text-base lg:text-lg text-[#C5C5C5] mb-6 sm:mb-8 leading-relaxed">{t("events.text")}</p>
-            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+            <ul className="grid grid-cols-1 gap-1 sm:gap-2">
               {benefits.map((benefit, index) => (
                 <motion.li
                   key={index}
-                  className="min-h-20 flex items-start gap-3 rounded-xl border border-[#00FFB3]/15 bg-[#0D1315]/90 p-4 sm:min-h-24 sm:p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]"
+                  className="flex items-start gap-3 border-b border-[#00FFB3]/10 py-3.5 last:border-b-0 sm:py-4"
                   initial={{ opacity: 0, x: -10 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
@@ -317,8 +318,7 @@ function Events() {
           </motion.div>
 
           <motion.div
-            className="relative min-w-0 overflow-hidden rounded-2xl border border-[#00FFB3]/20 bg-[#080E10]/95 p-5 shadow-[0_24px_80px_rgba(0,255,179,0.06)] sm:rounded-3xl sm:p-7 lg:p-8"
-
+            className="order-first relative min-w-0 overflow-hidden rounded-2xl border border-[#00FFB3]/25 bg-gradient-to-br from-[#06352D] via-[#0A201E] to-[#101719] p-5 shadow-[0_24px_80px_rgba(0,255,179,0.08)] sm:rounded-3xl sm:p-7 lg:order-last lg:p-8"
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
