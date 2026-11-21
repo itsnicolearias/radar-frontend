@@ -5,6 +5,10 @@ export interface IPresignedUrlResponse {
   fileUrl: string
 }
 
+interface IProfilePhotoResponse {
+  photoUrl: string
+}
+
 export const uploadService = {
   async getPresignedUrl(fileName: string, fileType: string): Promise<IPresignedUrlResponse> {
     const response = await axiosRequestor.get<IPresignedUrlResponse>("/get-signed-url", {
@@ -36,12 +40,28 @@ export const uploadService = {
 
   },
 
+  async uploadProfilePhoto(file: File | Blob, fileName: string): Promise<string> {
+    const formData = new FormData()
+    formData.append("image", file, fileName)
+
+    const response = await axiosRequestor.post<IProfilePhotoResponse>(
+      "/profile/photo",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      },
+    )
+
+    if (!response.data.photoUrl) {
+      throw new Error("Invalid profile photo upload response")
+    }
+
+    return response.data.photoUrl
+  },
+
   async uploadImage(file: File | Blob, fileName: string): Promise<string | null> {
-
-    const { signedUrl, fileUrl } = await this.getPresignedUrl(fileName, file.type)
-
-    await this.uploadToS3(signedUrl, file)
-    return fileUrl
-
+    return this.uploadProfilePhoto(file, fileName)
   },
 }
