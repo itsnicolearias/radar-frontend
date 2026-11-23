@@ -5,6 +5,10 @@
       "requests": "Requests",
       "connected": "Connected"
     },
+    "request": {
+      "accept": "Accept request",
+      "reject": "Reject"
+    },
     "emptyChats": {
       "title": "You have no conversations yet",
       "subtitle": "Connect with nearby people to start chatting"

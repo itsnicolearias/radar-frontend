@@ -118,7 +118,7 @@ function ChatConversationPage() {
 
   const firstMsg = userMessages[0];
   const name = firstMsg ? (firstMsg.senderId === userId ? firstMsg?.Sender?.displayName : firstMsg?.Receiver?.displayName) : t("titleFallback");
-  const photoUrl = firstMsg ? (firstMsg.senderId === userId ? firstMsg.Sender.Profile?.photoUrl : firstMsg.Receiver.Profile?.photoUrl) : "";
+  const photoUrl = firstMsg ? (firstMsg.senderId === userId ? firstMsg.Sender?.Profile?.photoUrl : firstMsg.Receiver.Profile?.photoUrl) : "";
   const distance = firstMsg ? (firstMsg.senderId === userId ? firstMsg.Sender.distance : firstMsg.Receiver.distance) : 0;
 
   const formatDistanceLabel = (value?: number) => {
