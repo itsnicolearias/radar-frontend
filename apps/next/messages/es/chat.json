@@ -5,6 +5,10 @@
       "requests": "Solicitudes",
       "connected": "Conectados"
     },
+    "request": {
+      "accept": "Aceptar solicitud",
+      "reject": "Rechazar"
+    },
     "emptyChats": {
       "title": "No tienes conversaciones aun",
       "subtitle": "Conecta con personas cercanas para empezar a chatear"

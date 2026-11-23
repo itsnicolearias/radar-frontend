@@ -256,7 +256,7 @@ export default function ChatsPage() {
                           }}
                           className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] text-black font-medium shadow-lg shadow-[#00FFB3]/30 hover:scale-105 transition-transform"
                         >
-                          {t("tabs.connected")}
+                          {t("request.accept")}
                         </button>
                         <button
                           onClick={(e) => {
@@ -266,7 +266,7 @@ export default function ChatsPage() {
                           className="flex-1 h-10 rounded-xl bg-[#1A1A1A] border border-[#FF005C]/30 hover:bg-[#FF005C]/10 text-[#FF005C] transition-all"
                         >
                           <X className="w-4 h-4 inline mr-1" />
-                          {t("conversation.deleteMessage")}
+                          {t("request.reject")}
                         </button>
                       </div>
                     </div>

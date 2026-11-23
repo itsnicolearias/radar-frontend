@@ -40,7 +40,7 @@ export const messageService = {
 
   async markAsRead(messageIds: string[]): Promise<IMarkAsReadResponse> {
     const requestData = { messageIds: messageIds }
-    const response = await axiosRequestor.post<IMarkAsReadResponse>("/messages/mark-as-read", requestData)
+    const response = await axiosRequestor.post<IMarkAsReadResponse>("/messages/read", requestData)
     return response.data
   },
 
