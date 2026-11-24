@@ -107,6 +107,12 @@ Escanea el código QR con Expo Go para ver la app en tu dispositivo.
 
 
 
+## Internacionalización en Next.js
+
+La aplicación web utiliza `next-intl` y admite inglés (`en`) y español (`es`). Las rutas incluyen siempre el idioma (`/en/...` o `/es/...`). La configuración central de idiomas y el idioma de reserva están en `apps/next/i18n/config.ts`; el enrutamiento se define en `apps/next/i18n/routing.ts` y la negociación de idioma se aplica en `apps/next/middleware.ts`.
+
+Al visitar `/`, Next.js toma el primer idioma compatible de la cabecera `Accept-Language` del navegador y redirige a la ruta correspondiente. Si no hay un idioma compatible, utiliza el idioma de reserva (`es`). `next-intl` también gestiona la preferencia de idioma persistida por su cookie y las rutas localizadas. Para añadir o modificar textos, edita los archivos JSON en `apps/next/messages/en/` y `apps/next/messages/es/`; se cargan y combinan mediante `apps/next/i18n/messages.ts` y se ofrecen a las páginas a través del `NextIntlClientProvider` en `apps/next/app/[locale]/layout.tsx`.
+
 ## Reglas de Codificación
 
 - Código y nombres en inglés, UI en español
