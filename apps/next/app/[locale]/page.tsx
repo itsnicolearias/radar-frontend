@@ -16,8 +16,8 @@ function LandingNavbar() {
       animate={{ y: 0 }}
       className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md border-b border-white/10"
     >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+      <div className="container mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 gap-2">
           <Link href={`/${locale}`} className="flex items-center gap-2">
             <div className="relative w-8 h-8">
               <div className="absolute inset-0 bg-gradient-to-br from-[#00FFB3] to-[#1DE3F2] rounded-full blur-sm opacity-70" />
@@ -48,12 +48,12 @@ function LandingNavbar() {
           </div>
 
           <div className="flex items-center gap-3">
-            <Link href={`/${locale}/login`} className="text-sm text-gray-300 hover:text-white transition-colors px-4 py-2">
+            <Link href={`/${locale}/login`} className="min-h-11 inline-flex items-center justify-center text-xs sm:text-sm text-gray-300 hover:text-white transition-colors px-2.5 sm:px-4 py-2">
               {t("nav.login")}
             </Link>
             <Link
               href={`/${locale}/register`}
-              className="text-sm font-medium text-black bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] hover:opacity-90 transition-opacity px-6 py-2 rounded-full"
+              className="min-h-11 inline-flex items-center justify-center whitespace-nowrap text-xs sm:text-sm font-medium text-black bg-gradient-to-r from-[#00FFB3] to-[#1DE3F2] hover:opacity-90 transition-opacity px-4 sm:px-6 py-2 rounded-full"
             >
               {t("nav.register")}
             </Link>
@@ -196,7 +196,7 @@ function Features() {
   ];
 
   return (
-    <section id="funcionalidades" className="relative py-14 sm:py-20 lg:py-28 px-4 sm:px-6 lg:px-8 bg-black">
+    <section id="funcionalidades" className="relative py-16 sm:py-20 lg:py-28 px-4 sm:px-6 lg:px-8 bg-black scroll-mt-20">
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -205,35 +205,39 @@ function Features() {
       />
       <div className="max-w-7xl mx-auto relative z-10">
         <motion.div
-          className="mb-10 sm:mb-14 lg:mb-16"
+          className="mb-12 sm:mb-16 lg:mb-20"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
-          <div className="rounded-2xl sm:rounded-3xl border border-[#00FFB3]/20 bg-[#11151A]/80 p-5 sm:p-7 lg:p-8">
+          <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-[#00FFB3]/20 bg-[#0B1114]/90 p-6 sm:p-8 lg:p-10 shadow-[0_20px_80px_rgba(0,255,179,0.06)]">
+            <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-[#00FFB3]/70 to-transparent" />
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 sm:mb-4 text-balance">
               {t("about.title")}
             </h2>
             <p className="text-sm sm:text-base lg:text-lg text-[#C5C5C5] leading-relaxed max-w-4xl">{t("about.text")}</p>
           </div>
-          <p className="text-lg sm:text-2xl lg:text-3xl font-semibold text-white text-center mt-7 sm:mt-9">{t("features.title")}</p>
+          <p className="text-lg sm:text-2xl lg:text-3xl font-semibold text-white text-center mt-10 sm:mt-14">{t("features.title")}</p>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-7">
           {features.map((feature, index) => (
             <motion.div
               key={index}
-              className="h-full p-5 sm:p-6 bg-[#171B20] border border-[#00FFB3]/20 rounded-2xl hover:border-[#00FFB3]/50 transition-all hover:shadow-lg hover:shadow-[#00FFB3]/10"
+              className="group relative h-full min-w-0 overflow-hidden rounded-2xl border border-[#00FFB3]/15 bg-gradient-to-br from-[#10191B] via-[#0B1013] to-[#080B0D] p-6 sm:p-7 lg:p-8 shadow-[0_12px_40px_rgba(0,0,0,0.25)] transition-all duration-300 hover:-translate-y-1 hover:border-[#00FFB3]/45 hover:shadow-[0_18px_50px_rgba(0,255,179,0.08)]"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
             >
-              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-[#00FFB3] to-[#1DE3F2] rounded-full flex items-center justify-center mb-4 sm:mb-5">
-                <feature.icon className="w-6 h-6 sm:w-7 sm:h-7 text-black" />
+              <div className="absolute -right-12 -top-12 size-32 rounded-full bg-[#00FFB3]/[0.04] blur-2xl transition-colors group-hover:bg-[#00FFB3]/[0.09]" />
+              <div className="relative">
+                <div className="mb-5 inline-flex size-12 items-center justify-center rounded-2xl border border-[#00FFB3]/25 bg-[#00FFB3]/[0.08] text-[#00FFB3] shadow-[0_0_24px_rgba(0,255,179,0.08)] sm:mb-6 sm:size-14">
+                  <feature.icon className="size-6 sm:size-7" />
+                </div>
+                <h3 className="mb-3 text-lg font-bold leading-snug text-white sm:text-xl">{feature.title}</h3>
+                <p className="text-sm leading-relaxed text-[#B8C2C2] sm:text-base">{feature.description}</p>
               </div>
-              <h3 className="text-base sm:text-lg font-bold text-white mb-2 sm:mb-3 leading-snug">{feature.title}</h3>
-              <p className="text-sm sm:text-base text-[#C5C5C5] leading-relaxed">{feature.description}</p>
             </motion.div>
           ))}
         </div>
@@ -277,10 +281,13 @@ function Events() {
   ];
 
   return (
-    <section id="eventos" className="relative py-14 sm:py-20 lg:py-28 px-4 sm:px-6 lg:px-8 bg-black">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-start">
+    <section id="eventos" className="relative isolate overflow-hidden py-20 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-8 bg-[#050809] scroll-mt-20">
+      <div className="pointer-events-none absolute -left-32 top-1/4 size-80 rounded-full bg-[#00FFB3]/[0.06] blur-[100px]" />
+      <div className="pointer-events-none absolute right-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-[#00FFB3]/25 to-transparent" />
+      <div className="max-w-7xl mx-auto relative">
+        <div className="grid grid-cols-1 lg:grid-cols-[0.92fr_1.08fr] gap-12 sm:gap-16 lg:gap-20 items-start">
           <motion.div
+            className="order-last lg:order-first"
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
@@ -293,11 +300,11 @@ function Events() {
               {t("events.heading")}
             </h3>
             <p className="text-sm sm:text-base lg:text-lg text-[#C5C5C5] mb-6 sm:mb-8 leading-relaxed">{t("events.text")}</p>
-            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <ul className="grid grid-cols-1 gap-1 sm:gap-2">
               {benefits.map((benefit, index) => (
                 <motion.li
                   key={index}
-                  className="flex items-start gap-3 p-3 sm:p-4 rounded-xl border border-[#00FFB3]/15 bg-[#12161B]"
+                  className="flex items-start gap-3 border-b border-[#00FFB3]/10 py-3.5 last:border-b-0 sm:py-4"
                   initial={{ opacity: 0, x: -10 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
@@ -311,17 +318,17 @@ function Events() {
           </motion.div>
 
           <motion.div
-            className="bg-gradient-to-br from-[#0F2B33] to-[#1A1A1A] rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 border border-[#00FFB3]/20"
+            className="order-first relative min-w-0 overflow-hidden rounded-2xl border border-[#00FFB3]/25 bg-gradient-to-br from-[#06352D] via-[#0A201E] to-[#101719] p-5 shadow-[0_24px_80px_rgba(0,255,179,0.08)] sm:rounded-3xl sm:p-7 lg:order-last lg:p-8"
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <div className="space-y-3 sm:space-y-4">
+            <div className="flex flex-col gap-4 sm:gap-5">
               {eventsList.map((event, index) => (
                 <motion.div
                   key={index}
-                  className="p-3 sm:p-4 bg-[#13181D] border border-[#00FFB3]/20 rounded-xl sm:rounded-2xl flex items-start gap-3 sm:gap-4 hover:border-[#00FFB3]/50 transition-all cursor-pointer"
+                  className="group relative min-h-28 overflow-hidden rounded-2xl border border-white/[0.07] bg-gradient-to-r from-[#101719] to-[#0B1012] p-5 sm:min-h-32 sm:p-6 flex items-center gap-4 sm:gap-5 hover:border-[#00FFB3]/35 hover:shadow-[0_12px_40px_rgba(0,255,179,0.06)] transition-all cursor-pointer"
                   initial={{ opacity: 0, y: 10 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
@@ -329,11 +336,11 @@ function Events() {
                   whileHover={{ scale: 1.02 }}
                 >
                   <div
-                    className={`w-10 h-10 sm:w-12 sm:h-12 ${event.color} rounded-lg flex items-center justify-center shrink-0`}
+                    className={`relative size-12 sm:size-14 ${event.color} rounded-2xl flex items-center justify-center shrink-0 shadow-[0_0_28px_rgba(0,255,179,0.12)]`}
                   >
-                    <event.icon className="w-5 h-5 sm:w-6 sm:h-6 text-black" />
+                    <event.icon className="size-6 sm:size-7 text-black" />
                   </div>
-                  <div className="flex-1 min-w-0 space-y-2">
+                  <div className="flex-1 min-w-0 space-y-3">
                     <h4 className="font-semibold text-white text-sm sm:text-base leading-snug">{event.title}</h4>
                     <div className="flex flex-wrap gap-2 text-[11px] sm:text-xs text-[#D5D5D5]">
                       <span className="px-2.5 py-1 rounded-full border border-[#00FFB3]/30 bg-[#0F1418]">
@@ -488,7 +495,7 @@ export default function LandingPage() {
         ))}
       </div>
 
-      <section className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-24 sm:pt-32 pb-16 sm:pb-20">
+      <section className="relative min-h-[100svh] flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-24 sm:pt-32 pb-16 sm:pb-20">
         <div className="max-w-7xl mx-auto w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 sm:gap-16 lg:gap-20 items-center">
             <motion.div
