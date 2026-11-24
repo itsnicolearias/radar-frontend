@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { MessageCircle, Users, Check, X, Crown } from "lucide-react";
+import { MessageCircle, Users, Check, X, Crown, Bell } from "lucide-react";
 import { motion } from "framer-motion";
-import { useChatStore, useConnectionStore, useSocketEvent, useProfileViewsStore, useAuthStore } from "@radar/features";
-import { messageService, connectionService, profileViewService } from "@radar/api";
-import type { IConnectionResponse, IMessageResponse, IRadarUser } from "@radar/types";
+import { useChatStore, useConnectionStore, useSocketEvent, useProfileViewsStore, useAuthStore, useNotificationStore } from "@radar/features";
+import { messageService, connectionService, profileViewService, notificationService } from "@radar/api";
+import type { IConnectionResponse, IMessageResponse, INotificationResponse, IRadarUser } from "@radar/types";
 import { BottomNav, UserProfileModal } from "@radar/ui";
 import { formatDistance } from "../../../../lib/utils/format-distance";
 
@@ -24,29 +24,39 @@ export default function ChatsPage() {
   const { chats, setChats, updateChatLastMessage, incrementUnreadCount } = useChatStore();
   const { connections, pendingRequests, setConnections, setPendingRequests, myPendingRequests, setMyPendingRequests } = useConnectionStore();
   const { profileViews, setProfileViews } = useProfileViewsStore();
+  const { notifications, setNotifications, markAsRead } = useNotificationStore();
+  const [markingNotificationId, setMarkingNotificationId] = useState<string | null>(null);
+  const unreadAcceptedNotifications = notifications.filter(
+    (notification) => notification.type === "CONNECTION_ACCEPTED" && !notification.isRead,
+  );
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [chatsData, connectionsData, requestsData, viewsData, pendingData] = await Promise.all([
+        const [chatsData, connectionsData, requestsData, viewsData, pendingData, notificationsData] = await Promise.all([
           messageService.getConversations(),
           connectionService.getAcceptedConnections(),
           connectionService.getPendingConnections(),
           profileViewService.getProfileViews(),
           connectionService.getMyPendingConnections(),
+          notificationService.getNotifications().catch((error) => {
+            console.error("[v0] Error fetching notifications:", error)
+            return [] as INotificationResponse[]
+          }),
         ]);
         setChats(chatsData);
         setConnections(connectionsData);
         setPendingRequests(requestsData);
         setProfileViews(viewsData);
         setMyPendingRequests(pendingData);
+        setNotifications(notificationsData);
       } catch (error) {
         console.error("[chats] Error fetching chats data:", error);
       }
     };
 
     fetchData();
-  }, [setChats, setConnections, setPendingRequests, setProfileViews, setMyPendingRequests]);
+  }, [setChats, setConnections, setPendingRequests, setProfileViews, setMyPendingRequests, setNotifications]);
 
   useSocketEvent<IMessageResponse>(
     "new-message",
@@ -111,6 +121,18 @@ export default function ChatsPage() {
     }
   };
 
+  const handleMarkNotificationAsRead = async (notification: INotificationResponse) => {
+    setMarkingNotificationId(notification.notificationId);
+    try {
+      await notificationService.markAsRead({ notificationIds: [notification.notificationId] });
+      markAsRead(notification.notificationId);
+    } catch (error) {
+      console.error("[chats] Error marking notification as read:", error);
+    } finally {
+      setMarkingNotificationId(null);
+    }
+  };
+
   const isConnectionPending = (userId: string) => myPendingRequests.some((c) => c.receiverId === userId);
   const formatProfileDistance = (distance?: number) => {
     if (distance == null) return profileT("near");
@@ -146,8 +168,8 @@ export default function ChatsPage() {
         >
           <Users className="w-4 h-4" />
           <span className="text-sm font-medium">{t("tabs.requests")}</span>
-          {pendingRequests.length > 0 && (
-            <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#FF005C] rounded-full text-white text-xs flex items-center justify-center font-bold">{pendingRequests.length}</span>
+          {pendingRequests.length + unreadAcceptedNotifications.length > 0 && (
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#FF005C] rounded-full text-white text-xs flex items-center justify-center font-bold">{pendingRequests.length + unreadAcceptedNotifications.length}</span>
           )}
         </button>
 
@@ -212,6 +234,26 @@ export default function ChatsPage() {
 
         {activeTab === "solicitudes" && (
           <div className="space-y-4">
+            {unreadAcceptedNotifications.map((notification) => (
+              <article key={notification.notificationId} className="flex items-start justify-between gap-4 rounded-2xl border border-[#00FFB3]/30 bg-[#00FFB3]/10 p-4">
+                <div>
+                  <p className="font-semibold text-white">Conexión aceptada</p>
+                  <p className="mt-1 text-sm text-white/70">{notification.message}</p>
+                  <time className="mt-2 block text-xs text-white/50" dateTime={String(notification.createdAt)}>
+                    {formatTimestamp(String(notification.createdAt))}
+                  </time>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleMarkNotificationAsRead(notification)}
+                  disabled={markingNotificationId === notification.notificationId}
+                  className="shrink-0 rounded-full border border-white/20 px-3 py-2 text-xs font-medium text-white transition hover:bg-white/10 disabled:opacity-50"
+                  aria-label="Marcar notificación como vista"
+                >
+                  {markingNotificationId === notification.notificationId ? "Guardando…" : "Marcar vista"}
+                </button>
+              </article>
+            ))}
             {pendingRequests.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
                 <p className="text-[#C5C5C5]">{t("emptyRequests.title")}</p>

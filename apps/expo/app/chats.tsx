@@ -5,9 +5,9 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from "rea
 import { useRouter } from "expo-router"
 import { MessageCircle, Users, Check, X, Crown } from "lucide-react-native"
 import { MotiView } from "moti"
-import { useChatStore, useConnectionStore, useSocketEvent, useProfileViewsStore, useAuthStore } from "@radar/features"
-import { messageService, connectionService, profileViewService } from "@radar/api"
-import type { IMessageResponse, IConnectionResponse, IRadarUser } from "@radar/types"
+import { useChatStore, useConnectionStore, useSocketEvent, useProfileViewsStore, useAuthStore, useNotificationStore } from "@radar/features"
+import { messageService, connectionService, profileViewService, notificationService } from "@radar/api"
+import type { IMessageResponse, IConnectionResponse, INotificationResponse, IRadarUser } from "@radar/types"
 import { BottomNavNative } from "../../../packages/ui/navigation/bottom-nav.native"
 import { formatDistance } from "../../../lib/utils/format-distance"
 import { UserProfileModalNative } from "@radar/ui/profile/user-profile-modal.native"
@@ -20,17 +20,26 @@ export default function ChatsScreen() {
   const { chats, setChats, updateChatLastMessage, incrementUnreadCount } = useChatStore()
   const { connections, pendingRequests, setConnections, setPendingRequests, myPendingRequests, setMyPendingRequests, removeConnection } = useConnectionStore()
   const { profileViews, setProfileViews } = useProfileViewsStore()
+  const { notifications, setNotifications, markAsRead } = useNotificationStore()
+  const [markingNotificationId, setMarkingNotificationId] = useState<string | null>(null)
+  const unreadAcceptedNotifications = notifications.filter(
+    (notification) => notification.type === "CONNECTION_ACCEPTED" && !notification.isRead,
+  )
   const [selectedUser, setSelectedUser] = useState<IRadarUser | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [chatsData, connectionsData, requestsData, viewsData, pendingData] = await Promise.all([
+        const [chatsData, connectionsData, requestsData, viewsData, pendingData, notificationsData] = await Promise.all([
           messageService.getConversations(),
           connectionService.getAcceptedConnections(),
           connectionService.getPendingConnections(),
           profileViewService.getProfileViews(),
-          connectionService.getMyPendingConnections()
+          connectionService.getMyPendingConnections(),
+          notificationService.getNotifications().catch((error) => {
+            console.error("[v0] Error fetching notifications:", error)
+            return [] as INotificationResponse[]
+          }),
         ])
 
         setChats(chatsData)
@@ -38,13 +47,14 @@ export default function ChatsScreen() {
         setPendingRequests(requestsData)
         setProfileViews(viewsData)
         setMyPendingRequests(pendingData)
+        setNotifications(notificationsData)
       } catch (error) {
         console.error("[v0] Error fetching chats data:", error)
       }
     }
 
     fetchData()
-  }, [setChats, setConnections, setPendingRequests, setProfileViews])
+  }, [setChats, setConnections, setPendingRequests, setProfileViews, setMyPendingRequests, setNotifications])
 
   useSocketEvent<IMessageResponse>(
     "new-message",
@@ -89,6 +99,18 @@ export default function ChatsScreen() {
       setPendingRequests(pendingRequests.filter((r) => r.connectionId !== connectionId))
     } catch (error) {
       console.error("[v0] Error rejecting connection:", error)
+    }
+  }
+
+  const handleMarkNotificationAsRead = async (notification: INotificationResponse) => {
+    setMarkingNotificationId(notification.notificationId)
+    try {
+      await notificationService.markAsRead({ notificationIds: [notification.notificationId] })
+      markAsRead(notification.notificationId)
+    } catch (error) {
+      console.error("[v0] Error marking notification as read:", error)
+    } finally {
+      setMarkingNotificationId(null)
     }
   }
 
@@ -196,9 +218,9 @@ export default function ChatsScreen() {
           >
             <Users size={16} color={activeTab === "solicitudes" ? "#000" : "rgba(255,255,255,0.7)"} />
             <Text style={[styles.tabText, activeTab === "solicitudes" && styles.tabTextActive]}>Solicitudes</Text>
-            {pendingRequests.length > 0 && (
+            {pendingRequests.length + unreadAcceptedNotifications.length > 0 && (
               <View style={styles.badge}>
-                <Text style={styles.badgeText}>{pendingRequests.length}</Text>
+                <Text style={styles.badgeText}>{pendingRequests.length + unreadAcceptedNotifications.length}</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -217,6 +239,22 @@ export default function ChatsScreen() {
         {/* Solicitudes Tab */}
         {activeTab === "solicitudes" && (
           <View style={styles.section}>
+            {unreadAcceptedNotifications.map((notification) => (
+              <View key={notification.notificationId} style={{ backgroundColor: "rgba(0,255,179,0.1)", borderColor: "rgba(0,255,179,0.4)", borderWidth: 1, borderRadius: 16, padding: 16, marginBottom: 12 }}>
+                <Text style={{ color: "#fff", fontWeight: "600", fontSize: 15 }}>Conexión aceptada</Text>
+                <Text style={{ color: "rgba(255,255,255,0.72)", marginTop: 6 }}>{notification.message}</Text>
+                <Text style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, marginTop: 8 }}>{formatTimestamp(String(notification.createdAt))}</Text>
+                <TouchableOpacity
+                  accessibilityRole="button"
+                  accessibilityLabel="Marcar notificación como vista"
+                  style={{ alignSelf: "flex-start", marginTop: 12, borderColor: "rgba(255,255,255,0.3)", borderWidth: 1, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8, opacity: markingNotificationId === notification.notificationId ? 0.5 : 1 }}
+                  disabled={markingNotificationId === notification.notificationId}
+                  onPress={() => handleMarkNotificationAsRead(notification)}
+                >
+                  <Text style={{ color: "#fff", fontSize: 12 }}>{markingNotificationId === notification.notificationId ? "Guardando…" : "Marcar vista"}</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
             {filteredPendingRequests.length === 0 ? (
               <View style={styles.emptyState}>
                 <Text style={styles.emptyText}>No tienes solicitudes aun</Text>
